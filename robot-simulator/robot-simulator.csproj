@@ -94,5 +94,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OptimizationLogic\OptimizationLogic.csproj">
+      <Project>{d30b5128-f5f7-4621-9c91-57dee4300666}</Project>
+      <Name>OptimizationLogic</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
