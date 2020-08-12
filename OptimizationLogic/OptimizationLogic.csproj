@@ -44,6 +44,8 @@
     <Compile Include="DTO\ItemState.cs" />
     <Compile Include="DTO\PositionCodes.cs" />
     <Compile Include="DTO\ProductionState.cs" />
+    <Compile Include="DTO\StepModel.cs" />
+    <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
