@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,15 @@ namespace robot_simulator
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.Debug()
+            .CreateLogger();
+
+            Log.Debug($"Serilog ready - {1}");
+        }
     }
 }
