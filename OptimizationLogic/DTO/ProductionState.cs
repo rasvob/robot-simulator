@@ -60,7 +60,8 @@ namespace OptimizationLogic.DTO
                 else if (code == PositionCodes.Service)
                 {
                     return TimeMatrix.GetLength(0) - 3;
-                } else
+                }
+                else
                 {
                     (int numericalPart, char alphabetPart) = ParsePositionCode(code);
                     return numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
