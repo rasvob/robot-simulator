@@ -46,5 +46,19 @@
     <Compile Include="DTO\ProductionState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="InputFiles\ProcessingTimeMatrix.csv" />
+    <None Include="InputFiles\situation1\WarehouseInitialState.csv" />
+    <None Include="InputFiles\situation2\WarehouseInitialState.csv" />
+    <None Include="InputFiles\situation3\WarehouseInitialState.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="InputFiles\situation1\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation1\HistoricalProductionList.txt" />
+    <Content Include="InputFiles\situation2\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation2\HistoricalProductionList.txt" />
+    <Content Include="InputFiles\situation3\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation3\HistoricalProductionList.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
