@@ -37,40 +37,14 @@ namespace OptimizationLogic.DTO
                 {
                     (int numericalPart, char alphabetPart) = ParsePositionCode(code);
                     int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
-                    int row = alphabetPart == 'A' ? 1 : 0 + (numericalPart % 2 == 0 ? 2 : 0);
+                    int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
                     return (row, col);
                 }
             });
-
-            //_warehousePositionMapping[PositionCodes.Stacker] = (2, 0);
-            //_warehousePositionMapping[PositionCodes.Service] = (2, 11);
-
-            //foreach (PositionCodes code in Enum.GetValues(typeof(PositionCodes)))
-            //{
-            //    if (code == PositionCodes.Service || code == PositionCodes.Stacker)
-            //    {
-            //        continue;
-            //    }
-
-            //    (int numericalPart, char alphabetPart) = ParsePositionCode(code);
-
-            //    int row, col;
-            //    if (numericalPart % 2 == 0)
-            //    {
-            //        col = numericalPart / 2;
-            //        row = alphabetPart == 'A' ? 3 : 2;
-            //    }
-            //    else
-            //    {
-            //        col = (numericalPart - 1) / 2;
-            //        row = alphabetPart == 'A' ? 1 : 0;
-            //    }
-            //    _warehousePositionMapping[code] = (row, col);
-            //}
         }
 
         private (int numericalPart, char alphabetPart) ParsePositionCode(PositionCodes code) {
-            var pureCode = code.ToString().Skip(1).ToString();
+            var pureCode = code.ToString().Remove(0, 1);
             var numericalPart = int.Parse(pureCode.Remove(pureCode.Length - 1));
             var alphabetPart = pureCode[pureCode.Length - 1];
             return (numericalPart, alphabetPart);
@@ -92,20 +66,6 @@ namespace OptimizationLogic.DTO
                     return numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
                 }
             });
-
-
-            //_timeMatrixMapping[PositionCodes.Stacker] = 0;
-            //_timeMatrixMapping[PositionCodes.Service] = TimeMatrix.GetLength(0) - 3;
-
-            //foreach (PositionCodes code in Enum.GetValues(typeof(PositionCodes)))
-            //{
-            //    if (code == PositionCodes.Service || code == PositionCodes.Stacker)
-            //    {
-            //        continue;
-            //    }
-            //    (int numericalPart, char alphabetPart) = ParsePositionCode(code);
-            //    _timeMatrixMapping[code] = numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
-            //}
         }
 
         public int GetTimeMatrixIndex(PositionCodes code) => _timeMatrixMapping[code];
