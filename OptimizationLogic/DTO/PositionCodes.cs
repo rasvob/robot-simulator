@@ -55,6 +55,6 @@ namespace OptimizationLogic.DTO
         _22A,
         _22B,
         _23A,
-        _23
+        _23B
     }
 }

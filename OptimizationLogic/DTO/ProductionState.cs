@@ -15,6 +15,7 @@ namespace OptimizationLogic.DTO
         public Queue<ItemState> ProductionHistory { get; set; } = new Queue<ItemState>();
         public ItemState[,] WarehouseState { get; set; } = new ItemState[WarehouseYDimension, WarehouseXDimension];
         public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
+        public bool ProductionStateIsOk { get; set; } = true;
 
         private const int TimeMatrixDimension = 47;
         private const int WarehouseXDimension = 12;
