@@ -17,15 +17,41 @@ namespace OptimizationLogic.DTO
         public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
         public bool ProductionStateIsOk { get; set; } = true;
 
+        public int WarehouseColls
+        {
+            get
+            {
+                return WarehouseXDimension;
+            }
+        }
+
+        public int WarehouseRows 
+        { 
+            get
+            {
+                return WarehouseYDimension;
+            }
+        }
+
+        public int TimeMatrixDimensionPub
+        {
+            get
+            {
+                return TimeMatrixDimension;
+            }
+        }
+
         private const int TimeMatrixDimension = 47;
         private const int WarehouseXDimension = 12;
         private const int WarehouseYDimension = 4;
         private Dictionary<PositionCodes, (int row, int col)> _warehousePositionMapping;
+        private Dictionary<(int row, int col), PositionCodes> _warehousePositionMappingReverse;
         private Dictionary<PositionCodes, int> _timeMatrixMapping;
 
         public ProductionState()
         {
             _warehousePositionMapping = BuildWarehousePositionMappingDict();
+            _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
             _timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
         }
 
@@ -48,6 +74,11 @@ namespace OptimizationLogic.DTO
                     return (row, col);
                 }
             });
+        }
+
+        private Dictionary<(int row, int col), PositionCodes> BuildWarehousePositionMappingReverseDict()
+        {
+            return _warehousePositionMapping.ToDictionary(x => x.Value, x => x.Key);
         }
 
         private (int numericalPart, char alphabetPart) ParsePositionCode(PositionCodes code) {
@@ -78,6 +109,7 @@ namespace OptimizationLogic.DTO
 
         public int GetTimeMatrixIndex(PositionCodes code) => _timeMatrixMapping[code];
         public (int row, int col) GetWarehouseIndex(PositionCodes code) => _warehousePositionMapping[code];
+        public PositionCodes GetWarehouseCell(int row, int col) => _warehousePositionMappingReverse[(row, col)];
 
         private void CheckCorrectInputDimension(string[] arr, int correctLen)
         {

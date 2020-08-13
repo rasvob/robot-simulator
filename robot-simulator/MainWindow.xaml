@@ -6,16 +6,24 @@
         xmlns:local="clr-namespace:robot_simulator"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
+        xmlns:viewModels="clr-namespace:robot_simulator.ViewModels"
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         BorderThickness="1" 
         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
         ResizeMode="CanResizeWithGrip"
         WindowTransitionsEnabled="False"
         WindowStartupLocation="CenterScreen"
+          
+                 
         Title="Robot Simulator" Height="600" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="200"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
+        <TextBlock Text="Naive approach" Grid.Row="0" Margin="15"></TextBlock>
+        
+        
+        
     </Grid>
 </mah:MetroWindow>
