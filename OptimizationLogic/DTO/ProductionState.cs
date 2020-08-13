@@ -51,6 +51,7 @@ namespace OptimizationLogic.DTO
         public ProductionState()
         {
             _warehousePositionMapping = BuildWarehousePositionMappingDict();
+            var s = _warehousePositionMapping.Select(t => t.Value).GroupBy(t => t);
             _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
             _timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
         }
@@ -78,7 +79,17 @@ namespace OptimizationLogic.DTO
 
         private Dictionary<(int row, int col), PositionCodes> BuildWarehousePositionMappingReverseDict()
         {
-            return _warehousePositionMapping.ToDictionary(x => x.Value, x => x.Key);
+            var res = _warehousePositionMapping.ToDictionary(x => x.Value, x => x.Key);
+            (int numericalPart, char alphabetPart) = (22, 'A');
+            int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
+            int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
+            res[(row, col)] = PositionCodes.Service;
+
+            (numericalPart, alphabetPart) = (22, 'B');
+            col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
+            row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
+            res[(row, col)] = PositionCodes.Service;
+            return res;
         }
 
         private (int numericalPart, char alphabetPart) ParsePositionCode(PositionCodes code) {
@@ -88,24 +99,22 @@ namespace OptimizationLogic.DTO
             return (numericalPart, alphabetPart);
         }
 
-        private Dictionary<PositionCodes, int> BuildTimeMatrixPositionMappingDict()
+        private Dictionary<PositionCodes, int> BuildTimeMatrixPositionMappingDict() => _timeMatrixMapping = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code =>
         {
-            return ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code => {
-                if (code == PositionCodes.Stacker)
-                {
-                    return 0;
-                }
-                else if (code == PositionCodes.Service)
-                {
-                    return TimeMatrix.GetLength(0) - 3;
-                }
-                else
-                {
-                    (int numericalPart, char alphabetPart) = ParsePositionCode(code);
-                    return numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
-                }
-            });
-        }
+            if (code == PositionCodes.Stacker)
+            {
+                return 0;
+            }
+            else if (code == PositionCodes.Service)
+            {
+                return TimeMatrix.GetLength(0) - 3;
+            }
+            else
+            {
+                (int numericalPart, char alphabetPart) = ParsePositionCode(code);
+                return numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
+            }
+        });
 
         public int GetTimeMatrixIndex(PositionCodes code) => _timeMatrixMapping[code];
         public (int row, int col) GetWarehouseIndex(PositionCodes code) => _warehousePositionMapping[code];
@@ -135,22 +144,14 @@ namespace OptimizationLogic.DTO
             }
         }
 
-        private ItemState GetItemState(string str)
+        private ItemState GetItemState(string str) => str switch
         {
-            switch(str)
-            {
-                case "MQB": 
-                    return ItemState.MQB;
-                case "MEB":
-                    return ItemState.MEB;
-                case "Forbidden":
-                    return ItemState.Forbidden;
-                case "Empty":
-                    return ItemState.Empty;
-                default:
-                    throw new Exception("Wrong item state in warehouse input state.");
-            }
-        }
+            "MQB" => ItemState.MQB,
+            "MEB" => ItemState.MEB,
+            "Forbidden" => ItemState.Forbidden,
+            "Empty" => ItemState.Empty,
+            _ => throw new ArgumentException("Wrong item state in warehouse input state."),
+        };
 
         public void LoadWarehouseState(string csvPath)
         {
@@ -168,14 +169,8 @@ namespace OptimizationLogic.DTO
             }
         }
 
-        public void LoadProductionHistory(string csvPath)
-        {
-            ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(line => GetItemState(line)));
-        }
+        public void LoadProductionHistory(string csvPath) => ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
 
-        public void LoadFutureProductionPlan(string csvPath)
-        {
-            FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(line => GetItemState(line)));
-        }
+        public void LoadFutureProductionPlan(string csvPath) => FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
     }
 }

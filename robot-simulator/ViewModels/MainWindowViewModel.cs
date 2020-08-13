@@ -34,7 +34,6 @@ namespace robot_simulator.ViewModels
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;
-
             NextStep = new SimpleCommand(NextStepClickedExecute);
             CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
         }
