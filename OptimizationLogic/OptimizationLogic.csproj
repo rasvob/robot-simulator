@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BruteForceOptimizedController.cs" />
     <Compile Include="DTO\ItemState.cs" />
     <Compile Include="DTO\PositionCodes.cs" />
     <Compile Include="DTO\ProductionState.cs" />

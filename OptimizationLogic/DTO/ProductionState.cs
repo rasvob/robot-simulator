@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace OptimizationLogic.DTO
 {
     //TODO: CSV files deployment settings - copy to publish
-    public class ProductionState
+    public class ProductionState : ICloneable
     {
         public Queue<ItemState> FutureProductionPlan { get; set; } = new Queue<ItemState>();
         public Queue<ItemState> ProductionHistory { get; set; } = new Queue<ItemState>();
@@ -145,6 +146,42 @@ namespace OptimizationLogic.DTO
         public void LoadFutureProductionPlan(string csvPath)
         {
             FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(line => GetItemState(line)));
+        }
+
+        public object Clone()
+        {
+            ProductionState productionStateCopy = new ProductionState();
+            productionStateCopy.FutureProductionPlan = new Queue<ItemState>(this.FutureProductionPlan);
+            productionStateCopy.ProductionHistory = new Queue<ItemState>(this.ProductionHistory);
+            productionStateCopy.WarehouseState = (ItemState[,])this.WarehouseState.Clone();
+            productionStateCopy.TimeMatrix = this.TimeMatrix;
+            productionStateCopy.ProductionStateIsOk = this.ProductionStateIsOk;
+            productionStateCopy.StepCounter = this.StepCounter;
+            return productionStateCopy;
+        }
+
+        public override string ToString()
+        {
+            Dictionary<ItemState, int> occurancesDict = new Dictionary<ItemState, int>();
+            for (int i = 0; i < WarehouseYDimension; i++)
+            {
+                for (int j = 0; j < WarehouseXDimension; j++)
+                {
+                    if (!occurancesDict.ContainsKey(WarehouseState[i, j]))
+                    {
+                        occurancesDict[WarehouseState[i, j]] = 0;
+                    }
+                    occurancesDict[WarehouseState[i, j]]++;
+                }
+            }
+            String warehouseToString = "";
+            foreach (KeyValuePair<ItemState, int> kvp in occurancesDict)
+            {
+                warehouseToString += string.Format("Key = {0}, Value = {1}\n", kvp.Key, kvp.Value);
+            }
+
+            return String.Format("StepCounter={0}, ProductionStateIsOk={1}, FutureProductionPlan len={2}, FutureProductionPlan head={3}, ProductionHistory len={4}, ProductionHistory head={5}\nWarehouse occurances:\n{6}",
+                StepCounter, ProductionStateIsOk, FutureProductionPlan.Count, FutureProductionPlan.Peek(), ProductionHistory.Count, ProductionHistory.Peek(), warehouseToString);
         }
     }
 }

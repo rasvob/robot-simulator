@@ -9,7 +9,7 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            RunNaiveVersion();
+            RunBruteForceVersion();
         }
         static void RunNaiveVersion()
         {
@@ -36,6 +36,23 @@ namespace ConsoleApp
             {
                 Console.WriteLine(stepModel);
             }
+        }
+        static void RunBruteForceVersion()
+        {
+            string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            BruteForceOptimizedController bruteForceOptimizedController = new BruteForceOptimizedController(new ProductionState(),
+                Path.Combine(startupPath, @"OptimizationLogic\InputFiles\ProcessingTimeMatrix.csv"),
+                Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\WarehouseInitialState.csv"),
+                Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\HistoricalProductionList.txt"),
+                Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\FutureProductionList.txt"));
+            
+            ProductionState productionStateCopy = (ProductionState)bruteForceOptimizedController.ProductionState.Clone();
+            Console.WriteLine(bruteForceOptimizedController.ProductionState);
+            Console.WriteLine(productionStateCopy);
+            bruteForceOptimizedController.NextStep();
+            Console.WriteLine(bruteForceOptimizedController.ProductionState);
+            Console.WriteLine(productionStateCopy);
+
         }
     }
 }

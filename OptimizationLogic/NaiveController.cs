@@ -41,7 +41,7 @@ namespace OptimizationLogic
             ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
         }
 
-        public void NextStep()
+        public virtual void NextStep()
         {
             var needed = ProductionState.FutureProductionPlan.Dequeue();
             var current = ProductionState.ProductionHistory.Dequeue();
@@ -61,8 +61,8 @@ namespace OptimizationLogic
             var totalTime = insertTime + moveToDifferentCellTime + withdrawTime;
             
             ProductionState.ProductionStateIsOk = totalTime <= TimeLimit;
-
             ProductionState.StepCounter++;
+
             StepLog.Add(new StepModel
             {
                 InsertToCell = nearestFreePosition,
@@ -75,12 +75,12 @@ namespace OptimizationLogic
             });
         }
 
-        private PositionCodes GetNearestEmptyPosition()
+        protected PositionCodes GetNearestEmptyPosition()
         {
             return GetNearesElementWarehousePosition(ItemState.Empty);
         }
 
-        private PositionCodes GetNearesElementWarehousePosition(ItemState itemState)
+        protected PositionCodes GetNearesElementWarehousePosition(ItemState itemState)
         {
             foreach (PositionCodes positionCode in SortedPositionCodes)
             {
