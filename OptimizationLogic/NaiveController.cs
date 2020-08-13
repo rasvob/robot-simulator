@@ -62,6 +62,7 @@ namespace OptimizationLogic
             
             ProductionState.ProductionStateIsOk = totalTime <= TimeLimit;
 
+            ProductionState.StepCounter++;
             StepLog.Add(new StepModel
             {
                 InsertToCell = nearestFreePosition,
