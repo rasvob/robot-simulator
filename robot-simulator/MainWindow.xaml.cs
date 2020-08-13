@@ -1,4 +1,7 @@
 ﻿using MahApps.Metro.Controls;
+using OptimizationLogic;
+using OptimizationLogic.DTO;
+using robot_simulator.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,10 +25,15 @@ namespace robot_simulator
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        public MainWindowViewModel ViewModel { get; set; }
         public MainWindow()
         {
             InitializeComponent();
-            Debug.WriteLine("Debug");
+            var productionState = new ProductionState();
+            var naiveController = new NaiveController(productionState, )
+            //var naiveController = new NaiveController()
+            //ViewModel = new MainWindowViewModel()
+
         }
     }
 }

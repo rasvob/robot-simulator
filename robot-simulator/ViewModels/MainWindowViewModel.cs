@@ -10,19 +10,31 @@ using System.Windows.Input;
 
 namespace robot_simulator.ViewModels
 {
-    public class MainWindowViewModel: BaseViewModel
+    public class MainWindowViewModel : BaseViewModel
     {
+        private ObservableCollection<WarehouseItemViewModel> currentWarehouseState;
+
         public NaiveController NaiveController { get; set; }
         public ProductionState ProductionState { get; set; }
 
         public ICommand NextStep { get; private set; }
 
-        public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState { get; set; }
+        public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState { get => currentWarehouseState;
+            set
+            {
+                if (currentWarehouseState != value)
+                {
+                    currentWarehouseState = value;
+                    OnPropertyChanged(nameof(CurrentWarehouseState));
+                }
+            }
+        }
 
         public MainWindowViewModel(NaiveController naiveController)
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;
+
             NextStep = new SimpleCommand(NextStepClickedExecute);
             CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
         }
@@ -30,8 +42,6 @@ namespace robot_simulator.ViewModels
         public void NextStepClickedExecute(object o)
         {
             NaiveController.NextStep();
-
-
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()
