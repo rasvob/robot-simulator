@@ -19,7 +19,9 @@ namespace robot_simulator.ViewModels
 
         public ICommand NextStep { get; private set; }
 
-        public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState { get => currentWarehouseState;
+        public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
+        {
+            get => currentWarehouseState;
             set
             {
                 if (currentWarehouseState != value)
@@ -30,12 +32,43 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private ObservableCollection<WarehouseItemViewModel> historyQueue;
+        private ObservableCollection<WarehouseItemViewModel> futureQueue;
+
+        public ObservableCollection<WarehouseItemViewModel> HistoryQueue
+        {
+            get => historyQueue;
+
+            set
+            {
+                if (historyQueue != value)
+                {
+                    historyQueue = value;
+                    OnPropertyChanged(nameof(HistoryQueue));
+                }
+            }
+        }
+
+        public ObservableCollection<WarehouseItemViewModel> FutureQueue { get => futureQueue;
+            set
+            {
+                if (futureQueue != value)
+                {
+                    futureQueue = value;
+                    OnPropertyChanged(nameof(FutureQueue));
+                }
+            }
+        }
+
+
         public MainWindowViewModel(NaiveController naiveController)
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;
             NextStep = new SimpleCommand(NextStepClickedExecute);
             CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
+            HistoryQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.ProductionHistory));
+            FutureQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.FutureProductionPlan));
         }
 
         public void NextStepClickedExecute(object o)
@@ -46,22 +79,32 @@ namespace robot_simulator.ViewModels
         public void NotifyCurrentWarehouseState()
         {
             OnPropertyChanged(nameof(CurrentWarehouseState));
+            OnPropertyChanged(nameof(HistoryQueue));
+            OnPropertyChanged(nameof(FutureQueue));
+        }
+
+        public void UpdateProductionStateInView()
+        {
+            CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
+            HistoryQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.ProductionHistory));
+            FutureQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.FutureProductionPlan));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()
         {
-            var whRows = Enumerable.Range(0, ProductionState.WarehouseRows);
             var whColls = Enumerable.Range(0, ProductionState.WarehouseColls);
-            return whRows
+            return Enumerable.Range(0, ProductionState.WarehouseRows)
                 .SelectMany(row => whColls.Select(col => (row, col)))
                 .Select(cell => new WarehouseItemViewModel()
                 {
                     Row = cell.row,
                     Col = cell.col,
-                    PosiionCode = ProductionState.GetWarehouseCell(cell.row, cell.col).ToGuiString(),
+                    PositionCode = ProductionState.GetWarehouseCell(cell.row, cell.col).ToGuiString(),
                     StateStr = ProductionState.WarehouseState[cell.row, cell.col].ToString(),
                 });
         }
+
+        public IEnumerable<WarehouseItemViewModel> CreateItemStateCollectionFromQueue(Queue<ItemState> queue) => queue.ToArray().Select((t, idx) => new WarehouseItemViewModel { StateStr = t.ToString(), PositionCode = idx == 0 ? "Next" : $"Next+{idx}" });
     }
 
 }

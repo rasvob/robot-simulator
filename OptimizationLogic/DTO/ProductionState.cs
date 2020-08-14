@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic.DTO
 {
-    //TODO: CSV files deployment settings - copy to publish
     public class ProductionState : ICloneable
     {
         public Queue<ItemState> FutureProductionPlan { get; set; } = new Queue<ItemState>();

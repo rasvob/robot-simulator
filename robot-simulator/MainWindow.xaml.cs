@@ -34,5 +34,10 @@ namespace robot_simulator
             ViewModel = new MainWindowViewModel(naiveController);
             DataContext = ViewModel;
         }
+
+        private void ItemsControl_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+
+        }
     }
 }

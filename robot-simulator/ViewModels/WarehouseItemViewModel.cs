@@ -53,12 +53,12 @@ namespace robot_simulator.ViewModels
                 }
             }
         }
-        public string PosiionCode { get => posiionCode; set
+        public string PositionCode { get => posiionCode; set
             {
                 if (posiionCode != value)
                 {
                     posiionCode = value;
-                    OnPropertyChanged(nameof(PosiionCode));
+                    OnPropertyChanged(nameof(PositionCode));
                 }
             }
         }

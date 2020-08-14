@@ -149,6 +149,9 @@
     <Compile Include="ViewModels\SimpleCommand.cs" />
     <Compile Include="ViewModels\ValueConterters\TileColorValueConterter.cs" />
     <Compile Include="ViewModels\WarehouseItemViewModel.cs" />
+    <Compile Include="Views\QueueViewControl.xaml.cs">
+      <DependentUpon>QueueViewControl.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -161,6 +164,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\QueueViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ViewModels\BaseViewModel.cs" />
@@ -177,6 +184,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="InputFiles\situation1\FutureProductionList1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
