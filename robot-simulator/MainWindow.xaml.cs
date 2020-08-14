@@ -32,6 +32,7 @@ namespace robot_simulator
             var productionState = new ProductionState();
             var naiveController = new NaiveController(productionState, "InputFiles/ProcessingTimeMatrix.csv", "InputFiles/situation1/WarehouseInitialState1.csv", "InputFiles/situation1/HistoricalProductionList1.txt", "InputFiles/situation1/FutureProductionList1.txt");
             ViewModel = new MainWindowViewModel(naiveController);
+            DataContext = ViewModel;
         }
     }
 }

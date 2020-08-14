@@ -43,6 +43,11 @@ namespace robot_simulator.ViewModels
             NaiveController.NextStep();
         }
 
+        public void NotifyCurrentWarehouseState()
+        {
+            OnPropertyChanged(nameof(CurrentWarehouseState));
+        }
+
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()
         {
             var whRows = Enumerable.Range(0, ProductionState.WarehouseRows);

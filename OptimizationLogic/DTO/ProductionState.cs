@@ -82,15 +82,14 @@ namespace OptimizationLogic.DTO
         private Dictionary<(int row, int col), PositionCodes> BuildWarehousePositionMappingReverseDict()
         {
             var res = _warehousePositionMapping.ToDictionary(x => x.Value, x => x.Key);
-            (int numericalPart, char alphabetPart) = (22, 'A');
-            int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
-            int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
-            res[(row, col)] = PositionCodes.Service;
-
-            (numericalPart, alphabetPart) = (22, 'B');
-            col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
-            row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
-            res[(row, col)] = PositionCodes.Service;
+            foreach (char alphabetPart in new[] { 'A', 'B' })
+            {
+                int numericalPart = 22;
+                int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
+                int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
+                res[(row, col)] = PositionCodes.Service;
+            }
+            res[(3, 0)] = PositionCodes.Stacker;
             return res;
         }
 

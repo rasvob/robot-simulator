@@ -7,23 +7,88 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         xmlns:viewModels="clr-namespace:robot_simulator.ViewModels"
+        xmlns:converters="clr-namespace:robot_simulator.ViewModels.ValueConterters"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         BorderThickness="1" 
         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
         ResizeMode="CanResizeWithGrip"
         WindowTransitionsEnabled="False"
         WindowStartupLocation="CenterScreen"
-          
-                 
         Title="Robot Simulator" Height="600" Width="800">
-    <Grid>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="HeadingStyle"
+                   BasedOn="{StaticResource MahApps.Styles.TextBlock}"
+                   TargetType="{x:Type TextBlock}">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="FontWeight" Value="Normal" />
+            </Style>
+
+            <Style x:Key="LargeTileStyle" TargetType="mah:Tile">
+                <Setter Property="Height" Value="125" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+                <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+                <Setter Property="TitleFontSize" Value="14" />
+                <Setter Property="Width" Value="300" />
+            </Style>
+
+            <Style x:Key="SmallTileStyle" TargetType="mah:Tile">
+                <Setter Property="Height" Value="80" />
+                <Setter Property="TextOptions.TextFormattingMode" Value="Ideal" />
+                <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+                <Setter Property="FontWeight" Value="Medium" />
+                <Setter Property="TitleFontSize" Value="10" />
+                <Setter Property="Margin" Value="0, 20, 5, 0" />
+            </Style>
+
+            <converters:TileColorValueConterter x:Key="TileColorValueConterter" />
+            <converters:TileEnabledValueConterter x:Key="TileEnabledValueConterter" />
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="200"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
-        <TextBlock Text="Naive approach" Grid.Row="0" Margin="15"></TextBlock>
-        
-        
-        
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Settings" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <ItemsControl  ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <mah:Tile Title="{Binding PosiionCode, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                           Background="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TileColorValueConterter}}"
+                           Count="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                           CountFontSize="15"
+                           HorizontalTitleAlignment="Left"
+                           IsEnabled="True"
+                           Style="{StaticResource SmallTileStyle}"
+                           TitleFontSize="12"
+                           HorizontalContentAlignment="Center"
+                           Width="Auto"
+                           VerticalTitleAlignment="Top" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </mah:MetroWindow>
