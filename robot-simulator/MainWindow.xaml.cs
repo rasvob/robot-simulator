@@ -1,22 +1,11 @@
 ﻿using MahApps.Metro.Controls;
 using OptimizationLogic;
+using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
 using robot_simulator.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace robot_simulator
 {
@@ -30,14 +19,25 @@ namespace robot_simulator
         {
             InitializeComponent();
             var productionState = new ProductionState();
-            var naiveController = new NaiveController(productionState, "InputFiles/ProcessingTimeMatrix.csv", "InputFiles/situation1/WarehouseInitialState1.csv", "InputFiles/situation1/HistoricalProductionList1.txt", "InputFiles/situation1/FutureProductionList1.txt");
+            var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
+            scenarioLoader.LoadScenarion(productionState, 0);
+            var naiveController = new NaiveController(productionState);
             ViewModel = new MainWindowViewModel(naiveController);
             DataContext = ViewModel;
         }
 
-        private void ItemsControl_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
-        }
+        private List<ProductionScenarioPaths> LoadScenarionPaths(string folder) =>
+            Directory.GetDirectories(folder, "*situation*")
+            .Select(Directory.GetFiles)
+            .Select(t =>
+            {
+                return new ProductionScenarioPaths()
+                {
+                    FutureProductionListCsv = t.FirstOrDefault(s => s.Contains("Future")),
+                    HistoricalProductionListCsv = t.FirstOrDefault(s => s.Contains("Historical")),
+                    WarehouseInitialStateCsv = t.FirstOrDefault(s => s.Contains("Warehouse"))
+                };
+            })
+            .ToList();
     }
 }

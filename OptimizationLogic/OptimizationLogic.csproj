@@ -54,38 +54,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="InputFiles\ProcessingTimeMatrix.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation1\WarehouseInitialState.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation2\WarehouseInitialState.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation3\WarehouseInitialState.csv">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="InputFiles\ProcessingTimeMatrix.csv" />
+    <Content Include="InputFiles\situation1\WarehouseInitialState.csv" />
+    <Content Include="InputFiles\situation2\WarehouseInitialState.csv" />
+    <Content Include="InputFiles\situation3\WarehouseInitialState.csv" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="InputFiles\situation1\FutureProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation1\HistoricalProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation2\FutureProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation2\HistoricalProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation3\FutureProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="InputFiles\situation3\HistoricalProductionList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="InputFiles\situation1\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation1\HistoricalProductionList.txt" />
+    <Content Include="InputFiles\situation2\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation2\HistoricalProductionList.txt" />
+    <Content Include="InputFiles\situation3\FutureProductionList.txt" />
+    <Content Include="InputFiles\situation3\HistoricalProductionList.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

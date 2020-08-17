@@ -21,7 +21,6 @@ namespace OptimizationLogic.DAL
         public void LoadScenarion(ProductionState productionState, int scenarioIdx=0)
         {
             var current = DefaultScenarios[scenarioIdx];
-
             productionState.LoadTimeMatrix(TimeMatrixCsvPath);
             productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
             productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);

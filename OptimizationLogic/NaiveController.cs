@@ -25,7 +25,7 @@ namespace OptimizationLogic
             InitSortedPositionCodes();
         }
 
-        private void InitSortedPositionCodes()
+        public void InitSortedPositionCodes()
         {
             Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
             foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
@@ -43,6 +43,12 @@ namespace OptimizationLogic
         {
             ProductionState = state;
             ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
+            InitSortedPositionCodes();
+        }
+
+        public NaiveController(ProductionState state)
+        {
+            ProductionState = state;
             InitSortedPositionCodes();
         }
 
