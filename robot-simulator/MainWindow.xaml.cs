@@ -20,9 +20,8 @@ namespace robot_simulator
             InitializeComponent();
             var productionState = new ProductionState();
             var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
-            scenarioLoader.LoadScenarion(productionState, 0);
             var naiveController = new NaiveController(productionState);
-            ViewModel = new MainWindowViewModel(naiveController);
+            ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
             DataContext = ViewModel;
         }
 

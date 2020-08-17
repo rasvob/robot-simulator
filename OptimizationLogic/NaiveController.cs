@@ -52,6 +52,12 @@ namespace OptimizationLogic
             InitSortedPositionCodes();
         }
 
+        public void RenewControllerState()
+        {
+            InitSortedPositionCodes();
+            StepLog.Clear();
+        }
+
         public virtual void NextStep()
         {
             var needed = ProductionState.FutureProductionPlan.Dequeue();

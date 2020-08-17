@@ -53,6 +53,11 @@
             <converters:QueueDisplayLimitConverter x:Key="QueueDisplayLimitConverter" />
         </ResourceDictionary>
     </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding NextStep}" Modifiers="Ctrl" Key="N" />
+    </Window.InputBindings>
+    
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <TabControl Style="{DynamicResource MahApps.Styles.TabControl.Animated}"
                     mah:TabControlHelper.UnderlinePlacement="Bottom" 
@@ -60,21 +65,51 @@
                     mah:TabControlHelper.Underlined="TabItems">
             <mah:MetroTabItem Header="Simulation">
                 <StackPanel Margin="0 15 15 0" >
-                <Expander Header="Settings" IsExpanded="True">
+                <Expander Header="Settings" IsExpanded="False">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Settings" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
-                    </Grid>
+                            <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="Predefined scenarios" FontWeight="Bold" Margin="2 0 0 3" />
+                                <StackPanel Orientation="Horizontal" >
+                                    <ComboBox Width="200" SelectedIndex="{Binding SelectedPredefinedScenario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBoxItem Content="Scenario 1" />
+                                        <ComboBoxItem Content="Scenario 2" />
+                                        <ComboBoxItem Content="Scenario 3" />
+                                    </ComboBox>
+                                    <Button Content="Load scenario" Margin="5 0 0 0" Command="{Binding LoadSelectedScenario}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
                 </Expander>
 
+                    <Expander Header="Simulation control" IsExpanded="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="Current step, number of items in queue, time... etc" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
+                                <Button Content="Next step" ToolTip="Ctlr+N" Command="{Binding NextStep}" />
+                            </StackPanel>
+                        </Grid>
+                    </Expander>
+
                 <TextBlock Text="Current front stack state (M13)" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
-                <ItemsControl  ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                <ItemsControl ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid Rows="4" />

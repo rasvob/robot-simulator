@@ -13,18 +13,35 @@ namespace OptimizationLogic.DAL
         {
             DefaultScenarios = scenarios;
             TimeMatrixCsvPath = timeMatrixCsvPath;
+            DefaultScenariosInMemory = DefaultScenarios.Select(current => {
+                var productionState = new ProductionState();
+                productionState.LoadTimeMatrix(TimeMatrixCsvPath);
+                productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
+                productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);
+                productionState.LoadProductionHistory(current.HistoricalProductionListCsv);
+                return productionState;
+            }).ToList();
         }
 
         public List<ProductionScenarioPaths> DefaultScenarios { get; set; }
+        public List<ProductionState> DefaultScenariosInMemory { get; set; }
         public string TimeMatrixCsvPath { get; set; }
-
-        public void LoadScenarion(ProductionState productionState, int scenarioIdx=0)
+        public void LoadScenarioFromDisk(ProductionState productionState, int scenarioIdx=0)
         {
             var current = DefaultScenarios[scenarioIdx];
             productionState.LoadTimeMatrix(TimeMatrixCsvPath);
             productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
             productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);
             productionState.LoadProductionHistory(current.HistoricalProductionListCsv);
+        }
+
+        public void LoadScenarioFromMemory(ProductionState productionState, int scenarioIdx = 0)
+        {
+            var current = (ProductionState)DefaultScenariosInMemory[scenarioIdx].Clone();
+            productionState.TimeMatrix = current.TimeMatrix;
+            productionState.FutureProductionPlan = current.FutureProductionPlan;
+            productionState.ProductionHistory = current.ProductionHistory;
+            productionState.WarehouseState = current.WarehouseState;
         }
     }
 

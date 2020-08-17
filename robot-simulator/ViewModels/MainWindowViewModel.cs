@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic;
+using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace robot_simulator.ViewModels
         public ProductionState ProductionState { get; set; }
 
         public ICommand NextStep { get; private set; }
+        public ICommand LoadSelectedScenario { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -60,20 +62,47 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private int _selectedPredefinedScenario = 0;
 
-        public MainWindowViewModel(NaiveController naiveController)
+        public int SelectedPredefinedScenario
+        {
+            get { return _selectedPredefinedScenario; }
+
+            set
+            {
+                if (_selectedPredefinedScenario != value)
+                {
+                    _selectedPredefinedScenario = value;
+                    OnPropertyChanged(nameof(SelectedPredefinedScenario));
+                }
+            }
+        }
+
+
+        public ProductionStateLoader ScenarioLoader { get; }
+        
+        public MainWindowViewModel(NaiveController naiveController, ProductionStateLoader scenarioLoader)
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;
+            ScenarioLoader = scenarioLoader;
+            ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
             NextStep = new SimpleCommand(NextStepClickedExecute);
-            CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
-            HistoryQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.ProductionHistory));
-            FutureQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.FutureProductionPlan));
+            LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
+            UpdateProductionStateInView();
         }
 
         public void NextStepClickedExecute(object o)
         {
             NaiveController.NextStep();
+            UpdateProductionStateInView();
+        }
+
+        public void LoadSelectedScenarioExecute(object o)
+        {
+            ScenarioLoader.LoadScenarioFromMemory(ProductionState, SelectedPredefinedScenario);
+            NaiveController.RenewControllerState();
+            UpdateProductionStateInView();
         }
 
         public void NotifyCurrentWarehouseState()
