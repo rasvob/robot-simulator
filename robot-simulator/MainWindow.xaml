@@ -54,31 +54,36 @@
         </ResourceDictionary>
     </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-        <StackPanel Margin="15">
-            <Expander Header="Settings" IsExpanded="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Settings" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
-                </Grid>
-            </Expander>
-            
-            <TextBlock Text="Current front stack state (M13)" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
-            <ItemsControl  ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Rows="4" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+        <TabControl Style="{DynamicResource MahApps.Styles.TabControl.Animated}"
+                    mah:TabControlHelper.UnderlinePlacement="Bottom" 
+                    Margin="15 15 0 0"
+                    mah:TabControlHelper.Underlined="TabItems">
+            <mah:MetroTabItem Header="Simulation">
+                <StackPanel Margin="0 15 15 0" >
+                <Expander Header="Settings" IsExpanded="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Settings" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
+                    </Grid>
+                </Expander>
 
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <mah:Tile Title="{Binding PositionCode, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBlock Text="Current front stack state (M13)" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
+                <ItemsControl  ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <mah:Tile Title="{Binding PositionCode, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                            Background="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TileColorValueConterter}}"
                            Count="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                            CountFontSize="15"
@@ -89,33 +94,39 @@
                            HorizontalContentAlignment="Center"
                            Width="Auto"
                            VerticalTitleAlignment="Top" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
-                <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="Past production queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
-            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
+                    <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="Past production queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
+                </Grid>
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <Expander  Header="Complete future production queue" IsExpanded="False" Grid.Column="0">
-                    <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Expander>
+                    <Expander  Header="Complete future production queue" IsExpanded="False" Grid.Column="0">
+                        <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Expander>
 
-                <Expander  Header="Complete past production queue" IsExpanded="False" Grid.Column="1" Margin="0, 0, 5, 0">
-                    <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Expander>
-            </Grid>
-        </StackPanel>
+                    <Expander  Header="Complete past production queue" IsExpanded="False" Grid.Column="2" Margin="0, 0, 5, 0">
+                        <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Expander>
+                </Grid>
+            </StackPanel>
+            </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="Logs">
+                <TextBlock FontSize="30" Text="Logs" />
+            </mah:MetroTabItem>
+        </TabControl>
     </ScrollViewer>
-
 </mah:MetroWindow>

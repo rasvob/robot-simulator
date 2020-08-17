@@ -22,7 +22,11 @@ namespace OptimizationLogic
             ProductionState.LoadProductionHistory(csvHistroicalProduction);
             ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
             ProductionState.LoadWarehouseState(csvWarehouseInitialState);
+            InitSortedPositionCodes();
+        }
 
+        private void InitSortedPositionCodes()
+        {
             Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
             foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
             {
@@ -39,6 +43,7 @@ namespace OptimizationLogic
         {
             ProductionState = state;
             ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
+            InitSortedPositionCodes();
         }
 
         public virtual void NextStep()
@@ -90,7 +95,7 @@ namespace OptimizationLogic
                     return positionCode;
                 }
             }
-            throw new Exception("ItemState is not in warehouse.");
+            throw new ArgumentException("ItemState is not in warehouse.");
         }
     }
 }

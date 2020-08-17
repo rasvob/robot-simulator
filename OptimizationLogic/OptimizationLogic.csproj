@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BruteForceOptimizedController.cs" />
+    <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\ItemState.cs" />
     <Compile Include="DTO\OptimizationDtoExtensions.cs" />
     <Compile Include="DTO\PositionCodes.cs" />
