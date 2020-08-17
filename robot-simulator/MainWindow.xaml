@@ -50,6 +50,7 @@
             <converters:TileColorValueConterter x:Key="TileColorValueConterter" />
             <converters:TileEnabledValueConterter x:Key="TileEnabledValueConterter" />
             <converters:TileColorEnumValueConterter x:Key="TileColorEnumValueConterter" />
+            <converters:QueueDisplayLimitConverter x:Key="QueueDisplayLimitConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -67,7 +68,7 @@
                 </Grid>
             </Expander>
             
-            <TextBlock Text="Current front stack state M13" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
+            <TextBlock Text="Current front stack state (M13)" Grid.Row="0" Grid.Column="0" Style="{StaticResource HeadingStyle}" />
             <ItemsControl  ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -96,8 +97,8 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="History queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
+                <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="Past production queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
             </Grid>
 
             <Grid>
@@ -106,18 +107,14 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Expander  Header="Complete history queue" IsExpanded="False" Grid.Column="0" Margin="0, 0, 5, 0">
-                    <views:QueueViewControl ControlTitle="History queue" ColumnsCount="6" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander  Header="Complete future production queue" IsExpanded="False" Grid.Column="0">
+                    <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Expander>
 
-                <Expander  Header="Complete future queue" IsExpanded="False" Grid.Column="1">
-                    <views:QueueViewControl ControlTitle="Future queue" ColumnsCount="6" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Expander  Header="Complete past production queue" IsExpanded="False" Grid.Column="1" Margin="0, 0, 5, 0">
+                    <views:QueueViewControl ControlTitle="" ColumnsCount="6" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Expander>
-
             </Grid>
-
-
-
         </StackPanel>
     </ScrollViewer>
 

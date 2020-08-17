@@ -147,6 +147,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SimpleCommand.cs" />
+    <Compile Include="ViewModels\ValueConterters\QueueDisplayLimitConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\TileColorValueConterter.cs" />
     <Compile Include="ViewModels\WarehouseItemViewModel.cs" />
     <Compile Include="Views\QueueViewControl.xaml.cs">
