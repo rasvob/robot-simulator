@@ -137,7 +137,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
+                        <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
                     <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="Past production queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
                 </Grid>
 

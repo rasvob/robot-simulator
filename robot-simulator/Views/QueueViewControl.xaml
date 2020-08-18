@@ -45,8 +45,8 @@
     </UserControl.Resources>
 
     <StackPanel>
-    <TextBlock Text="{Binding ControlTitle, ElementName=root}" Style="{StaticResource HeadingStyle}" />
-    <ItemsControl ItemsSource="{Binding}">
+        <TextBlock Text="{Binding ControlTitle, ElementName=root}" Style="{StaticResource HeadingStyle}" />
+        <ItemsControl ItemsSource="{Binding}">
         <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
                     <UniformGrid Columns="{Binding ColumnsCount, ElementName=root}" />

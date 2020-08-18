@@ -38,7 +38,6 @@ namespace OptimizationLogic
             SortedPositionCodes = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
         }
 
-        // TODO: Generate random inputs
         public NaiveController(ProductionState state, string csvProcessingTimeMatrix)
         {
             ProductionState = state;

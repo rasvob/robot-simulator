@@ -1,6 +1,9 @@
-﻿using System;
+﻿using robot_simulator.ViewModels;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,8 +21,11 @@ namespace robot_simulator.Views
     /// <summary>
     /// Interakční logika pro QueueViewControl.xaml
     /// </summary>
-    public partial class QueueViewControl : UserControl
-    {
+    public partial class QueueViewControl : UserControl, INotifyPropertyChanged  {
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         public string ControlTitle
         {
             get { return (string)GetValue(ControlTitleProperty); }
@@ -40,6 +46,7 @@ namespace robot_simulator.Views
         // Using a DependencyProperty as the backing store for ColumnsCount.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ColumnsCountProperty =
             DependencyProperty.Register("ColumnsCount", typeof(int), typeof(QueueViewControl), new PropertyMetadata(1));
+
 
         public QueueViewControl()
         {

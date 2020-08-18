@@ -63,7 +63,6 @@ namespace robot_simulator.ViewModels
         }
 
         private int _selectedPredefinedScenario = 0;
-
         public int SelectedPredefinedScenario
         {
             get { return _selectedPredefinedScenario; }
@@ -79,6 +78,8 @@ namespace robot_simulator.ViewModels
         }
 
 
+
+
         public ProductionStateLoader ScenarioLoader { get; }
         
         public MainWindowViewModel(NaiveController naiveController, ProductionStateLoader scenarioLoader)
@@ -87,7 +88,7 @@ namespace robot_simulator.ViewModels
             ProductionState = NaiveController.ProductionState;
             ScenarioLoader = scenarioLoader;
             ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
-            NextStep = new SimpleCommand(NextStepClickedExecute);
+            NextStep = new SimpleCommand(NextStepClickedExecute, (_) => !ProductionState.SimulationFinished);
             LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
             UpdateProductionStateInView();
         }

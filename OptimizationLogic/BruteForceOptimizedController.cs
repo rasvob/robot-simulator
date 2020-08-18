@@ -15,13 +15,17 @@ namespace OptimizationLogic
         {
         }
 
-        public override void NextStep()
+        public override bool NextStep()
         {
+            if (ProductionState.FutureProductionPlan.Count == 0)
+            {
+                return false;
+            }
+            
             if ((ProductionState.StepCounter-1) % 50 == 0)
             {
                 ReorganizeWarehouse(300);
             }
-
 
             var needed = ProductionState.FutureProductionPlan.Dequeue();
             var current = ProductionState.ProductionHistory.Dequeue();
@@ -53,6 +57,8 @@ namespace OptimizationLogic
                 MoveToDifferentCellTime = moveToDifferentCellTime,
                 WithdrawTime = withdrawTime
             });
+
+            return true;
         }
 
         private void ReorganizeWarehouse (int reservedTime)

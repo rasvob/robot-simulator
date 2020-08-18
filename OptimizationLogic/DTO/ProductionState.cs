@@ -17,7 +17,7 @@ namespace OptimizationLogic.DTO
         public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
         public bool ProductionStateIsOk { get; set; } = true;
         public int StepCounter { get; set; } = 1;
-        public bool SimulationFinished { get => FutureProductionPlan.Count != 0; }
+        public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
 
         public int WarehouseColls
         {
@@ -125,7 +125,7 @@ namespace OptimizationLogic.DTO
         {
             if (arr.Length != correctLen)
             {
-                throw new Exception("Incorrect input matrix shape");
+                throw new ArgumentException("Incorrect input matrix shape");
             }
         }
 
