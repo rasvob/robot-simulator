@@ -15,6 +15,8 @@ namespace OptimizationLogic
         private List<PositionCodes> SortedPositionCodes;
         private const int TimeLimit = 55;
 
+        public bool Finished { get; set; } = false;
+
         public NaiveController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
         {
             ProductionState = productionState;
@@ -56,10 +58,17 @@ namespace OptimizationLogic
         {
             InitSortedPositionCodes();
             StepLog.Clear();
+            Finished = false;
         }
 
-        public virtual void NextStep()
+        public virtual bool NextStep()
         {
+            if (ProductionState.FutureProductionPlan.Count == 0)
+            {
+                Finished = true;
+                return false;
+            }
+            
             var needed = ProductionState.FutureProductionPlan.Dequeue();
             var current = ProductionState.ProductionHistory.Dequeue();
             ProductionState.ProductionHistory.Enqueue(needed);
@@ -90,6 +99,8 @@ namespace OptimizationLogic
                 MoveToDifferentCellTime = moveToDifferentCellTime,
                 WithdrawTime = withdrawTime
             });
+
+            return true;
         }
 
         protected PositionCodes GetNearestEmptyPosition()
