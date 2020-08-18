@@ -17,6 +17,7 @@ namespace OptimizationLogic.DTO
         public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
         public bool ProductionStateIsOk { get; set; } = true;
         public int StepCounter { get; set; } = 1;
+        public bool SimulationFinished { get => FutureProductionPlan.Count != 0; }
 
         public int WarehouseColls
         {
@@ -199,14 +200,15 @@ namespace OptimizationLogic.DTO
                     occurancesDict[WarehouseState[i, j]]++;
                 }
             }
-            String warehouseToString = "";
+            var sb = new StringBuilder();
             foreach (KeyValuePair<ItemState, int> kvp in occurancesDict)
             {
-                warehouseToString += string.Format("Key = {0}, Value = {1}\n", kvp.Key, kvp.Value);
+                sb.Append("Key = ").Append(kvp.Key).Append(", Value = ").Append(kvp.Value).Append('\n');
+                //warehouseToString += $"Key = {kvp.Key}, Value = {kvp.Value}\n";
             }
+            string warehouseToString = sb.ToString();
 
-            return String.Format("StepCounter={0}, ProductionStateIsOk={1}, FutureProductionPlan len={2}, FutureProductionPlan head={3}, ProductionHistory len={4}, ProductionHistory head={5}\nWarehouse occurances:\n{6}",
-                StepCounter, ProductionStateIsOk, FutureProductionPlan.Count, FutureProductionPlan.Peek(), ProductionHistory.Count, ProductionHistory.Peek(), warehouseToString);
+            return $"StepCounter={StepCounter}, ProductionStateIsOk={ProductionStateIsOk}, FutureProductionPlan len={FutureProductionPlan.Count}, FutureProductionPlan head={FutureProductionPlan.Peek()}, ProductionHistory len={ProductionHistory.Count}, ProductionHistory head={ProductionHistory.Peek()}\nWarehouse occurances:\n{warehouseToString}";
         }
     }
 }
