@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic
 {
-    public class BruteForceOptimizedController : NaiveController
+    public class BruteForceOptimizedController : BaseController
     {
-        private const int TimeLimit = 55;
+        new private const int TimeLimit = 55;
 
         public BruteForceOptimizedController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
@@ -64,7 +64,6 @@ namespace OptimizationLogic
         private void ReorganizeWarehouse (int reservedTime)
         {
             ProductionState initialProductionState = (ProductionState)ProductionState.Clone(); 
-
         }
     }
 }

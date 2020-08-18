@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseController.cs" />
     <Compile Include="BruteForceOptimizedController.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\ItemState.cs" />

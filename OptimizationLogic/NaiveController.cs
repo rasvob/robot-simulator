@@ -7,57 +7,21 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic
 {
-    public class NaiveController
+    public class NaiveController: BaseController
     {
-        public ProductionState ProductionState { get; set; }
-        public List<StepModel> StepLog { get; set; } = new List<StepModel>();
-
-        private List<PositionCodes> SortedPositionCodes;
-        private const int TimeLimit = 55;
-
-        public NaiveController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
+        public NaiveController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan): base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
-            ProductionState = productionState;
-            ProductionState.LoadFutureProductionPlan(csvFutureProductionPlan);
-            ProductionState.LoadProductionHistory(csvHistroicalProduction);
-            ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
-            ProductionState.LoadWarehouseState(csvWarehouseInitialState);
-            InitSortedPositionCodes();
         }
 
-        public void InitSortedPositionCodes()
+        public NaiveController(ProductionState state, string csvProcessingTimeMatrix): base(state, csvProcessingTimeMatrix)
         {
-            Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
-            foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
-            {
-                if (positionCode != PositionCodes.Service && positionCode != PositionCodes.Stacker)
-                {
-                    cellsTimes[positionCode] = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(positionCode)];
-                }
-            }
-            SortedPositionCodes = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
         }
 
-        public NaiveController(ProductionState state, string csvProcessingTimeMatrix)
+        public NaiveController(ProductionState state): base(state)
         {
-            ProductionState = state;
-            ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
-            InitSortedPositionCodes();
         }
 
-        public NaiveController(ProductionState state)
-        {
-            ProductionState = state;
-            InitSortedPositionCodes();
-        }
-
-        public void RenewControllerState()
-        {
-            InitSortedPositionCodes();
-            StepLog.Clear();
-        }
-
-        public virtual bool NextStep()
+        public override bool NextStep()
         {
             if (ProductionState.FutureProductionPlan.Count == 0)
             {
@@ -96,24 +60,6 @@ namespace OptimizationLogic
             });
 
             return true;
-        }
-
-        protected PositionCodes GetNearestEmptyPosition()
-        {
-            return GetNearesElementWarehousePosition(ItemState.Empty);
-        }
-
-        protected PositionCodes GetNearesElementWarehousePosition(ItemState itemState)
-        {
-            foreach (PositionCodes positionCode in SortedPositionCodes)
-            {
-                (int r, int c) = ProductionState.GetWarehouseIndex(positionCode);
-                if (ProductionState.WarehouseState[r, c] == itemState)
-                {
-                    return positionCode;
-                }
-            }
-            throw new ArgumentException("ItemState is not in warehouse.");
         }
     }
 }
