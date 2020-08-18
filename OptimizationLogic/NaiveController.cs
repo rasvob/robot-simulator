@@ -44,7 +44,8 @@ namespace OptimizationLogic
             var moveToDifferentCellTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestFreePosition), ProductionState.GetTimeMatrixIndex(nearestNeededPosition)] - 5; // TODO: Validate this calculation
             var withdrawTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestNeededPosition), ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
             var totalTime = insertTime + moveToDifferentCellTime + withdrawTime;
-            
+            TimeSpentInSimulation += totalTime;
+
             ProductionState.ProductionStateIsOk = totalTime <= TimeLimit;
             ProductionState.StepCounter++;
 

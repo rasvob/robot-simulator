@@ -77,8 +77,9 @@ namespace robot_simulator.ViewModels
             }
         }
 
-
-
+        public int CurrentStep { get => ProductionState.StepCounter; }
+        public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
+        public int TimeSpentInSimulation { get => ProductionState.FutureProductionPlan.Count; }
 
         public ProductionStateLoader ScenarioLoader { get; }
         
@@ -118,6 +119,8 @@ namespace robot_simulator.ViewModels
             CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
             HistoryQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.ProductionHistory));
             FutureQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.FutureProductionPlan));
+            OnPropertyChanged(nameof(CurrentStep));
+            OnPropertyChanged(nameof(NumberOfItemsInProductionQueue));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()
@@ -136,5 +139,4 @@ namespace robot_simulator.ViewModels
 
         public IEnumerable<WarehouseItemViewModel> CreateItemStateCollectionFromQueue(Queue<ItemState> queue) => queue.ToArray().Select((t, idx) => new WarehouseItemViewModel { StateStr = t.ToString(), PositionCode = idx == 0 ? "Next" : $"Next+{idx}" });
     }
-
 }

@@ -18,6 +18,7 @@ namespace OptimizationLogic.DTO
         public bool ProductionStateIsOk { get; set; } = true;
         public int StepCounter { get; set; } = 1;
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
+        public int ClockInSeconds { get; } = 55;
 
         public int WarehouseColls
         {

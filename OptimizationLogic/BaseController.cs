@@ -14,6 +14,7 @@ namespace OptimizationLogic
 
         protected List<PositionCodes> SortedPositionCodes;
         protected const int TimeLimit = 55;
+        public double TimeSpentInSimulation { get; set; } = 0;
 
         public void InitSortedPositionCodes()
         {
@@ -54,6 +55,7 @@ namespace OptimizationLogic
         {
             InitSortedPositionCodes();
             StepLog.Clear();
+            TimeSpentInSimulation = 0;
         }
 
         protected PositionCodes GetNearestEmptyPosition()
