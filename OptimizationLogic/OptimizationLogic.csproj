@@ -54,6 +54,7 @@
     <Compile Include="Extensions\ProductionStateExt.cs" />
     <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="InputFiles\ProcessingTimeMatrix.csv" />
@@ -69,5 +70,6 @@
     <Content Include="InputFiles\situation3\FutureProductionList.txt" />
     <Content Include="InputFiles\situation3\HistoricalProductionList.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
