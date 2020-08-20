@@ -20,6 +20,7 @@ namespace robot_simulator.ViewModels
 
         public ICommand NextStep { get; private set; }
         public ICommand LoadSelectedScenario { get; private set; }
+        public ICommand Undo { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -51,7 +52,9 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        public ObservableCollection<WarehouseItemViewModel> FutureQueue { get => futureQueue;
+        public ObservableCollection<WarehouseItemViewModel> FutureQueue 
+        {
+            get => futureQueue;
             set
             {
                 if (futureQueue != value)
@@ -79,7 +82,11 @@ namespace robot_simulator.ViewModels
 
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
-        public int TimeSpentInSimulation { get => ProductionState.FutureProductionPlan.Count; }
+        public double TimeSpentInSimulation { get => ProductionState.TimeSpentInSimulation; }
+        public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.TimeLimitForOneStep; }
+        public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
+        public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
+
 
         public ProductionStateLoader ScenarioLoader { get; }
         
@@ -91,6 +98,14 @@ namespace robot_simulator.ViewModels
             ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
             NextStep = new SimpleCommand(NextStepClickedExecute, (_) => !ProductionState.SimulationFinished);
             LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
+            Undo = new SimpleCommand(UndoExecute, _ => NaiveController.CanUndo());
+            UpdateProductionStateInView();
+        }
+
+        public void UndoExecute(object o)
+        {
+            NaiveController.Undo();
+            ProductionState = NaiveController.ProductionState;
             UpdateProductionStateInView();
         }
 
@@ -103,6 +118,7 @@ namespace robot_simulator.ViewModels
         public void LoadSelectedScenarioExecute(object o)
         {
             ScenarioLoader.LoadScenarioFromMemory(ProductionState, SelectedPredefinedScenario);
+            ProductionState.ResetState();
             NaiveController.RenewControllerState();
             UpdateProductionStateInView();
         }
@@ -121,6 +137,11 @@ namespace robot_simulator.ViewModels
             FutureQueue = new ObservableCollection<WarehouseItemViewModel>(CreateItemStateCollectionFromQueue(ProductionState.FutureProductionPlan));
             OnPropertyChanged(nameof(CurrentStep));
             OnPropertyChanged(nameof(NumberOfItemsInProductionQueue));
+            OnPropertyChanged(nameof(TimeSpentInSimulation));
+            OnPropertyChanged(nameof(TotalSimulationTime));
+            OnPropertyChanged(nameof(TotalSimulationTime));
+            OnPropertyChanged(nameof(ProductionStateIsOk));
+            OnPropertyChanged(nameof(CurrentStepTime));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()

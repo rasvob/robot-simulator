@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic.DTO;
+using OptimizationLogic.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,9 @@ namespace OptimizationLogic
             {
                 return false;
             }
-            
+
+            History.Push(ProductionState.Copy());
+
             var needed = ProductionState.FutureProductionPlan.Dequeue();
             var current = ProductionState.ProductionHistory.Dequeue();
             ProductionState.ProductionHistory.Enqueue(needed);
@@ -44,9 +47,10 @@ namespace OptimizationLogic
             var moveToDifferentCellTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestFreePosition), ProductionState.GetTimeMatrixIndex(nearestNeededPosition)] - 5; // TODO: Validate this calculation
             var withdrawTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestNeededPosition), ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
             var totalTime = insertTime + moveToDifferentCellTime + withdrawTime;
-            TimeSpentInSimulation += totalTime;
+            ProductionState.CurrentStepTime = totalTime;
+            ProductionState.TimeSpentInSimulation += totalTime;
 
-            ProductionState.ProductionStateIsOk = totalTime <= TimeLimit;
+            ProductionState.ProductionStateIsOk = ProductionState.ProductionStateIsOk && totalTime <= TimeLimit;
             ProductionState.StepCounter++;
 
             StepLog.Add(new StepModel

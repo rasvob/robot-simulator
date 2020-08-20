@@ -47,6 +47,13 @@
                 <Setter Property="Margin" Value="0, 0, 5, 15" />
             </Style>
 
+            <Style x:Key="SmallSectionHeader" TargetType="TextBlock">
+                <Setter Property="Margin" Value="2 0 0 3" />
+                <Setter Property="FontWeight" Value="Bold" />
+            </Style>
+
+            <Thickness x:Key="LeftControlMargin">5,0,0,0</Thickness>
+
             <converters:TileColorValueConterter x:Key="TileColorValueConterter" />
             <converters:TileEnabledValueConterter x:Key="TileEnabledValueConterter" />
             <converters:TileColorEnumValueConterter x:Key="TileColorEnumValueConterter" />
@@ -56,6 +63,7 @@
 
     <Window.InputBindings>
         <KeyBinding Command="{Binding NextStep}" Modifiers="Ctrl" Key="N" />
+        <KeyBinding Command="{Binding Undo}" Modifiers="Ctrl" Key="Z" />
     </Window.InputBindings>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -76,7 +84,7 @@
                                 <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="Predefined scenarios" FontWeight="Bold" Margin="2 0 0 3" />
+                                <TextBlock Text="Predefined scenarios" Style="{StaticResource SmallSectionHeader}" />
                                 <StackPanel Orientation="Horizontal" >
                                     <ComboBox Width="200" SelectedIndex="{Binding SelectedPredefinedScenario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                         <ComboBoxItem Content="Scenario 1" />
@@ -91,7 +99,7 @@
 
                     <Expander Header="Simulation control" IsExpanded="True">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Simulation statistics" FontWeight="Bold" Margin="2 0 0 3" Grid.Row="0" />
+                            <TextBlock Text="Simulation statistics" Style="{StaticResource SmallSectionHeader}" Grid.Row="0" />
                             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
                                 <RichTextBox Width="100" Margin="0 0 5 5"
                                      IsReadOnly="True"
@@ -132,7 +140,7 @@
                                     <RichTextBox.Document>
                                         <FlowDocument>
                                             <Paragraph>
-                                                <Run Text="{Binding SelectedPredefinedScenario, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Run Text="{Binding TimeSpentInSimulation, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                                             </Paragraph>
                                         </FlowDocument>
                                     </RichTextBox.Document>
@@ -147,7 +155,22 @@
                                     <RichTextBox.Document>
                                         <FlowDocument>
                                             <Paragraph>
-                                                <Run Text="{Binding SelectedPredefinedScenario, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <Run Text="{Binding TotalSimulationTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
+                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Time for current step"
+                                     IsDocumentEnabled="True"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding CurrentStepTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                                             </Paragraph>
                                         </FlowDocument>
                                     </RichTextBox.Document>
@@ -158,12 +181,14 @@
                                    OffContent="No, operation time exceeded limit"
                                    OnContent="Yes"
                                    IsEnabled="True"
-                                   IsOn="True" />
+                                   IsHitTestVisible="False"
+                                   IsOn="{Binding ProductionStateIsOk, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
                             
                             <!--Row 1-->
-                            <TextBlock Text="Simulation control panel" FontWeight="Bold" Margin="2 0 0 3" Grid.Row="0" />
+                            <TextBlock Text="Simulation control panel" Style="{StaticResource SmallSectionHeader}" Grid.Row="0" />
                             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
                                 <Button Content="Next step" ToolTip="Ctlr+N" Command="{Binding NextStep}" />
+                                <Button Content="Undo" ToolTip="Ctlr+Z" Command="{Binding Undo}" Margin="{StaticResource LeftControlMargin}" />
                             </StackPanel>
                         </StackPanel>
                     </Expander>
@@ -195,10 +220,13 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <views:QueueViewControl Grid.Column="0" ColumnsCount="6" ControlTitle="Future production queue (Next 6 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
-                    <views:QueueViewControl  Grid.Column="1" ColumnsCount="6" ControlTitle="Past production queue (Next 6 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=6}" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <views:QueueViewControl Grid.Column="0" Grid.Row="0" ColumnsCount="12" ControlTitle="Future production queue (Next 12 items)" DataContext="{Binding FutureQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=12}" />
+                    <views:QueueViewControl  Grid.Column="0" Grid.Row="1" ColumnsCount="12" ControlTitle="Past production queue (Next 12 items)" DataContext="{Binding HistoryQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource QueueDisplayLimitConverter}, ConverterParameter=12}" />
                 </Grid>
 
                 <Grid>
