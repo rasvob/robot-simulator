@@ -86,7 +86,7 @@ namespace robot_simulator.ViewModels
         public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.TimeLimitForOneStep; }
         public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
         public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
-
+        public IEnumerable<string> StepLog { get => NaiveController.StepLog.Select((t, i) => $"#{i}\t{t}").Reverse(); }
 
         public ProductionStateLoader ScenarioLoader { get; }
         
@@ -142,6 +142,7 @@ namespace robot_simulator.ViewModels
             OnPropertyChanged(nameof(TotalSimulationTime));
             OnPropertyChanged(nameof(ProductionStateIsOk));
             OnPropertyChanged(nameof(CurrentStepTime));
+            OnPropertyChanged(nameof(StepLog));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()

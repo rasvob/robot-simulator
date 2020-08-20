@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:robot_simulator"
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:xb="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         xmlns:viewModels="clr-namespace:robot_simulator.ViewModels"
         xmlns:views="clr-namespace:robot_simulator.Views"
         xmlns:converters="clr-namespace:robot_simulator.ViewModels.ValueConterters"
+        xmlns:behaviours="clr-namespace:robot_simulator.ViewModels.Behaviours"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         BorderThickness="1" 
         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
@@ -176,6 +178,7 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
                             </StackPanel>
+                            
                             <mah:ToggleSwitch Margin="0 0 5 5"
                                    Header="Is simulation running ok?"
                                    OffContent="No, operation time exceeded limit"
@@ -247,8 +250,20 @@
             </StackPanel>
             </mah:MetroTabItem>
 
-            <mah:MetroTabItem Header="Logs">
-                <TextBlock FontSize="30" Text="Logs" />
+            <mah:MetroTabItem Header="Log">
+                <ListBox SelectionMode="Single" ItemsSource="{Binding StepLog, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" ScrollViewer.CanContentScroll="False" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <xb:Interaction.Behaviors>
+                        <behaviours:IgnoreMouseWheelBehavior />
+                    </xb:Interaction.Behaviors>
+                    
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </mah:MetroTabItem>
         </TabControl>
     </ScrollViewer>
