@@ -20,6 +20,8 @@ namespace OptimizationLogic.DAL
             }).ToList();
         }
 
+        public double[,] TimeMatrix { get => DefaultScenariosInMemory[0].TimeMatrix; }
+
         public List<ProductionScenarioPaths> DefaultScenarios { get; set; }
         public List<ProductionState> DefaultScenariosInMemory { get; set; }
         public string TimeMatrixCsvPath { get; set; }

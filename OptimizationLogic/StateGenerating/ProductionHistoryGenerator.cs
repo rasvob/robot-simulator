@@ -7,34 +7,31 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic.StateGenerating
 {
-    public class FutureProductionPlanGenerator
+    public class ProductionHistoryGenerator : FutureProductionPlanGenerator
     {
-        public double MqbToMebTransitionProbability { get; set; } = 0.5;
-        public double ProbabilityOfStartingInMqbState { get; set; } = 1.0;
-        public int? RandomSeed { get; set; }
-        public Random RandomGenerator { get; set; }
-        public int SequenceLength { get; set; } = 100;
+        private int _numberOfUsedMebItems;
+        public int MaximumNumberOfMebItems { get; set; } = 35;
 
-        public FutureProductionPlanGenerator(double mqbToMebTransitionProbability, int sequenceLength = 100)
+        public ProductionHistoryGenerator(double mqbToMebTransitionProbability, int sequenceLength=64) : base(mqbToMebTransitionProbability, sequenceLength)
         {
-            MqbToMebTransitionProbability = mqbToMebTransitionProbability;
-            RandomGenerator = !RandomSeed.HasValue ? new Random() : new Random(RandomSeed.Value);
-            SequenceLength = sequenceLength;
+
+        }
+        
+        public override double ComputeFinalMqbToMebTransitionProbability()
+        {
+            return MqbToMebTransitionProbability * (_numberOfUsedMebItems == MaximumNumberOfMebItems ? 0.0 : 1.0);
         }
 
-        public virtual double ComputeFinalMqbToMebTransitionProbability()
+        new public List<ItemState> GenerateSequence()
         {
-            return MqbToMebTransitionProbability;
-        }
-
-        public List<ItemState> GenerateSequence()
-        {
+            _numberOfUsedMebItems = 0;
             var res = new List<ItemState>(SequenceLength);
 
             var currentState = RandomGenerator.NextDouble() < ProbabilityOfStartingInMqbState ? ItemState.MQB : ItemState.MEB;
 
             for (int i = 0; i < SequenceLength; i++)
             {
+                _numberOfUsedMebItems += currentState == ItemState.MEB ? 1 : 0;
                 res.Add(currentState);
                 currentState = currentState switch
                 {

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OptimizationLogic.DTO;
+using OptimizationLogic.StateGenerating;
 
 namespace OptimizationUnitTests
 {
@@ -30,6 +32,34 @@ namespace OptimizationUnitTests
             Assert.AreEqual((expectedRow, expectedCol), res);
         }
 
-        
+        [DataTestMethod]
+        [DataRow(0.0, 100)]
+        [DataRow(1.0, 50)]
+        public void TestFutureProductionPlanGenerator(double proba, int expected)
+        {
+            var generator = new FutureProductionPlanGenerator(proba)
+            {
+                ProbabilityOfStartingInMqbState = 1.0,
+                SequenceLength = 100
+            };
+
+            var sequence = generator.GenerateSequence();
+            Assert.AreEqual(expected, sequence.Count(t => t == ItemState.MQB));
+        }
+
+        [DataTestMethod]
+        [DataRow(0.0, 64)]
+        [DataRow(1.0, 32)]
+        public void TestProductionHistoryGenerator(double proba, int expected)
+        {
+            var generator = new ProductionHistoryGenerator(proba)
+            {
+                ProbabilityOfStartingInMqbState = 1.0,
+                SequenceLength = 64,
+            };
+
+            var sequence = generator.GenerateSequence();
+            Assert.AreEqual(expected, sequence.Count(t => t == ItemState.MQB));
+        }
     }
 }

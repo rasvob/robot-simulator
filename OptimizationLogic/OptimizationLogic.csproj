@@ -55,6 +55,8 @@
     <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
+    <Compile Include="StateGenerating\ProductionHistoryGenerator.cs" />
+    <Compile Include="StateGenerating\ProductionStateGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="InputFiles\ProcessingTimeMatrix.csv" />
