@@ -11,12 +11,12 @@ namespace OptimizationLogic.StateGenerating
     {
         public double MqbToMebTransitionProbability { get; set; } = 0.5;
         public double ProbabilityOfStartingInMqbState { get; set; } = 1.0;
-        public int RandomSeed { get; set; } = 13;
+        public int? RandomSeed { get; set; }
         public Random RandomGenerator { get; set; }
         public FutureProductionPlanGenerator(double mqbToMebTransitionProbability)
         {
             MqbToMebTransitionProbability = mqbToMebTransitionProbability;
-            RandomGenerator = new Random(RandomSeed);
+            RandomGenerator = !RandomSeed.HasValue ? new Random() : new Random(RandomSeed.Value);
         }
 
         public virtual double ComputeFinalMqbToMebTransitionProbability()
@@ -28,7 +28,7 @@ namespace OptimizationLogic.StateGenerating
         {
             var res = new List<ItemState>(count);
 
-            var currentState = RandomGenerator.NextDouble() <= ProbabilityOfStartingInMqbState ? ItemState.MQB : ItemState.MEB;
+            var currentState = RandomGenerator.NextDouble() < ProbabilityOfStartingInMqbState ? ItemState.MQB : ItemState.MEB;
 
             for (int i = 0; i < count; i++)
             {
@@ -36,7 +36,7 @@ namespace OptimizationLogic.StateGenerating
                 currentState = currentState switch
                 {
                     ItemState.MEB => ItemState.MQB,
-                    ItemState.MQB => RandomGenerator.NextDouble() <= ComputeFinalMqbToMebTransitionProbability() ? ItemState.MEB : ItemState.MQB,
+                    ItemState.MQB => RandomGenerator.NextDouble() < ComputeFinalMqbToMebTransitionProbability() ? ItemState.MEB : ItemState.MQB,
                     _ => ItemState.MQB
                 };
             }
