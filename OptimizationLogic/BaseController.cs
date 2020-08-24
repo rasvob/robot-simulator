@@ -12,21 +12,24 @@ namespace OptimizationLogic
         public ProductionState ProductionState { get; set; }
         public List<StepModel> StepLog { get; set; } = new List<StepModel>();
 
-        protected List<PositionCodes> SortedPositionCodes;
+        protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
         protected const int TimeLimit = 55;
         public double TimeSpentInSimulation { get; set; } = 0;
 
         public void InitSortedPositionCodes()
         {
-            Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
-            foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
+            SortedPositionCodes = new Dictionary<PositionCodes, List<PositionCodes>>();
+            foreach (PositionCodes sourcePosition in Enum.GetValues(typeof(PositionCodes)))
             {
-                if (positionCode != PositionCodes.Service && positionCode != PositionCodes.Stacker)
+                Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
+
+                foreach (PositionCodes destinationPosition in Enum.GetValues(typeof(PositionCodes)))
                 {
-                    cellsTimes[positionCode] = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(positionCode)];
+                    cellsTimes[destinationPosition] = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(destinationPosition)];
                 }
-            }
-            SortedPositionCodes = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
+
+                SortedPositionCodes[sourcePosition] = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
+            }            
         }
 
         public BaseController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
@@ -58,17 +61,24 @@ namespace OptimizationLogic
             TimeSpentInSimulation = 0;
         }
 
-        protected PositionCodes GetNearestEmptyPosition()
+        protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)
         {
-            return GetNearesElementWarehousePosition(ItemState.Empty);
+            return GetNearesElementWarehousePosition(actualProductionState, ItemState.Empty);
         }
-
-        protected PositionCodes GetNearesElementWarehousePosition(ItemState itemState)
+        protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState, PositionCodes sourcePosition)
         {
-            foreach (PositionCodes positionCode in SortedPositionCodes)
+            return GetNearesElementWarehousePosition(actualProductionState, sourcePosition, ItemState.Empty);
+        }
+        protected PositionCodes GetNearesElementWarehousePosition(ProductionState actualProductionState, ItemState itemState)
+        {
+            return GetNearesElementWarehousePosition(actualProductionState, PositionCodes.Stacker, itemState);
+        }
+        protected PositionCodes GetNearesElementWarehousePosition(ProductionState actualProductionState, PositionCodes sourcePosition, ItemState itemState)
+        {
+            foreach (PositionCodes positionCode in SortedPositionCodes[sourcePosition])
             {
-                (int r, int c) = ProductionState.GetWarehouseIndex(positionCode);
-                if (ProductionState.WarehouseState[r, c] == itemState)
+                (int r, int c) = actualProductionState.GetWarehouseIndex(positionCode);
+                if (actualProductionState.WarehouseState[r, c] == itemState)
                 {
                     return positionCode;
                 }

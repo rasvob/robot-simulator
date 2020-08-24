@@ -47,12 +47,7 @@ namespace ConsoleApp
                 Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\FutureProductionList.txt"));
             
             ProductionState productionStateCopy = (ProductionState)bruteForceOptimizedController.ProductionState.Clone();
-            Console.WriteLine(bruteForceOptimizedController.ProductionState);
-            Console.WriteLine(productionStateCopy);
             bruteForceOptimizedController.NextStep();
-            Console.WriteLine(bruteForceOptimizedController.ProductionState);
-            Console.WriteLine(productionStateCopy);
-
         }
     }
 }

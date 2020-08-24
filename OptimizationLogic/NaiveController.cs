@@ -32,11 +32,11 @@ namespace OptimizationLogic
             var current = ProductionState.ProductionHistory.Dequeue();
             ProductionState.ProductionHistory.Enqueue(needed);
 
-            var nearestFreePosition = GetNearestEmptyPosition();
+            var nearestFreePosition = GetNearestEmptyPosition(ProductionState);
             (int r, int c) = ProductionState.GetWarehouseIndex(nearestFreePosition);
             ProductionState.WarehouseState[r, c] = current;
             
-            var nearestNeededPosition = GetNearesElementWarehousePosition(needed);
+            var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, needed);
             (r, c) = ProductionState.GetWarehouseIndex(nearestNeededPosition);
             ProductionState.WarehouseState[r, c] = ItemState.Empty;
 

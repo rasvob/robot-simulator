@@ -174,6 +174,52 @@ namespace OptimizationLogic.DTO
         public void LoadProductionHistory(string csvPath) => ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
         public void LoadFutureProductionPlan(string csvPath) => FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
 
+        public List<Tuple<PositionCodes, PositionCodes>> GetAvailableWarehouseSwaps()
+        {
+            Dictionary<ItemState, List<PositionCodes>> dict = new Dictionary<ItemState, List<PositionCodes>>();
+            foreach (ItemState itemState in Enum.GetValues(typeof(ItemState)))
+            {
+                dict[itemState] = new List<PositionCodes>();
+            }
+            foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
+            {
+                if (positionCode != PositionCodes.Service && positionCode != PositionCodes.Stacker)
+                {
+                    (int row, int col) = GetWarehouseIndex(positionCode);
+                    dict[WarehouseState[row, col]].Add(positionCode);
+                }
+            }
+
+            List<Tuple<PositionCodes, PositionCodes>> availableSwaps = new List<Tuple<PositionCodes, PositionCodes>>();
+            var query = dict[ItemState.Empty].SelectMany(x => dict[ItemState.MEB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
+            foreach (var item in query)
+            {
+                availableSwaps.Add(item);
+            }
+            query = dict[ItemState.Empty].SelectMany(x => dict[ItemState.MQB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
+            foreach (var item in query)
+            {
+                availableSwaps.Add(item);
+            }
+            query = dict[ItemState.MQB].SelectMany(x => dict[ItemState.MEB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
+            foreach (var item in query)
+            {
+                availableSwaps.Add(item);
+            }
+
+            return availableSwaps;
+        }
+
+        public double SwapWarehouseItems(PositionCodes pos1, PositionCodes pos2)
+        {
+            (int row1, int col1) = GetWarehouseIndex(pos1);
+            var item1 = WarehouseState[row1, col1];
+            (int row2, int col2) = GetWarehouseIndex(pos2);
+            var item2 = WarehouseState[row2, col2];
+            WarehouseState[row1, col1] = item2;
+            WarehouseState[row2, col2] = item1;
+            return TimeMatrix[GetTimeMatrixIndex(pos1), GetTimeMatrixIndex(pos2)];
+        }
 
         public object Clone()
         {
