@@ -79,7 +79,9 @@ namespace OptimizationLogic.StateGenerating
                 var cumsum = validProbs.CumulativeSum().Select((value, index) => (index, value));
                 var rndDouble = RandomGenerator.NextDouble();
                 var positionIndex = cumsum.FirstOrDefault(t => rndDouble < t.value).index;
-
+                var position = validPositions[positionIndex];
+                state.WarehouseState[position.row, position.col] = item;
+                validPositions.RemoveAt(positionIndex);
             }
         }
     }

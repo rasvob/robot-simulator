@@ -60,6 +60,15 @@ namespace OptimizationLogic.DTO
             var s = _warehousePositionMapping.Select(t => t.Value).GroupBy(t => t);
             _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
             _timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
+            FillForbidden();
+        }
+
+        public void FillForbidden()
+        {
+            WarehouseState[2, 0] = ItemState.Forbidden;
+            WarehouseState[3, 0] = ItemState.Forbidden;
+            WarehouseState[2, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
+            WarehouseState[3, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
         }
 
         public void ResetState()
@@ -173,7 +182,7 @@ namespace OptimizationLogic.DTO
 
             for (int i = 0; i < lines.Length; i++)
             {
-                String[] row = lines[i].Split(';');
+                string[] row = lines[i].Split(';');
                 CheckCorrectInputDimension(row, WarehouseXDimension);
                 for (int j = 0; j < row.Length; j++)
                 {
@@ -218,7 +227,6 @@ namespace OptimizationLogic.DTO
             foreach (KeyValuePair<ItemState, int> kvp in occurancesDict)
             {
                 sb.Append("Key = ").Append(kvp.Key).Append(", Value = ").Append(kvp.Value).Append('\n');
-                //warehouseToString += $"Key = {kvp.Key}, Value = {kvp.Value}\n";
             }
             string warehouseToString = sb.ToString();
 

@@ -65,7 +65,7 @@ namespace OptimizationUnitTests
         }
 
         [DataTestMethod]
-        [DataRow(1, 1, 1, 6)]
+        [DataRow(-10, -10, 0, 8)]
         public void TestProductionStateGenerator(double mqbDistanceWeight, double mebDistanceWeight, double uniformProbabilityWeight, int expected)
         {
             var historyGenerator = new ProductionHistoryGenerator(0.5)
