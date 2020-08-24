@@ -52,8 +52,12 @@
     <Compile Include="DTO\ProductionState.cs" />
     <Compile Include="DTO\StepModel.cs" />
     <Compile Include="DTO\WarehouseReorganizationRecord.cs" />
+    <Compile Include="Extensions\ProductionStateExt.cs" />
     <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
+    <Compile Include="StateGenerating\ProductionHistoryGenerator.cs" />
+    <Compile Include="StateGenerating\ProductionStateGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="InputFiles\ProcessingTimeMatrix.csv" />
@@ -69,5 +73,6 @@
     <Content Include="InputFiles\situation3\FutureProductionList.txt" />
     <Content Include="InputFiles\situation3\HistoricalProductionList.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

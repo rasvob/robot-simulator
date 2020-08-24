@@ -17,8 +17,10 @@ namespace OptimizationLogic.DTO
         public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
         public bool ProductionStateIsOk { get; set; } = true;
         public int StepCounter { get; set; } = 1;
+        public double CurrentStepTime { get; set; } = 0;
+        public double TimeSpentInSimulation { get; set; } = 0;
+
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
-        public int ClockInSeconds { get; } = 55;
 
         public int WarehouseColls
         {
@@ -57,6 +59,23 @@ namespace OptimizationLogic.DTO
             var s = _warehousePositionMapping.Select(t => t.Value).GroupBy(t => t);
             _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
             _timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
+            FillForbidden();
+        }
+
+        public void FillForbidden()
+        {
+            WarehouseState[2, 0] = ItemState.Forbidden;
+            WarehouseState[3, 0] = ItemState.Forbidden;
+            WarehouseState[2, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
+            WarehouseState[3, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
+        }
+
+        public void ResetState()
+        {
+            StepCounter = 0;
+            ProductionStateIsOk = true;
+            CurrentStepTime = 0;
+            TimeSpentInSimulation = 0;
         }
 
         private Dictionary<PositionCodes, (int row, int col)> BuildWarehousePositionMappingDict()
@@ -137,7 +156,7 @@ namespace OptimizationLogic.DTO
             
             for (int i = 0; i < lines.Length; i++)
             {
-                String[] row = lines[i].Split(';');
+                string[] row = lines[i].Split(';');
                 CheckCorrectInputDimension(row, TimeMatrixDimension); 
                 for (int j = 0; j < row.Length; j++)
                 {
@@ -162,7 +181,7 @@ namespace OptimizationLogic.DTO
 
             for (int i = 0; i < lines.Length; i++)
             {
-                String[] row = lines[i].Split(';');
+                string[] row = lines[i].Split(';');
                 CheckCorrectInputDimension(row, WarehouseXDimension);
                 for (int j = 0; j < row.Length; j++)
                 {
@@ -230,6 +249,8 @@ namespace OptimizationLogic.DTO
             productionStateCopy.TimeMatrix = this.TimeMatrix;
             productionStateCopy.ProductionStateIsOk = this.ProductionStateIsOk;
             productionStateCopy.StepCounter = this.StepCounter;
+            productionStateCopy.CurrentStepTime = this.CurrentStepTime;
+            productionStateCopy.TimeSpentInSimulation = this.TimeSpentInSimulation;
             return productionStateCopy;
         }
 
@@ -251,7 +272,6 @@ namespace OptimizationLogic.DTO
             foreach (KeyValuePair<ItemState, int> kvp in occurancesDict)
             {
                 sb.Append("Key = ").Append(kvp.Key).Append(", Value = ").Append(kvp.Value).Append('\n');
-                //warehouseToString += $"Key = {kvp.Key}, Value = {kvp.Value}\n";
             }
             string warehouseToString = sb.ToString();
 
