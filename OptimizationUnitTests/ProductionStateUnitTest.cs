@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
 using OptimizationLogic.StateGenerating;
 
@@ -60,6 +62,40 @@ namespace OptimizationUnitTests
 
             var sequence = generator.GenerateSequence();
             Assert.AreEqual(expected, sequence.Count(t => t == ItemState.MQB));
+        }
+
+        [DataTestMethod]
+        [DataRow(1, 1, 1, 6)]
+        public void TestProductionStateGenerator(double mqbDistanceWeight, double mebDistanceWeight, double uniformProbabilityWeight, int expected)
+        {
+            var historyGenerator = new ProductionHistoryGenerator(0.5)
+            {
+                ProbabilityOfStartingInMqbState = 1.0,
+                SequenceLength = 64,
+            };
+
+            var futureGenerator = new FutureProductionPlanGenerator(0.5)
+            {
+                ProbabilityOfStartingInMqbState = 1.0,
+                SequenceLength = 100
+            };
+
+            var files = Directory.GetFiles("Input", "*");
+            var loaderFiles = Enumerable.Repeat(0, 1).Select(t =>
+            {
+                return new ProductionScenarioPaths()
+                {
+                    FutureProductionListCsv = files.FirstOrDefault(s => s.Contains("Future")),
+                    HistoricalProductionListCsv = files.FirstOrDefault(s => s.Contains("Historical")),
+                    WarehouseInitialStateCsv = files.FirstOrDefault(s => s.Contains("Warehouse"))
+                };
+            })
+            .ToList();
+            var loader = new ProductionStateLoader(loaderFiles, "Input/ProcessingTimeMatrix.csv");
+
+            var prodStateGenerator = new ProductionStateGenerator(historyGenerator, futureGenerator, loader.TimeMatrix, mqbDistanceWeight, mebDistanceWeight, uniformProbabilityWeight);
+            var state = prodStateGenerator.GenerateProductionState();
+            Assert.AreEqual(expected, state.WarehouseState.Cast<ItemState>().Count(t => t == ItemState.Empty));
         }
     }
 }
