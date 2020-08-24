@@ -88,7 +88,7 @@ namespace OptimizationLogic
             throw new ArgumentException("ItemState is not in warehouse.");
         }
 
-        public void Undo()
+        public virtual void Undo()
         {
             ProductionState = History.Pop();
             StepLog.RemoveAt(StepLog.Count - 1);
