@@ -48,13 +48,6 @@ namespace OptimizationLogic.StateGenerating
             double DistanceFunc(double time, double maxTime) => (1 + (-time/maxTime));
             double UniformFunc(int validCount) => (1.0 / validCount);
             Dictionary<(int row, int col), double> ComputeTimeAdvantageForCells(List<(int row, int col)> validPositions, double maximum) => validPositions.ToDictionary(k => ((k.row, k.col)), t => DistanceFunc(state.TimeMatrix[t.row, t.col], maximum));
-            List<double> ComputeSoftmax(IEnumerable<double> exponents) {
-                var exp = exponents.Select(Math.Exp);
-                double sum = exp.Sum();
-                return exp.Select(t => t / sum).ToList();
-            }
-
-
             var validPositions = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
                    .Where(t => t != PositionCodes.Service && t != PositionCodes.Stacker)
                    .Select(t => state.GetWarehouseIndex(t))

@@ -15,8 +15,9 @@ namespace OptimizationLogic
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
 
         protected List<PositionCodes> SortedPositionCodes;
-        protected const int TimeLimit = 55;
+        protected const int TimeLimit = 36;
         public int TimeLimitForOneStep { get => TimeLimit; }
+        public int ClockTime { get => 55; }
 
         public void InitSortedPositionCodes()
         {

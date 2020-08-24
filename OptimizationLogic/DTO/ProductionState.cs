@@ -21,7 +21,6 @@ namespace OptimizationLogic.DTO
         public double TimeSpentInSimulation { get; set; } = 0;
 
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
-        public int ClockInSeconds { get; } = 55;
 
         public int WarehouseColls
         {

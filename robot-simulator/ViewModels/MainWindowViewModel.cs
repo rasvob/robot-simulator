@@ -83,7 +83,7 @@ namespace robot_simulator.ViewModels
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
         public double TimeSpentInSimulation { get => ProductionState.TimeSpentInSimulation; }
-        public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.TimeLimitForOneStep; }
+        public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.ClockTime; }
         public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
         public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
         public IEnumerable<string> StepLog { get => NaiveController.StepLog.Select((t, i) => $"#{i}\t{t}").Reverse(); }
