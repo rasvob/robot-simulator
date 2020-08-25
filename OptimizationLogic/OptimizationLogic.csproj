@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncControllers\AsyncControllerState.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="BruteForceOptimizedController.cs" />

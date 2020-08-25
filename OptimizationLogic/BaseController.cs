@@ -56,7 +56,7 @@ namespace OptimizationLogic
             ProductionState = state;
             InitSortedPositionCodes();
         }
-        public void RenewControllerState()
+        public virtual void RenewControllerState()
         {
             InitSortedPositionCodes();
             StepLog.Clear();
@@ -94,7 +94,7 @@ namespace OptimizationLogic
             StepLog.RemoveAt(StepLog.Count - 1);
         }
 
-        public bool CanUndo() => History.Count > 0;
+        public virtual bool CanUndo() => History.Count > 0;
 
         public abstract bool NextStep();
     }
