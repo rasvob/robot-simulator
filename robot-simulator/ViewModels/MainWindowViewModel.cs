@@ -15,7 +15,7 @@ namespace robot_simulator.ViewModels
     {
         private ObservableCollection<WarehouseItemViewModel> currentWarehouseState;
 
-        public NaiveController NaiveController { get; set; }
+        public BaseController NaiveController { get; set; }
         public ProductionState ProductionState { get; set; }
 
         public ICommand NextStep { get; private set; }
@@ -90,7 +90,7 @@ namespace robot_simulator.ViewModels
 
         public ProductionStateLoader ScenarioLoader { get; }
         
-        public MainWindowViewModel(NaiveController naiveController, ProductionStateLoader scenarioLoader)
+        public MainWindowViewModel(BaseController naiveController, ProductionStateLoader scenarioLoader)
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;

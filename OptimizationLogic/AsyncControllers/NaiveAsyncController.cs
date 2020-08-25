@@ -201,7 +201,7 @@ namespace OptimizationLogic.AsyncControllers
 
         public override bool CanUndo()
         {
-            return false;
+            return base.CanUndo();
         }
     }
 }
