@@ -210,17 +210,12 @@ namespace OptimizationLogic.DTO
             }
 
             List<Tuple<PositionCodes, PositionCodes>> availableSwaps = new List<Tuple<PositionCodes, PositionCodes>>();
-            var query = dict[ItemState.Empty].SelectMany(x => dict[ItemState.MEB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
+            var query = dict[ItemState.MEB].SelectMany(x => dict[ItemState.Empty], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
             foreach (var item in query)
             {
                 availableSwaps.Add(item);
             }
-            query = dict[ItemState.Empty].SelectMany(x => dict[ItemState.MQB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
-            foreach (var item in query)
-            {
-                availableSwaps.Add(item);
-            }
-            query = dict[ItemState.MQB].SelectMany(x => dict[ItemState.MEB], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
+            query = dict[ItemState.MQB].SelectMany(x => dict[ItemState.Empty], (x, y) => new Tuple<PositionCodes, PositionCodes>(x, y));
             foreach (var item in query)
             {
                 availableSwaps.Add(item);

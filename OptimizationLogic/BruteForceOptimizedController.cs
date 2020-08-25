@@ -9,7 +9,9 @@ namespace OptimizationLogic
 {
     public class BruteForceOptimizedController : BaseController
     {
-        new private const int TimeLimit = 55;
+        new private const int TimeLimit = 36;
+        private List<Tuple<PositionCodes, PositionCodes>> reorganizationSwaps = null;
+        private int reorganizationSwapsCurrentIndex;
 
         public BruteForceOptimizedController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
@@ -22,9 +24,16 @@ namespace OptimizationLogic
                 return false;
             }
 
-            if ((ProductionState.StepCounter - 1) % 50 == 0)
+            if (reorganizationSwaps != null)
             {
-                ReorganizeWarehouse(300);
+                WarehouseSwap();
+            }
+            else if ((ProductionState.StepCounter - 1) % 50 == 0)
+            {
+                const int maxDepth = 50;
+                const int selectBestCnt = 30;
+                reorganizationSwaps = GetBestSwaps(300, maxDepth, selectBestCnt);
+                reorganizationSwapsCurrentIndex = 0;
             }
             else
             {
@@ -32,6 +41,53 @@ namespace OptimizationLogic
             }
 
             return true;
+        }
+
+        private void WarehouseSwap()
+        {
+            var currentSwap = reorganizationSwaps[reorganizationSwapsCurrentIndex];
+            (int r, int c) = ProductionState.GetWarehouseIndex(currentSwap.Item1);
+            var itemType = ProductionState.WarehouseState[r, c];
+            var swapTime = ProductionState.SwapWarehouseItems(currentSwap.Item1, currentSwap.Item2);
+            double moveToDifferentCellTime;
+
+            if (reorganizationSwapsCurrentIndex == 0)
+            {
+                moveToDifferentCellTime = ProductionState.TimeMatrix[
+                    ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker),
+                    ProductionState.GetTimeMatrixIndex(currentSwap.Item1)
+                    ];
+            }
+            else
+            {
+                var previousSwap = reorganizationSwaps[reorganizationSwapsCurrentIndex - 1];
+                moveToDifferentCellTime = ProductionState.TimeMatrix[
+                    ProductionState.GetTimeMatrixIndex(previousSwap.Item2),
+                    ProductionState.GetTimeMatrixIndex(currentSwap.Item1)
+                    ];
+            }
+
+            if (reorganizationSwapsCurrentIndex == reorganizationSwaps.Count-1)
+            {
+                moveToDifferentCellTime += ProductionState.TimeMatrix[
+                    ProductionState.GetTimeMatrixIndex(currentSwap.Item2),
+                    ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)
+                    ];
+                reorganizationSwaps = null;
+            }
+
+            reorganizationSwapsCurrentIndex++;
+
+            StepLog.Add(new StepModel
+            {
+                InsertToCell = currentSwap.Item2,
+                WithdrawFromCell = currentSwap.Item1,
+                InsertType = itemType,
+                WithdrawType = itemType,
+                InsertTime = swapTime,
+                MoveToDifferentCellTime = moveToDifferentCellTime,
+                WithdrawTime = swapTime
+            });
         }
 
         public void NaiveNextStep(ProductionState actualProductionState, List<StepModel> logger=null)
@@ -44,7 +100,9 @@ namespace OptimizationLogic
             (int r, int c) = actualProductionState.GetWarehouseIndex(nearestFreePosition);
             actualProductionState.WarehouseState[r, c] = current;
 
-            var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, needed);
+            // var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, needed);
+            // Try to optimize moving time
+            var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, nearestFreePosition, needed);
             (r, c) = ProductionState.GetWarehouseIndex(nearestNeededPosition);
             actualProductionState.WarehouseState[r, c] = ItemState.Empty;
 
@@ -72,20 +130,13 @@ namespace OptimizationLogic
             
         }
 
-        private void ReorganizeWarehouse(int reservedTime)
+
+        private List<Tuple<PositionCodes, PositionCodes>> GetBestSwaps(int reservedTime, int maxDepth, int selectBestCnt)
         {
-            ProductionState initialProductionState = (ProductionState)ProductionState.Clone();
-            //List<StepModel> log = new List<StepModel>();
+            Dictionary<int, List<WarehouseReorganizationRecord>> warehouseReorganizationRecordsDict = new Dictionary<int, List<WarehouseReorganizationRecord>>();
 
-            //ReorganizeWarehouseRecursion(initialProductionState, reservedTime, 100);            
-            RegorganizeMethod(reservedTime);
-        }
-
-        private void RegorganizeMethod(int reservedTime)
-        {
-            List<WarehouseReorganizationRecord> warehouseReorganizationRecords = new List<WarehouseReorganizationRecord>();
-
-            warehouseReorganizationRecords.Add(new WarehouseReorganizationRecord
+            warehouseReorganizationRecordsDict[0] = new List<WarehouseReorganizationRecord>();
+            warehouseReorganizationRecordsDict[0].Add(new WarehouseReorganizationRecord
             {
                 ProductionState = ProductionState,
                 Swap = null,
@@ -94,59 +145,77 @@ namespace OptimizationLogic
                 MissingSimulationSteps = SimulateProcessing(ProductionState, 100)
             });
 
-            int index = 0;
-            while (index < warehouseReorganizationRecords.Count)
+            for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++)
             {
-                var currentRecord = warehouseReorganizationRecords[index];
+                Console.WriteLine(String.Format("Processing records in depth {0} ...", depthIndex));
+                warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
+                var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
+                warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
 
-                if (currentRecord.RemainingTime > 0
-                    && (currentRecord.PreviousRecord == null || currentRecord.MissingSimulationSteps < currentRecord.PreviousRecord.MissingSimulationSteps)
-                    )
+                for (int topIndex = 0; topIndex < selectBestCnt && topIndex < warehouseReorganizationRecords.Count; topIndex++)
                 {
+                    var currentRecord = warehouseReorganizationRecords[topIndex];
                     var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
                     foreach (var swap in availableSwaps)
                     {
                         ProductionState newProductionState = (ProductionState)currentRecord.ProductionState.Clone();
                         var swapTimeConsumed = newProductionState.SwapWarehouseItems(swap.Item1, swap.Item2);
-                        int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
-
-                        Console.WriteLine(numberOfMissingSteps);
-
-                        warehouseReorganizationRecords.Add(new WarehouseReorganizationRecord
+                        PositionCodes previousPosition;
+                        if (currentRecord.PreviousRecord == null)
                         {
-                            ProductionState = newProductionState,
-                            Swap = swap,
-                            PreviousRecord = currentRecord,
-                            RemainingTime = currentRecord.RemainingTime - swapTimeConsumed - 100,
-                            MissingSimulationSteps = numberOfMissingSteps
-                        });
+                            previousPosition = PositionCodes.Stacker;
+                        }
+                        else
+                        {
+                            if (currentRecord.PreviousRecord.Swap == null)
+                            {
+                                previousPosition = PositionCodes.Stacker;
+                            }
+                            else
+                            {
+                                previousPosition = currentRecord.PreviousRecord.Swap.Item2;
+                            }                            
+                        }
+                        var moveTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(previousPosition), ProductionState.GetTimeMatrixIndex(swap.Item1)];
+                        var timeToStacker = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(swap.Item2), ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
+                        var timeRemaining = currentRecord.RemainingTime - moveTime - swapTimeConsumed;
+
+                        if (timeRemaining-timeToStacker > 0)
+                        {
+                            int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
+
+                            warehouseReorganizationRecordsDict[depthIndex + 1].Add(new WarehouseReorganizationRecord
+                            {
+                                ProductionState = newProductionState,
+                                Swap = swap,
+                                PreviousRecord = currentRecord,
+                                RemainingTime = timeRemaining,
+                                MissingSimulationSteps = numberOfMissingSteps
+                            });
+                        }
+                        
                     }
                 }
             }
-        }
 
-        private void ReorganizeWarehouseRecursion(ProductionState productionState, int reservedTime, int numberOfMissingStepsToBeat)
-        {
-            if (reservedTime <= 0)
+            // print best solution
+            //List<WarehouseReorganizationRecord> allRecords = new List<WarehouseReorganizationRecord>();
+            /*for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++)
             {
-                return;
+                //allRecords = allRecords.Concat(warehouseReorganizationRecordsDict[depthIndex]).ToList();
+                var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
+                Console.WriteLine(depthIndex);
+                var bestLocalRecord = warehouseReorganizationRecords[0];
+                Console.WriteLine(String.Format("Missing simulation steps: {0}, remaining time: {1}", bestLocalRecord.MissingSimulationSteps, bestLocalRecord.RemainingTime));
+                Console.WriteLine(bestLocalRecord.PrintSwapsFromRoot());
             }
+            */
+            var allRecords = warehouseReorganizationRecordsDict.Values.SelectMany(x => x).ToList();
+            var bestRecord = allRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList()[0];
+            Console.WriteLine(String.Format("Missing simulation steps: {0}, remaining time: {1}", bestRecord.MissingSimulationSteps, bestRecord.RemainingTime));
+            Console.WriteLine(bestRecord.PrintSwapsFromRoot());
 
-            var availableSwaps = productionState.GetAvailableWarehouseSwaps();
-            foreach (var swap in availableSwaps)
-            {
-                ProductionState currentProductionState = (ProductionState)productionState.Clone();
-                var timeConsumed = currentProductionState.SwapWarehouseItems(swap.Item1, swap.Item2);
-                //Console.WriteLine(swap);
-
-                int numberOfMissingSteps = SimulateProcessing(currentProductionState, 100);
-
-                if (numberOfMissingSteps < numberOfMissingStepsToBeat)
-                {
-                    Console.WriteLine("Missing steps {0}", numberOfMissingSteps);
-                    ReorganizeWarehouseRecursion(currentProductionState, reservedTime - 100, numberOfMissingSteps);
-                }
-            }
+            return bestRecord.GetSwapsFromRoot();
         }
 
         private int SimulateProcessing(ProductionState productionState, int numberOfImagenarySteps)
