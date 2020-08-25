@@ -192,7 +192,28 @@ namespace OptimizationLogic.DTO
 
         public void LoadProductionHistory(string csvPath) => ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
         public void LoadFutureProductionPlan(string csvPath) => FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
+        public void SaveProductionState(string path, string suffix)
+        {
+            Directory.CreateDirectory(Path.Combine(path, String.Format(@"situation{0}", suffix)));
+            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\FutureProductionList{0}.txt", suffix)), FutureProductionPlan.Select(x => x.ToString()).ToList());
+            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\HistoricalProductionList{0}.txt", suffix)), ProductionHistory.Select(x => x.ToString()).ToList());
 
+            string[] lines = new string[WarehouseYDimension];
+            for (int i = 0; i < WarehouseYDimension; i++)
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < WarehouseXDimension; j++)
+                {
+                    if (j > 0)
+                    {
+                        sb.Append(';');
+                    }
+                    sb.Append(WarehouseState[i, j].ToString());                    
+                }
+                lines[i] = sb.ToString();
+            }
+            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\WarehouseInitialState{0}.csv", suffix)), lines);
+        }
         public List<Tuple<PositionCodes, PositionCodes>> GetAvailableWarehouseSwaps()
         {
             Dictionary<ItemState, List<PositionCodes>> dict = new Dictionary<ItemState, List<PositionCodes>>();
