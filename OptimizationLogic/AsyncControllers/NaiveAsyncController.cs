@@ -19,6 +19,8 @@ namespace OptimizationLogic.AsyncControllers
         public double StackerOperationTime { get; private set; } = 2.5;
         public AsyncControllerState CurrentState { get; set; } = AsyncControllerState.Start;
 
+        public AsyncControllerState PreviousStateForPut { get; set; }
+
         public NaiveAsyncController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
 
@@ -67,17 +69,12 @@ namespace OptimizationLogic.AsyncControllers
                     OuttakeItem = ItemState.Empty;
                     IntakeItem = Current;
                     CurrentState = Needed == Current ? AsyncControllerState.SwapChain : AsyncControllerState.Put;
+                    PreviousStateForPut = AsyncControllerState.Start;
                     break;
                 case AsyncControllerState.SwapChain:
                     OuttakeItem = IntakeItem;
                     IntakeItem = ItemState.Empty;
                     RealTime += SwapChainTime;
-
-                    if (ProductionState.FutureProductionPlan.Count == 0)
-                    {
-                        CurrentState = AsyncControllerState.End;
-                        return false;
-                    }
 
                     if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
                     {
@@ -89,67 +86,79 @@ namespace OptimizationLogic.AsyncControllers
                     else
                     {
                         CurrentState = AsyncControllerState.Put;
+                        PreviousStateForPut = AsyncControllerState.SwapChain;
+                        Needed = ProductionState.FutureProductionPlan.Peek();
                     }
                     break;
                 case AsyncControllerState.Put:
+                {
                     var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, Needed);
-                    var stackerToItemGetItemAndBack = ProductionState[PositionCodes.Stacker, nearestNeededPosition] + ProductionState[nearestNeededPosition, PositionCodes.Stacker] - StackerOperationTime*3;
+                    var stackerRoundtripForItem = ProductionState[PositionCodes.Stacker, nearestNeededPosition] + ProductionState[nearestNeededPosition, PositionCodes.Stacker] - StackerOperationTime * 2;
                     ProductionState[nearestNeededPosition] = ItemState.Empty;
                     var nextOuttake = GetClosestNextOuttakeTime();
-                    RealTime += stackerToItemGetItemAndBack;
+                    RealTime += stackerRoundtripForItem;
 
-                    if (OuttakeItem == ItemState.Empty && RealTime > (nextOuttake - StackerOperationTime))
+                    switch (PreviousStateForPut)
                     {
-                        ProductionState.ProductionStateIsOk = false;
-                        CurrentState = AsyncControllerState.End;
-                    }
-                    else if (OuttakeItem == ItemState.Empty && RealTime < (nextOuttake - StackerOperationTime))
-                    {
-                        OuttakeItem = Needed;
-                        RealTime += StackerOperationTime;
-                        CurrentState = AsyncControllerState.Get;
-                    }
+                        case AsyncControllerState.Start:
+                            if (RealTime > nextOuttake)
+                            {
+                                ProductionState.ProductionStateIsOk = false;
+                                CurrentState = AsyncControllerState.End;
+                            }
+                            else if (RealTime <= nextOuttake)
+                            {
+                                OuttakeItem = Needed;
+                                CurrentState = AsyncControllerState.Get;
+                            }
+                            break;
 
-                    //TODO: Pridat kod pro cekani
+                        case AsyncControllerState.SwapChain:
+                            var deq = ProductionState.FutureProductionPlan.Dequeue();
+                            ProductionState.ProductionHistory.Enqueue(deq);
+                            CurrentState = AsyncControllerState.Get;
+                            RealTime = GetClosestNextIntakeTime();
+                            OuttakeItem = Needed;
 
+                            Current = ProductionState.ProductionHistory.Peek();
+                            IntakeItem = Current;
+                            break;
+
+                        case AsyncControllerState.Get:
+                            if (RealTime > nextOuttake)
+                            {
+                                ProductionState.ProductionStateIsOk = false;
+                                CurrentState = AsyncControllerState.End;
+                            }
+                            else if (RealTime <= nextOuttake)
+                            {
+                                OuttakeItem = Needed;
+                                Current = ProductionState.ProductionHistory.Peek();
+                                CurrentState = AsyncControllerState.Get;
+                                var deq1 = ProductionState.FutureProductionPlan.Dequeue();
+                                ProductionState.ProductionHistory.Enqueue(deq1);
+                            }
+                            break;
+                    }
                     break;
+                }
                 case AsyncControllerState.Get:
+                {
+                    var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, Current);
+                    var stackerRoundtripForItem = ProductionState[PositionCodes.Stacker, nearestNeededPosition] + ProductionState[nearestNeededPosition, PositionCodes.Stacker] - StackerOperationTime * 2;
+                    ProductionState[nearestNeededPosition] = ItemState.Empty;
+                    var nextOuttake = GetClosestNextOuttakeTime();
+                    RealTime += stackerRoundtripForItem;
+
+                    CurrentState = AsyncControllerState.Put;
+                    PreviousStateForPut = AsyncControllerState.Get;
+                    Needed = ProductionState.FutureProductionPlan.Peek();
+                    ProductionState.ProductionHistory.Dequeue();
                     break;
+                }
                 case AsyncControllerState.End:
                     return false;
             }
-
-            //Needed = ProductionState.FutureProductionPlan.Dequeue();
-            //Current = ProductionState.ProductionHistory.Dequeue();
-            //ProductionState.ProductionHistory.Enqueue(Needed);
-
-            //if (Needed == Current)
-            //{
-            //    RealTime += SwapChainTime;
-
-            //    if (ProductionState.FutureProductionPlan.Count == 0)
-            //    {
-            //        return false;
-            //    }
-
-            //    var futureNeed = ProductionState.FutureProductionPlan.Peek();
-            //    var futureGot = ProductionState.ProductionHistory.Peek();
-            //    if (futureNeed == futureGot)
-            //    {
-            //        NextIntake += IntakeClock;
-            //        NextOuttake += IntakeClock;
-            //        RealTime = NextIntake;
-            //        IntakeSolved = false;
-            //        OuttakeSolved = false;
-            //    }
-            //    else
-            //    {
-
-            //    }
-            //} else
-            //{
-
-            //}
 
             ProductionState.StepCounter++;
             StepLog.Add(new StepModel
