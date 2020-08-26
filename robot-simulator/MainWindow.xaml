@@ -92,6 +92,7 @@
                                         <ComboBoxItem Content="Scenario 1" />
                                         <ComboBoxItem Content="Scenario 2" />
                                         <ComboBoxItem Content="Scenario 3" />
+                                        <ComboBoxItem Content="Scenario 4" />
                                     </ComboBox>
                                     <Button Content="Load scenario" Margin="5 0 0 0" Command="{Binding LoadSelectedScenario}"/>
                                 </StackPanel>

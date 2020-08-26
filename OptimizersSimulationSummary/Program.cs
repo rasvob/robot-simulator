@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic;
+using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DTO;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace OptimizersSimulationsSummary
 
                 simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
                 simulationsDict[$"greedy-{i}"] = new BruteForceOptimizedController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                simulationsDict[$"async-{i}"] = new NaiveAsyncController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
             }
             RunSimulations(simulationsDict);
         }

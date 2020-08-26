@@ -20,6 +20,7 @@ namespace OptimizationLogic.AsyncControllers
         public AsyncControllerState CurrentState { get; set; } = AsyncControllerState.Start;
 
         public AsyncControllerState PreviousStateForPut { get; set; }
+        public double TimePadding { get; private set; } = 0.000;
 
         public NaiveAsyncController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
@@ -44,8 +45,13 @@ namespace OptimizationLogic.AsyncControllers
 
         protected double GetClosestNextOuttakeTime()
         {
-            int currentIntakeSteps = (int)((RealTime - TimeBase) / IntakeClock);
-            return TimeBase + (currentIntakeSteps) * IntakeClock + IntakeOuttakeDifference;
+            if ((RealTime) < (45))
+            {
+                return 45;
+            }
+
+            int currentIntakeSteps = (int)((RealTime - 45) / IntakeClock);
+            return (currentIntakeSteps+1) * IntakeClock + 45;
         }
 
         //TODO:  Check times for in-take/out-take operations
@@ -58,47 +64,71 @@ namespace OptimizationLogic.AsyncControllers
             }
 
             History.Push(ProductionState.Copy());
-
+            double realTimeBeforeOp;
             switch (CurrentState)
             {
                 case AsyncControllerState.Start:
-                    Needed = ProductionState.FutureProductionPlan.Dequeue();
-                    Current = ProductionState.ProductionHistory.Peek();
-                    ProductionState.ProductionHistory.Enqueue(Needed);
-
-                    OuttakeItem = ItemState.Empty;
-                    IntakeItem = Current;
-                    CurrentState = Needed == Current ? AsyncControllerState.SwapChain : AsyncControllerState.Put;
-                    PreviousStateForPut = AsyncControllerState.Start;
-                    break;
-                case AsyncControllerState.SwapChain:
-                    OuttakeItem = IntakeItem;
-                    IntakeItem = ItemState.Empty;
-                    RealTime += SwapChainTime;
-                    ProductionState.ProductionHistory.Dequeue();
-
-                    if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
                     {
-                        CurrentState = AsyncControllerState.Start;
-                        RealTime = GetClosestNextIntakeTime();
+                        Needed = ProductionState.FutureProductionPlan.Dequeue();
+                        Current = ProductionState.ProductionHistory.Peek();
+                        ProductionState.ProductionHistory.Enqueue(Needed);
                         OuttakeItem = ItemState.Empty;
-                        IntakeItem = ItemState.Empty;
+                        IntakeItem = Current;
+                        CurrentState = Needed == Current ? AsyncControllerState.SwapChain : AsyncControllerState.Put;
+                        PreviousStateForPut = AsyncControllerState.Start;
+
+                        StepLog.Add(new AsyncStepModel
+                        {
+                            CurrentState = AsyncControllerState.Start,
+                            Message = $"RealTime: {RealTime}, Need: {Needed}, Current from history: {Current}, Going to state: {CurrentState}"
+                        });
+                        break;
                     }
-                    else
+                case AsyncControllerState.SwapChain:
                     {
-                        CurrentState = AsyncControllerState.Put;
-                        PreviousStateForPut = AsyncControllerState.SwapChain;
-                        Needed = ProductionState.FutureProductionPlan.Peek();
+                        OuttakeItem = IntakeItem;
+                        IntakeItem = ItemState.Empty;
+                        realTimeBeforeOp = RealTime;
+                        RealTime += SwapChainTime;
+                        ProductionState.ProductionHistory.Dequeue();
+
+                        if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
+                        {
+                            CurrentState = AsyncControllerState.Start;
+                            RealTime = GetClosestNextIntakeTime();
+                            OuttakeItem = ItemState.Empty;
+                            IntakeItem = ItemState.Empty;
+                        }
+                        else
+                        {
+                            CurrentState = AsyncControllerState.Put;
+                            PreviousStateForPut = AsyncControllerState.SwapChain;
+                            Needed = ProductionState.FutureProductionPlan.Peek();
+                        }
+
+                        StepLog.Add(new AsyncStepModel
+                        {
+                            CurrentState = AsyncControllerState.SwapChain,
+                            Message = $"RealTime: {RealTime}, Going to state: {CurrentState}, Time before swap: {realTimeBeforeOp}"
+                        });
+                        break;
                     }
-                    break;
                 case AsyncControllerState.Put:
                     {
                         var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, Needed);
                         var stackerRoundtripForItem = ProductionState[PositionCodes.Stacker, nearestNeededPosition] + ProductionState[nearestNeededPosition, PositionCodes.Stacker] - StackerOperationTime * 2;
                         ProductionState[nearestNeededPosition] = ItemState.Empty;
+                        realTimeBeforeOp = RealTime;
                         var nextOuttake = GetClosestNextOuttakeTime();
                         RealTime += stackerRoundtripForItem;
                         Current = ProductionState.ProductionHistory.Peek();
+
+                        AsyncStepModel step = new AsyncStepModel
+                        {
+                            CurrentState = AsyncControllerState.Put,
+                            Message = $"RealTime: {RealTime}, Need: {Needed}, Took item from position: {nearestNeededPosition} with time {stackerRoundtripForItem}, Next outtake in: {nextOuttake}, Came here from: {PreviousStateForPut}, Time before put: {realTimeBeforeOp}"
+                        };
+
                         switch (PreviousStateForPut)
                         {
                             case AsyncControllerState.Start:
@@ -137,9 +167,18 @@ namespace OptimizationLogic.AsyncControllers
                                     CurrentState = AsyncControllerState.Get;
                                     var deq1 = ProductionState.FutureProductionPlan.Dequeue();
                                     ProductionState.ProductionHistory.Enqueue(deq1);
+
+                                    double closestIntake = GetClosestNextIntakeTime();
+                                    if (RealTime < closestIntake)
+                                    {
+                                        RealTime = closestIntake + TimePadding;
+                                        step.Message += $", Skipped to intake: {RealTime}";
+                                    }
                                 }
                                 break;
                         }
+                        step.Message += $", Going to state: {CurrentState}";
+                        StepLog.Add(step);
                         break;
                     }
                 case AsyncControllerState.Get:
@@ -148,7 +187,14 @@ namespace OptimizationLogic.AsyncControllers
                         var stackerRoundtripForItem = ProductionState[PositionCodes.Stacker, nearestNeededPosition] + ProductionState[nearestNeededPosition, PositionCodes.Stacker] - StackerOperationTime * 2;
                         ProductionState[nearestNeededPosition] = Current;
                         var nextIntake = GetClosestNextIntakeTime();
+                        realTimeBeforeOp = RealTime;
                         RealTime += stackerRoundtripForItem;
+
+                        AsyncStepModel step = new AsyncStepModel
+                        {
+                            CurrentState = AsyncControllerState.Get,
+                            Message = $"RealTime: {RealTime}, Current: {Current}, Took item to position: {nearestNeededPosition} with time {stackerRoundtripForItem}, Next intake in: {nextIntake}, Time before put: {realTimeBeforeOp}"
+                        };
 
                         if (RealTime > nextIntake)
                         {
@@ -163,25 +209,38 @@ namespace OptimizationLogic.AsyncControllers
                             CurrentState = AsyncControllerState.Start;
                             RealTime = nextIntake;
                             IntakeItem = ItemState.Empty;
+                            step.Message += $", Going to state: {CurrentState}";
+                            StepLog.Add(step);
                             break;
+                        }
+
+                        double closestOuttake = GetClosestNextOuttakeTime();
+                        if (RealTime < closestOuttake)
+                        {
+                            RealTime = closestOuttake + TimePadding;
+                            step.Message += $", Skipped to outtake: {RealTime}";
                         }
 
                         CurrentState = AsyncControllerState.Put;
                         PreviousStateForPut = AsyncControllerState.Get;
                         Needed = ProductionState.FutureProductionPlan.Peek();
+                        step.Message += $", Going to state: {CurrentState}";
+                        StepLog.Add(step);
                         break;
                     }
                 case AsyncControllerState.End:
-                    return false;
+                    {
+                        AsyncStepModel step = new AsyncStepModel
+                        {
+                            CurrentState = AsyncControllerState.End,
+                            Message = $"RealTime: {RealTime}, Is state ok: {ProductionState.ProductionStateIsOk}"
+                        };
+                        StepLog.Add(step);
+                        return false;
+                    }
             }
 
             ProductionState.StepCounter++;
-            StepLog.Add(new AsyncStepModel
-            {
-                CurrentState = this.CurrentState,
-                Message = "Test"
-            });
-
             return true;
         }
 
