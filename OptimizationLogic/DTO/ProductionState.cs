@@ -194,9 +194,9 @@ namespace OptimizationLogic.DTO
         public void LoadFutureProductionPlan(string csvPath) => FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
         public void SaveProductionState(string path, string suffix)
         {
-            Directory.CreateDirectory(Path.Combine(path, String.Format(@"situation{0}", suffix)));
-            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\FutureProductionList{0}.txt", suffix)), FutureProductionPlan.Select(x => x.ToString()).ToList());
-            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\HistoricalProductionList{0}.txt", suffix)), ProductionHistory.Select(x => x.ToString()).ToList());
+            Directory.CreateDirectory(Path.Combine(path, String.Format(@"generated_situation{0}", suffix)));
+            File.WriteAllLines(Path.Combine(path, String.Format(@"generated_situation{0}\FutureProductionList{0}.txt", suffix)), FutureProductionPlan.Select(x => x.ToString()).ToList());
+            File.WriteAllLines(Path.Combine(path, String.Format(@"generated_situation{0}\HistoricalProductionList{0}.txt", suffix)), ProductionHistory.Select(x => x.ToString()).ToList());
 
             string[] lines = new string[WarehouseYDimension];
             for (int i = 0; i < WarehouseYDimension; i++)
@@ -212,7 +212,7 @@ namespace OptimizationLogic.DTO
                 }
                 lines[i] = sb.ToString();
             }
-            File.WriteAllLines(Path.Combine(path, String.Format(@"situation{0}\WarehouseInitialState{0}.csv", suffix)), lines);
+            File.WriteAllLines(Path.Combine(path, String.Format(@"generated_situation{0}\WarehouseInitialState{0}.csv", suffix)), lines);
         }
         public List<Tuple<PositionCodes, PositionCodes>> GetAvailableWarehouseSwaps()
         {
