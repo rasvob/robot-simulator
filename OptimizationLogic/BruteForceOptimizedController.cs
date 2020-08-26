@@ -90,7 +90,7 @@ namespace OptimizationLogic
             });
         }
 
-        public void NaiveNextStep(ProductionState actualProductionState, List<StepModel> logger=null)
+        public void NaiveNextStep(ProductionState actualProductionState, List<BaseStepModel> logger=null)
         {
             var needed = actualProductionState.FutureProductionPlan.Dequeue();
             var current = actualProductionState.ProductionHistory.Dequeue();
