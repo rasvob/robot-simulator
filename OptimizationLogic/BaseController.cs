@@ -10,7 +10,7 @@ namespace OptimizationLogic
     public abstract class BaseController
     {
         public ProductionState ProductionState { get; set; }
-        public List<StepModel> StepLog { get; set; } = new List<StepModel>();
+        public List<BaseStepModel> StepLog { get; set; } = new List<BaseStepModel>();
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
@@ -56,7 +56,7 @@ namespace OptimizationLogic
             ProductionState = state;
             InitSortedPositionCodes();
         }
-        public void RenewControllerState()
+        public virtual void RenewControllerState()
         {
             InitSortedPositionCodes();
             StepLog.Clear();
@@ -88,13 +88,13 @@ namespace OptimizationLogic
             throw new ArgumentException("ItemState is not in warehouse.");
         }
 
-        public void Undo()
+        public virtual void Undo()
         {
             ProductionState = History.Pop();
             StepLog.RemoveAt(StepLog.Count - 1);
         }
 
-        public bool CanUndo() => History.Count > 0;
+        public virtual bool CanUndo() => History.Count > 0;
 
         public abstract bool NextStep();
     }

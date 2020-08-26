@@ -1,5 +1,6 @@
 ﻿using MahApps.Metro.Controls;
 using OptimizationLogic;
+using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
 using robot_simulator.ViewModels;
@@ -21,7 +22,9 @@ namespace robot_simulator
             var productionState = new ProductionState();
             var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
             var naiveController = new NaiveController(productionState);
-            ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
+            var asyncController = new NaiveAsyncController(productionState);
+            //ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
+            ViewModel = new MainWindowViewModel(asyncController, scenarioLoader);
             DataContext = ViewModel;
         }
 

@@ -43,9 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncControllers\AsyncControllerState.cs" />
+    <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="BruteForceOptimizedController.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
+    <Compile Include="DTO\AsyncStepModel.cs" />
+    <Compile Include="DTO\BaseStepModel.cs" />
     <Compile Include="DTO\ItemState.cs" />
     <Compile Include="DTO\OptimizationDtoExtensions.cs" />
     <Compile Include="DTO\PositionCodes.cs" />

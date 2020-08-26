@@ -53,6 +53,32 @@ namespace OptimizationLogic.DTO
         private Dictionary<(int row, int col), PositionCodes> _warehousePositionMappingReverse;
         private Dictionary<PositionCodes, int> _timeMatrixMapping;
 
+        public ItemState this[PositionCodes index]
+        {
+            get 
+            {
+                (int r, int c) = GetWarehouseIndex(index);
+                return WarehouseState[r, c];
+            }
+            set 
+            {
+                (int r, int c) = GetWarehouseIndex(index);
+                WarehouseState[r, c] = value;
+            }
+        }
+
+        public double this[PositionCodes from, PositionCodes to]
+        {
+            get 
+            {
+                return TimeMatrix[GetTimeMatrixIndex(from), GetTimeMatrixIndex(to)];
+            }
+            private set 
+            {
+                TimeMatrix[GetTimeMatrixIndex(from), GetTimeMatrixIndex(to)] = value;
+            }
+        }
+
         public ProductionState()
         {
             _warehousePositionMapping = BuildWarehousePositionMappingDict();
