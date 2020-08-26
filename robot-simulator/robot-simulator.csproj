@@ -223,6 +223,11 @@
     <Content Include="InputFiles\situation3\WarehouseInitialState3.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+
+    <Content Include="GeneratedInput\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
