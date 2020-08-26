@@ -189,7 +189,7 @@
     <Resource Include="icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Content Include="InputFiles\situation1\FutureProductionList1.txt">
+    <!-- <Content Include="InputFiles\situation1\FutureProductionList1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="InputFiles\situation1\HistoricalProductionList1.txt">
@@ -221,6 +221,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="InputFiles\situation3\WarehouseInitialState3.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content> -->
+
+    <Content Include="InputFiles\**\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 

@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic;
+using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DTO;
 using OptimizersSimulationSummary;
 using System;
