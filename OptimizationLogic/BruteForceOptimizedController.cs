@@ -26,12 +26,20 @@ namespace OptimizationLogic
 
             if (reorganizationSwaps != null)
             {
-                WarehouseSwap();
+                if (reorganizationSwaps.Count >0)
+                {
+                    WarehouseSwap();
+                    ProductionState.StepCounter++;
+                } else
+                {
+                    reorganizationSwaps = null;
+                    ProductionState.StepCounter++;
+                }
             }
             else if ((ProductionState.StepCounter - 1) % 50 == 0)
             {
-                const int maxDepth = 50;
-                const int selectBestCnt = 30;
+                const int maxDepth = 8;
+                const int selectBestCnt = 5;
                 reorganizationSwaps = GetBestSwaps(300, maxDepth, selectBestCnt);
                 reorganizationSwapsCurrentIndex = 0;
             }
@@ -100,9 +108,9 @@ namespace OptimizationLogic
             (int r, int c) = actualProductionState.GetWarehouseIndex(nearestFreePosition);
             actualProductionState.WarehouseState[r, c] = current;
 
-            // var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, needed);
+            var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, needed);
             // Try to optimize moving time
-            var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, nearestFreePosition, needed);
+            //var nearestNeededPosition = GetNearesElementWarehousePosition(actualProductionState, nearestFreePosition, needed);
             (r, c) = ProductionState.GetWarehouseIndex(nearestNeededPosition);
             actualProductionState.WarehouseState[r, c] = ItemState.Empty;
 
@@ -127,9 +135,7 @@ namespace OptimizationLogic
                     WithdrawTime = withdrawTime
                 });
             }
-            
         }
-
 
         private List<Tuple<PositionCodes, PositionCodes>> GetBestSwaps(int reservedTime, int maxDepth, int selectBestCnt)
         {
@@ -147,7 +153,7 @@ namespace OptimizationLogic
 
             for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++)
             {
-                Console.WriteLine(String.Format("Processing records in depth {0} ...", depthIndex));
+                //Console.WriteLine(String.Format("Processing records in depth {0} ...", depthIndex));
                 warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
                 var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
                 warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
@@ -198,22 +204,10 @@ namespace OptimizationLogic
                 }
             }
 
-            // print best solution
-            //List<WarehouseReorganizationRecord> allRecords = new List<WarehouseReorganizationRecord>();
-            /*for (int depthIndex = 0; depthIndex < maxDepth; depthIndex++)
-            {
-                //allRecords = allRecords.Concat(warehouseReorganizationRecordsDict[depthIndex]).ToList();
-                var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
-                Console.WriteLine(depthIndex);
-                var bestLocalRecord = warehouseReorganizationRecords[0];
-                Console.WriteLine(String.Format("Missing simulation steps: {0}, remaining time: {1}", bestLocalRecord.MissingSimulationSteps, bestLocalRecord.RemainingTime));
-                Console.WriteLine(bestLocalRecord.PrintSwapsFromRoot());
-            }
-            */
             var allRecords = warehouseReorganizationRecordsDict.Values.SelectMany(x => x).ToList();
             var bestRecord = allRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList()[0];
-            Console.WriteLine(String.Format("Missing simulation steps: {0}, remaining time: {1}", bestRecord.MissingSimulationSteps, bestRecord.RemainingTime));
-            Console.WriteLine(bestRecord.PrintSwapsFromRoot());
+            //Console.WriteLine(String.Format("Missing simulation steps: {0}, remaining time: {1}", bestRecord.MissingSimulationSteps, bestRecord.RemainingTime));
+            //Console.WriteLine(bestRecord.PrintSwapsFromRoot());
 
             return bestRecord.GetSwapsFromRoot();
         }
