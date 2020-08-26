@@ -1,5 +1,6 @@
 ﻿using OptimizationLogic;
 using OptimizationLogic.DTO;
+using OptimizersSimulationSummary;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,8 @@ namespace OptimizersSimulationsSummary
     {
         static void Main(string[] args)
         {
-            SimulateAssignedScenarios();
+            //SimulateAssignedScenarios();
+            SimulateGeneratedScenarios();
 
             Console.WriteLine("Finished. Press any key to close.");
             Console.ReadKey();
@@ -33,17 +35,33 @@ namespace OptimizersSimulationsSummary
 
                 simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
                 simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
-                    maxDepth: 5, selectBestCnt:10);
+                    maxDepth: 3, selectBestCnt:3);
             }
             RunSimulations(simulationsDict);
         }
 
         static void SimulateGeneratedScenarios() 
         {
+            string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            Dictionary<string, BaseController> simulationsDict = new Dictionary<string, BaseController>();
+
+            for (int i = 1; i <= 1200; i++)
+            {
+                var matrixFilename = Path.Combine(startupPath, @"robot-simulator\robot-simulator\GeneratedInput\ProcessingTimeMatrix.csv");
+                var warehouseFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\WarehouseInitialState{i}.csv");
+                var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\HistoricalProductionList{i}.txt");
+                var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\FutureProductionList{i}.txt");
+
+                simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
+                    maxDepth: 3, selectBestCnt: 3);
+            }
+            RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_output.csv"));
         }
 
-        static void RunSimulations(Dictionary<string, BaseController> simulationsDict)
+        static void RunSimulations(Dictionary<string, BaseController> simulationsDict, string outputFilename=null)
         {
+            List<SimulationResult> simulationResults = new List<SimulationResult>();
             foreach (var simulation in simulationsDict)
             {
                 var simulationName = simulation.Key;
@@ -53,7 +71,13 @@ namespace OptimizersSimulationsSummary
                 {
                     controller.NextStep();
                 }
-                Console.WriteLine($"simulation {simulationName}\tmissing steps {controller.ProductionState.FutureProductionPlan.Count}");
+                var res = new SimulationResult() { Name = simulationName, MissingSteps = controller.ProductionState.FutureProductionPlan.Count };
+                simulationResults.Add(res);
+                Console.WriteLine(res);
+            }
+            if (outputFilename != null)
+            {
+                File.WriteAllLines(outputFilename, simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
             }
         }
     }
