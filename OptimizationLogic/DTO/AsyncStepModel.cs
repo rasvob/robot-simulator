@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic.DTO
 {
-    public class AsyncStepModel : StepModel
+    public class AsyncStepModel : BaseStepModel
     {
         public AsyncControllerState CurrentState { get; set; }
 
         public override string ToString()
         {
-            return base.ToString();
+            return $"{CurrentState}: {base.ToString()}";
         }
     }
 }

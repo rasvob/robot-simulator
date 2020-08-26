@@ -10,7 +10,7 @@ namespace OptimizationLogic
     public abstract class BaseController
     {
         public ProductionState ProductionState { get; set; }
-        public List<StepModel> StepLog { get; set; } = new List<StepModel>();
+        public List<BaseStepModel> StepLog { get; set; } = new List<BaseStepModel>();
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;

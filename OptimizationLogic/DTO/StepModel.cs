@@ -1,6 +1,6 @@
 ﻿namespace OptimizationLogic.DTO
 {
-    public class StepModel
+    public class StepModel: BaseStepModel
     {
         public PositionCodes InsertToCell { get; set; }
         public PositionCodes WithdrawFromCell { get; set; }

@@ -176,15 +176,10 @@ namespace OptimizationLogic.AsyncControllers
             }
 
             ProductionState.StepCounter++;
-            StepLog.Add(new StepModel
+            StepLog.Add(new AsyncStepModel
             {
-                //InsertToCell = nearestFreePosition,
-                //WithdrawFromCell = nearestNeededPosition,
-                //InsertType = current,
-                //WithdrawType = needed,
-                //InsertTime = insertTime,
-                //MoveToDifferentCellTime = moveToDifferentCellTime,
-                //WithdrawTime = withdrawTime
+                CurrentState = this.CurrentState,
+                Message = "Test"
             });
 
             return true;
