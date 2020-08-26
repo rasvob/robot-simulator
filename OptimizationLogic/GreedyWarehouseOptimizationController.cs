@@ -7,14 +7,18 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic
 {
-    public class BruteForceOptimizedController : BaseController
+    public class GreedyWarehouseOptimizationController : BaseController
     {
         new private const int TimeLimit = 36;
+        private int MaxDepth;
+        private int SelectBestCnt;
         private List<Tuple<PositionCodes, PositionCodes>> reorganizationSwaps = null;
         private int reorganizationSwapsCurrentIndex;
 
-        public BruteForceOptimizedController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
+        public GreedyWarehouseOptimizationController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan, int maxDepth=5, int selectBestCnt=5) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
+            MaxDepth = maxDepth;
+            SelectBestCnt = selectBestCnt;
         }
 
         public override bool NextStep()
@@ -29,18 +33,18 @@ namespace OptimizationLogic
                 if (reorganizationSwaps.Count >0)
                 {
                     WarehouseSwap();
+                    // TODO: validate how to work with step counter
                     ProductionState.StepCounter++;
                 } else
                 {
                     reorganizationSwaps = null;
+                    // TODO: validate how to work with step counter
                     ProductionState.StepCounter++;
                 }
             }
             else if ((ProductionState.StepCounter - 1) % 50 == 0)
             {
-                const int maxDepth = 8;
-                const int selectBestCnt = 5;
-                reorganizationSwaps = GetBestSwaps(300, maxDepth, selectBestCnt);
+                reorganizationSwaps = GetBestSwaps(300, MaxDepth, SelectBestCnt);
                 reorganizationSwapsCurrentIndex = 0;
             }
             else
@@ -77,25 +81,34 @@ namespace OptimizationLogic
 
             if (reorganizationSwapsCurrentIndex == reorganizationSwaps.Count-1)
             {
-                moveToDifferentCellTime += ProductionState.TimeMatrix[
+                var extraTime = ProductionState.TimeMatrix[
                     ProductionState.GetTimeMatrixIndex(currentSwap.Item2),
                     ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)
                     ];
                 reorganizationSwaps = null;
+
+                StepLog.Add(new WarehouseSwapStepModel
+                {
+                    MoveTime = moveToDifferentCellTime,
+                    SwapFromCell = currentSwap.Item1,
+                    SwapTime = swapTime,
+                    SwapToCell = currentSwap.Item2,
+                    SwapElement = itemType,
+                    ExtraTime = extraTime
+                });
             }
-
-            reorganizationSwapsCurrentIndex++;
-
-            StepLog.Add(new StepModel
+            else
             {
-                InsertToCell = currentSwap.Item2,
-                WithdrawFromCell = currentSwap.Item1,
-                InsertType = itemType,
-                WithdrawType = itemType,
-                InsertTime = swapTime,
-                MoveToDifferentCellTime = moveToDifferentCellTime,
-                WithdrawTime = swapTime
-            });
+                StepLog.Add(new WarehouseSwapStepModel
+                {
+                    MoveTime = moveToDifferentCellTime,
+                    SwapFromCell = currentSwap.Item1,
+                    SwapTime = swapTime,
+                    SwapToCell = currentSwap.Item2,
+                    SwapElement = itemType,
+                });
+            }
+            reorganizationSwapsCurrentIndex++;
         }
 
         public void NaiveNextStep(ProductionState actualProductionState, List<BaseStepModel> logger=null)

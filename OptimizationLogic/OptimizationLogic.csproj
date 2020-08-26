@@ -46,7 +46,7 @@
     <Compile Include="AsyncControllers\AsyncControllerState.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="BaseController.cs" />
-    <Compile Include="BruteForceOptimizedController.cs" />
+    <Compile Include="GreedyWarehouseOptimizationController.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\AsyncStepModel.cs" />
     <Compile Include="DTO\BaseStepModel.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
     <Compile Include="StateGenerating\ProductionHistoryGenerator.cs" />
     <Compile Include="StateGenerating\ProductionStateGenerator.cs" />
+    <Compile Include="WarehouseSwapStepModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="InputFiles\ProcessingTimeMatrix.csv" />

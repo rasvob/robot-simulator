@@ -40,7 +40,7 @@ namespace ConsoleApp
         static void RunBruteForceVersion()
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            BruteForceOptimizedController bruteForceOptimizedController = new BruteForceOptimizedController(new ProductionState(),
+            GreedyWarehouseOptimizationController bruteForceOptimizedController = new GreedyWarehouseOptimizationController(new ProductionState(),
                 Path.Combine(startupPath, @"OptimizationLogic\InputFiles\ProcessingTimeMatrix.csv"),
                 Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\WarehouseInitialState.csv"),
                 Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\HistoricalProductionList.txt"),

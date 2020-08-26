@@ -32,7 +32,8 @@ namespace OptimizersSimulationsSummary
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\OptimizationLogic\InputFiles\situation{i}\FutureProductionList.txt");
 
                 simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
-                simulationsDict[$"greedy-{i}"] = new BruteForceOptimizedController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
+                    maxDepth: 5, selectBestCnt:10);
             }
             RunSimulations(simulationsDict);
         }
