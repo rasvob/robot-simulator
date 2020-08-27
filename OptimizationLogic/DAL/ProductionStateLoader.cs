@@ -42,6 +42,11 @@ namespace OptimizationLogic.DAL
             productionState.ProductionHistory = current.ProductionHistory;
             productionState.WarehouseState = current.WarehouseState;
         }
+
+        public ProductionState LoadScenarioFromMemory(int scenarioIdx = 0)
+        {
+            return (ProductionState)DefaultScenariosInMemory[scenarioIdx].Clone();
+        }
     }
 
     public class ProductionScenarioPaths
