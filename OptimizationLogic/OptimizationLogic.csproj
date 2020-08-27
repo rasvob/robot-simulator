@@ -47,7 +47,6 @@
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="GreedyWarehouseReorganizer.cs" />
-    <Compile Include="GreedyWarehouseOptimizationController.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\AsyncStepModel.cs" />
     <Compile Include="DTO\BaseStepModel.cs" />

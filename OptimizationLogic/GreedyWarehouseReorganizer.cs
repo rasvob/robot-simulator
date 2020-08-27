@@ -19,7 +19,7 @@ namespace OptimizationLogic
             SelectBestCnt = selectBestCnt;
         }
 
-        public void ReorganizeWarehouse(ProductionState productionState, List<BaseStepModel> logger, int reservedTime)
+        public void ReorganizeWarehouse(ProductionState productionState, List<BaseStepModel> logger, double reservedTime)
         {
             var bestSwaps = GetBestSwaps(productionState, reservedTime);
             var previousPosition = PositionCodes.Stacker;
@@ -72,7 +72,7 @@ namespace OptimizationLogic
             }
         }
 
-        private List<Tuple<PositionCodes, PositionCodes>> GetBestSwaps(ProductionState productionState, int reservedTime)
+        private List<Tuple<PositionCodes, PositionCodes>> GetBestSwaps(ProductionState productionState, double reservedTime)
         {
             Dictionary<int, List<WarehouseReorganizationRecord>> warehouseReorganizationRecordsDict = new Dictionary<int, List<WarehouseReorganizationRecord>>();
 
@@ -123,7 +123,6 @@ namespace OptimizationLogic
                         if (timeRemaining-timeToStacker > 0)
                         {
                             int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
-
                             warehouseReorganizationRecordsDict[depthIndex + 1].Add(new WarehouseReorganizationRecord
                             {
                                 ProductionState = newProductionState,
@@ -150,9 +149,8 @@ namespace OptimizationLogic
             {
                 localProductionState.FutureProductionPlan.Enqueue(localProductionState.FutureProductionPlan.ElementAt(counter++));
             }
-
-            NaiveController naiveController = new NaiveController(productionState);
-            while (naiveController.NextStep() && --numberOfImagenarySteps > 0) {}
+            NaiveController naiveController = new NaiveController(localProductionState);
+            while (naiveController.NextStep() && naiveController.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) {}
             return numberOfImagenarySteps;
         }
     }

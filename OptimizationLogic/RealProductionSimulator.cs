@@ -9,17 +9,18 @@ namespace OptimizationLogic
 {
     public class RealProductionSimulator
     {
-        public NaiveAsyncController Controller { get; set; }
+        public BaseController Controller { get; set; }
         public GreedyWarehouseReorganizer WarehouseReorganizer { get; set; }
         private List<Tuple<double, double>> productionDayBreaks = new List<Tuple<double, double>>();
         private const int secondsInProductionDay = 86400;
         private const int tactTime = 55;
 
-        public RealProductionSimulator(NaiveAsyncController controller, GreedyWarehouseReorganizer warehouseReorganizer = null)
+        public RealProductionSimulator(BaseController controller, GreedyWarehouseReorganizer warehouseReorganizer = null)
         {
             Controller = controller;
             WarehouseReorganizer = warehouseReorganizer;
 
+            productionDayBreaks.Add(new Tuple<double, double>(1000, 1500));
             productionDayBreaks.Add(new Tuple<double, double>(7200, 7500));
             productionDayBreaks.Add(new Tuple<double, double>(15300, 17100));
             productionDayBreaks.Add(new Tuple<double, double>(21600, 21900));
@@ -35,12 +36,12 @@ namespace OptimizationLogic
 
         private int GetBreakTimeIndex(double realTimeStamp)
         {
-            double time = realTimeStamp % secondsInProductionDay;
+            double time = (realTimeStamp+secondsInProductionDay) % secondsInProductionDay;
 
             for (int i = 0; i < productionDayBreaks.Count; i++)
             {
                 var breakPair = productionDayBreaks[i];
-                if (time > breakPair.Item1 - tactTime && time <= breakPair.Item2)
+                if (time >= breakPair.Item1 - tactTime && time < breakPair.Item2)
                 {
                     return i;
                 } 
@@ -50,25 +51,35 @@ namespace OptimizationLogic
 
         public void Run()
         {
+            Controller.RealTime = -300;
+            int logIndex = 0;
             while (Controller.ProductionState.FutureProductionPlan.Count > 0)
             {
                 var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
+                Console.WriteLine($"realtime {Controller.RealTime}\tstate {Controller.ProductionState.ProductionStateIsOk}");
                 if (breakTimeIndex >= 0)
                 {
                     var breakPair = productionDayBreaks[breakTimeIndex];
-                    var breakDuration = breakPair.Item2 - breakPair.Item1;
+                    var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                    Controller.StepLog.Add(new DTO.BaseStepModel() { Message=$"Break time (duration {breakDuration})"});
                     if (WarehouseReorganizer != null)
                     {
-                        WarehouseReorganizer.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, 300);
-                    }
+                        WarehouseReorganizer.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
+                    }                    
                     Controller.RealTime += breakDuration;
                 }
                 else
                 {
                     Controller.NextStep();
                 }
+                while (logIndex < Controller.StepLog.Count)
+                {
+                    Console.WriteLine(Controller.StepLog[logIndex++]);
+                }
+                
             }
-            
+
+            Console.WriteLine($"\nTotal delay time {Controller.Delay}\n");
         }
     }
 }
