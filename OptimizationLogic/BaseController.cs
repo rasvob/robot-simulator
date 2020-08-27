@@ -19,6 +19,7 @@ namespace OptimizationLogic
         public int ClockTime { get => 55; }
 
         public double RealTime { get; set; } = 0;
+        public double Delay { get; set; } = 0;
 
         public void InitSortedPositionCodes()
         {
@@ -63,6 +64,7 @@ namespace OptimizationLogic
             InitSortedPositionCodes();
             StepLog.Clear();
             History.Clear();
+            Delay = 0;
         }
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)
