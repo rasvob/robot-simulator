@@ -18,6 +18,8 @@ namespace OptimizationLogic
         public int TimeLimitForOneStep { get => TimeLimit; }
         public int ClockTime { get => 55; }
 
+        public double RealTime { get; set; } = 0;
+
         public void InitSortedPositionCodes()
         {
             SortedPositionCodes = new Dictionary<PositionCodes, List<PositionCodes>>();

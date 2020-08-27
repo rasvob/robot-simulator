@@ -11,7 +11,7 @@ namespace OptimizationLogic.AsyncControllers
         public int IntakeOuttakeDifference { get; private set; } = 36;
         public double SwapChainTime { get; private set; } = 10;
         public double TimeBase { get; private set; } = 9;
-        public double RealTime { get; set; } = 0;
+        
         public ItemState IntakeItem { get; set; } = ItemState.Empty;
         public ItemState OuttakeItem { get; set; } = ItemState.Empty;
         public ItemState Needed { get; set; }
