@@ -46,6 +46,7 @@
     <Compile Include="AsyncControllers\AsyncControllerState.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="BaseController.cs" />
+    <Compile Include="GreedyWarehouseReorganizer.cs" />
     <Compile Include="GreedyWarehouseOptimizationController.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\AsyncStepModel.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Extensions\ProductionStateExt.cs" />
     <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RealProductionSimulator.cs" />
     <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
     <Compile Include="StateGenerating\ProductionHistoryGenerator.cs" />
     <Compile Include="StateGenerating\ProductionStateGenerator.cs" />

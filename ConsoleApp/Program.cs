@@ -9,7 +9,15 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            RunBruteForceVersion();
+            string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            NaiveController naiveController = new NaiveController(new ProductionState(),
+                   Path.Combine(startupPath, @"OptimizationLogic\InputFiles\ProcessingTimeMatrix.csv"),
+                   Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\WarehouseInitialState.csv"),
+                   Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\HistoricalProductionList.txt"),
+                   Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\FutureProductionList.txt"));
+            GreedyWarehouseReorganizer warehouseReorganizer = new GreedyWarehouseReorganizer(maxDepth: 3, selectBestCnt: 4);
+            RealProductionSimulator productionSimulator = new RealProductionSimulator(naiveController, warehouseReorganizer);
+
         }
         static void RunNaiveVersion()
         {
