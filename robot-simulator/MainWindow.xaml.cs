@@ -3,6 +3,7 @@ using OptimizationLogic;
 using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
+using robot_simulator.Dialogs;
 using robot_simulator.ViewModels;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,8 @@ namespace robot_simulator
             var naiveController = new NaiveController(productionState);
             var asyncController = new NaiveAsyncController(productionState);
             //ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
-            ViewModel = new MainWindowViewModel(asyncController, scenarioLoader);
+            var openFileDialog = new OpenFileDialogService();
+            ViewModel = new MainWindowViewModel(asyncController, scenarioLoader, openFileDialog);
             DataContext = ViewModel;
         }
 

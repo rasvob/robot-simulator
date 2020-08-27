@@ -1,6 +1,8 @@
 ﻿using OptimizationLogic;
+using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DAL;
 using OptimizationLogic.DTO;
+using robot_simulator.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +22,10 @@ namespace robot_simulator.ViewModels
 
         public ICommand NextStep { get; private set; }
         public ICommand LoadSelectedScenario { get; private set; }
+        public ICommand SetSelectedOptimizer { get; private set; }
+        public ICommand LoadWarehouseState { get; private set; }
+        public ICommand LoadFutureProductionPlan { get; private set; }
+        public ICommand LoadProductionHistory { get; private set; }
         public ICommand Undo { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
@@ -66,6 +72,10 @@ namespace robot_simulator.ViewModels
         }
 
         private int _selectedPredefinedScenario = 0;
+        private int selectedOptimizer = 0;
+        private string notificationText = string.Empty;
+        private bool isNofiticationOpen = false;
+
         public int SelectedPredefinedScenario
         {
             get { return _selectedPredefinedScenario; }
@@ -80,17 +90,70 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        public int SelectedOptimizer
+        {
+            get { return selectedOptimizer; }
+
+            set
+            {
+                if (selectedOptimizer != value)
+                {
+                    selectedOptimizer = value;
+                    OnPropertyChanged(nameof(SelectedOptimizer));
+                }
+            }
+        }
+
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
         public double TimeSpentInSimulation { get => ProductionState.TimeSpentInSimulation; }
         public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.ClockTime; }
         public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
         public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
+        public double CurrentDelay { get => NaiveController.Delay; }
+        public double RealTime { get => NaiveController.RealTime; }
+        public double NextItemFromFlow { get => (NaiveController as NaiveAsyncController)?.GetClosestNextIntakeTime() ?? 0; }
+        public double NextItemFromQueue { get => (NaiveController as NaiveAsyncController)?.GetClosestNextOuttakeTime() ?? 0; }
         public IEnumerable<string> StepLog { get => NaiveController.StepLog.Select((t, i) => $"#{i}\t{t}").Reverse(); }
 
+        public string NotificationText
+        {
+            get { return notificationText; }
+
+            set
+            {
+                if (notificationText != value)
+                {
+                    notificationText = value;
+                    OnPropertyChanged(nameof(NotificationText));
+                }
+            }
+        }
+
+        public bool IsNofiticationOpen
+        {
+            get { return isNofiticationOpen; }
+
+            set
+            {
+                if (isNofiticationOpen != value)
+                {
+                    isNofiticationOpen = value;
+                    OnPropertyChanged(nameof(IsNofiticationOpen));
+                }
+            }
+        }
+
+        public void ShowNotification(string message)
+        {
+            NotificationText = message;
+            IsNofiticationOpen = true;
+        }
+
         public ProductionStateLoader ScenarioLoader { get; }
-        
-        public MainWindowViewModel(BaseController naiveController, ProductionStateLoader scenarioLoader)
+        public OpenFileDialogService OpenFileDialogService { get; }
+
+        public MainWindowViewModel(BaseController naiveController, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService)
         {
             NaiveController = naiveController;
             ProductionState = NaiveController.ProductionState;
@@ -98,8 +161,51 @@ namespace robot_simulator.ViewModels
             ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
             NextStep = new SimpleCommand(NextStepClickedExecute, (_) => !ProductionState.SimulationFinished);
             LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
+            SetSelectedOptimizer = new SimpleCommand(SetSelectedOptimizerExecute);
+            LoadWarehouseState = new SimpleCommand(LoadWarehouseStateExecute);
+            LoadFutureProductionPlan = new SimpleCommand(LoadFutureProductionPlanExecute);
+            LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
             Undo = new SimpleCommand(UndoExecute, _ => NaiveController.CanUndo());
             UpdateProductionStateInView();
+            OpenFileDialogService = openFileDialogService;
+        }
+
+        private void LoadProductionHistoryExecute(object obj)
+        {
+            LoadCurrentStateFromFile(ProductionState.LoadProductionHistory, "Items returning from flow loaded");
+        }
+
+        private void LoadFutureProductionPlanExecute(object obj)
+        {
+            LoadCurrentStateFromFile(ProductionState.LoadFutureProductionPlan, "Production queue loaded");
+        }
+
+        private void LoadWarehouseStateExecute(object obj)
+        {
+            LoadCurrentStateFromFile(ProductionState.LoadWarehouseState, "Warehouse state loaded");
+        }
+
+        private void LoadCurrentStateFromFile(Action<string> loadAction, string message)
+        {
+            var file = OpenFileDialogService.OpenFile();
+
+            if (file == null)
+            {
+                ShowNotification("File can't be opened");
+                return;
+            }
+
+            loadAction(file);
+            ShowNotification(message);
+            UpdateProductionStateInView();
+        }
+
+        private void SetSelectedOptimizerExecute(object obj)
+        {
+            //TODO: Create optimizer list
+            ProductionState.ResetState();
+            NaiveController.RenewControllerState();
+            return;
         }
 
         public void UndoExecute(object o)
@@ -123,13 +229,6 @@ namespace robot_simulator.ViewModels
             UpdateProductionStateInView();
         }
 
-        public void NotifyCurrentWarehouseState()
-        {
-            OnPropertyChanged(nameof(CurrentWarehouseState));
-            OnPropertyChanged(nameof(HistoryQueue));
-            OnPropertyChanged(nameof(FutureQueue));
-        }
-
         public void UpdateProductionStateInView()
         {
             CurrentWarehouseState = new ObservableCollection<WarehouseItemViewModel>(CreateWarehouseViewModelCollection());
@@ -143,6 +242,10 @@ namespace robot_simulator.ViewModels
             OnPropertyChanged(nameof(ProductionStateIsOk));
             OnPropertyChanged(nameof(CurrentStepTime));
             OnPropertyChanged(nameof(StepLog));
+            OnPropertyChanged(nameof(CurrentDelay));
+            OnPropertyChanged(nameof(RealTime));
+            OnPropertyChanged(nameof(NextItemFromFlow));
+            OnPropertyChanged(nameof(NextItemFromQueue));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()

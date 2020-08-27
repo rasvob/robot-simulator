@@ -10,7 +10,8 @@ namespace OptimizationLogic.AsyncControllers
         public int IntakeClock { get; private set; } = 55;
         public int IntakeOuttakeDifference { get; private set; } = 36;
         public double SwapChainTime { get; private set; } = 10;
-        public double TimeBase { get; private set; } = 9;
+        public double TimeBase { get => _timeBaseShift + Delay; }
+        private readonly double _timeBaseShift = 9;
         public ItemState IntakeItem { get; set; } = ItemState.Empty;
         public ItemState OuttakeItem { get; set; } = ItemState.Empty;
         public ItemState Needed { get; set; }
@@ -36,26 +37,26 @@ namespace OptimizationLogic.AsyncControllers
 
         }
 
-        protected double GetClosestNextIntakeTime()
+        public double GetClosestNextIntakeTime()
         {
-            if (RealTime < 9)
+            if (RealTime < _timeBaseShift)
             {
-                return 9;
+                return _timeBaseShift;
             }
 
             int currentIntakeSteps = (int)((RealTime - TimeBase) / IntakeClock);
             return TimeBase + (currentIntakeSteps + 1) * IntakeClock;
         }
 
-        protected double GetClosestNextOuttakeTime()
+        public double GetClosestNextOuttakeTime()
         {
-            if (RealTime < TimeBase + 36)
+            if (RealTime < TimeBase + IntakeOuttakeDifference)
             {
-                return TimeBase + 36;
+                return TimeBase + IntakeOuttakeDifference;
             }
 
-            int currentIntakeSteps = (int)((RealTime - (TimeBase + 36)) / IntakeClock);
-            return (currentIntakeSteps+1) * IntakeClock + TimeBase + 36;
+            int currentIntakeSteps = (int)((RealTime - (TimeBase + IntakeOuttakeDifference)) / IntakeClock);
+            return (currentIntakeSteps+1) * IntakeClock + TimeBase + IntakeOuttakeDifference;
         }
 
         public override bool NextStep()

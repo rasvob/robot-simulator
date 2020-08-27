@@ -54,6 +54,46 @@
                 <Setter Property="FontWeight" Value="Bold" />
             </Style>
 
+            <Style x:Key="ControllerStateItemVisibility" TargetType="RichTextBox" BasedOn="{StaticResource MahApps.Styles.RichTextBox}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="1">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="2">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="3">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="ControllerStateItemVisibilityForAsync" TargetType="RichTextBox" BasedOn="{StaticResource MahApps.Styles.RichTextBox}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="1">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="2">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding SelectedOptimizer, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="3">
+                        <Setter Property="Visibility" Value="Visible" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <Thickness x:Key="LeftControlMargin">5,0,0,0</Thickness>
 
             <converters:TileColorValueConterter x:Key="TileColorValueConterter" />
@@ -67,6 +107,19 @@
         <KeyBinding Command="{Binding NextStep}" Modifiers="Ctrl" Key="N" />
         <KeyBinding Command="{Binding Undo}" Modifiers="Ctrl" Key="Z" />
     </Window.InputBindings>
+
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+            <mah:Flyout AutoCloseInterval="2000"
+                        Position="Bottom"
+                        AreAnimationsEnabled="True"
+                        Header="{Binding NotificationText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        IsOpen="{Binding IsNofiticationOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        IsAutoCloseEnabled="True"
+                        >
+            </mah:Flyout>
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
         <TabControl Style="{DynamicResource MahApps.Styles.TabControl.Animated}"
@@ -77,25 +130,43 @@
                 <StackPanel Margin="0 15 15 0" >
                 <Expander Header="Settings" IsExpanded="False">
                     <Grid>
-                        <Grid.RowDefinitions>
+                            <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="Predefined scenarios" Style="{StaticResource SmallSectionHeader}" />
+                            <StackPanel Orientation="Horizontal" Grid.Row="0">
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="Predefined scenarios" Style="{StaticResource SmallSectionHeader}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedPredefinedScenario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                            <ComboBoxItem Content="Scenario 1 (Half MEB)" />
+                                            <ComboBoxItem Content="Scenario 2 (Mix)" />
+                                            <ComboBoxItem Content="Scenario 3 (All MQB)" />
+                                        </ComboBox>
+                                        <Button Content="Load scenario" Margin="5 0 0 0" Command="{Binding LoadSelectedScenario}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" Margin="5 0 0 0">
+                                    <TextBlock Text="Optimizers" Style="{StaticResource SmallSectionHeader}" />
+                                    <StackPanel Orientation="Horizontal" >
+                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedOptimizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                            <ComboBoxItem Content="Naive" />
+                                            <ComboBoxItem Content="Naive with using pauses" />
+                                            <ComboBoxItem Content="Async" />
+                                            <ComboBoxItem Content="Async with using pauses" />
+                                        </ComboBox>
+                                        <Button Content="Set optimizer" Margin="5 0 0 0" Command="{Binding SetSelectedOptimizer}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0 5 0 0">
+                                <TextBlock Text="Load own scenarios" Style="{StaticResource SmallSectionHeader}" />
                                 <StackPanel Orientation="Horizontal" >
-                                    <ComboBox Width="200" SelectedIndex="{Binding SelectedPredefinedScenario, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                        <ComboBoxItem Content="Scenario 1" />
-                                        <ComboBoxItem Content="Scenario 2" />
-                                        <ComboBoxItem Content="Scenario 3" />
-                                        <!--<ComboBoxItem Content="Scenario 4" />
-                                        <ComboBoxItem Content="Scenario 5" />-->
-                                    </ComboBox>
-                                    <Button Content="Load scenario" Margin="5 0 0 0" Command="{Binding LoadSelectedScenario}"/>
+                                    <Button Content="Load production queue" Margin="0 0 0 0" Command="{Binding LoadFutureProductionPlan}"/>
+                                    <Button Content="Load past flow" Margin="5 0 0 0" Command="{Binding LoadProductionHistory}"/>
+                                    <Button Content="Load warehouse state" Margin="5 0 0 0" Command="{Binding LoadWarehouseState}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -103,8 +174,8 @@
 
                     <Expander Header="Simulation control" IsExpanded="True">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Simulation statistics" Style="{StaticResource SmallSectionHeader}" Grid.Row="0" />
-                            <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
+                            <TextBlock Text="Simulation statistics" Style="{StaticResource SmallSectionHeader}"/>
+                            <StackPanel Orientation="Horizontal">
                                 <RichTextBox Width="100" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
@@ -135,7 +206,22 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
 
-                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                <RichTextBox Width="180" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Current delay in seconds"
+                                     IsDocumentEnabled="True"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding CurrentDelay, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
+                                <!--<RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
                                      mah:TextBoxHelper.Watermark="Time used for operations"
@@ -148,13 +234,14 @@
                                             </Paragraph>
                                         </FlowDocument>
                                     </RichTextBox.Document>
-                                </RichTextBox>
+                                </RichTextBox>-->
 
                                 <RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
                                      mah:TextBoxHelper.Watermark="Total time in simulation"
                                      IsDocumentEnabled="True"
+                                     Style="{StaticResource ControllerStateItemVisibility}"
                                      >
                                     <RichTextBox.Document>
                                         <FlowDocument>
@@ -170,6 +257,7 @@
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
                                      mah:TextBoxHelper.Watermark="Time for current step"
                                      IsDocumentEnabled="True"
+                                     Style="{StaticResource ControllerStateItemVisibility}"
                                      >
                                     <RichTextBox.Document>
                                         <FlowDocument>
@@ -179,9 +267,57 @@
                                         </FlowDocument>
                                     </RichTextBox.Document>
                                 </RichTextBox>
+
+                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Current timestamp"
+                                     IsDocumentEnabled="True"
+                                     Style="{StaticResource ControllerStateItemVisibilityForAsync}"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding RealTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
+                                <RichTextBox Width="200" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Next item from production plan leaves at: "
+                                     IsDocumentEnabled="True"
+                                     Style="{StaticResource ControllerStateItemVisibilityForAsync}"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding NextItemFromQueue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
+                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Next item from flow arrives at:"
+                                     IsDocumentEnabled="True"
+                                     Style="{StaticResource ControllerStateItemVisibilityForAsync}"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding NextItemFromFlow, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
                             </StackPanel>
-                            
-                            <mah:ToggleSwitch Margin="0 0 5 5"
+
+                        <mah:ToggleSwitch Margin="0 0 5 5"
                                    Header="Is simulation running ok?"
                                    OffContent="No, operation time exceeded limit"
                                    OnContent="Yes"
