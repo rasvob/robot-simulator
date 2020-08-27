@@ -15,8 +15,8 @@ namespace OptimizersSimulationsSummary
     {
         static void Main(string[] args)
         {
-            //SimulateAssignedScenarios();
-            SimulateGeneratedScenarios();
+            SimulateAssignedScenarios();
+            //SimulateGeneratedScenarios();
 
             Console.WriteLine("Finished. Press any key to close.");
             Console.ReadKey();
@@ -37,6 +37,7 @@ namespace OptimizersSimulationsSummary
                 simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
                 simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
                     maxDepth: 3, selectBestCnt:3);
+                simulationsDict[$"async-{i}"] = new NaiveAsyncController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
             }
             RunSimulations(simulationsDict);
         }
@@ -53,9 +54,10 @@ namespace OptimizersSimulationsSummary
                 var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\HistoricalProductionList{i}.txt");
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\FutureProductionList{i}.txt");
 
-                simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
-                simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
-                    maxDepth: 3, selectBestCnt: 3);
+                //simulationsDict[$"naive-{i}"] = new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                //simulationsDict[$"greedy-{i}"] = new GreedyWarehouseOptimizationController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename,
+                //    maxDepth: 3, selectBestCnt: 3);
+                simulationsDict[$"async-{i}"] = new NaiveAsyncController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename);
             }
             RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_output.csv"));
         }

@@ -45,12 +45,19 @@ namespace OptimizationLogic
 
             var insertTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(nearestFreePosition)];
             var moveToDifferentCellTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestFreePosition), ProductionState.GetTimeMatrixIndex(nearestNeededPosition)] - 5; // TODO: Validate this calculation
+            moveToDifferentCellTime = moveToDifferentCellTime < 0 ? 0 : moveToDifferentCellTime; 
             var withdrawTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestNeededPosition), ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
             var totalTime = insertTime + moveToDifferentCellTime + withdrawTime;
             ProductionState.CurrentStepTime = totalTime;
             ProductionState.TimeSpentInSimulation += totalTime;
 
             ProductionState.ProductionStateIsOk = ProductionState.ProductionStateIsOk && totalTime <= TimeLimit;
+            RealTime += ClockTime;
+            if (totalTime > TimeLimit)
+            {
+                Delay += totalTime - TimeLimit;
+                RealTime += totalTime - TimeLimit;
+            }            
             ProductionState.StepCounter++;
 
             StepLog.Add(new StepModel
