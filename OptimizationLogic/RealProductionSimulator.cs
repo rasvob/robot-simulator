@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OptimizationLogic.DTO;
 
 namespace OptimizationLogic
 {
@@ -20,7 +21,6 @@ namespace OptimizationLogic
             Controller = controller;
             WarehouseReorganizer = warehouseReorganizer;
 
-            productionDayBreaks.Add(new Tuple<double, double>(1000, 1500));
             productionDayBreaks.Add(new Tuple<double, double>(7200, 7500));
             productionDayBreaks.Add(new Tuple<double, double>(15300, 17100));
             productionDayBreaks.Add(new Tuple<double, double>(21600, 21900));
@@ -44,7 +44,7 @@ namespace OptimizationLogic
                 if (time >= breakPair.Item1 - tactTime && time < breakPair.Item2)
                 {
                     return i;
-                } 
+                }
             }
             return -1;
         }
@@ -52,34 +52,29 @@ namespace OptimizationLogic
         public void Run()
         {
             Controller.RealTime = -300;
-            int logIndex = 0;
             while (Controller.ProductionState.FutureProductionPlan.Count > 0)
             {
-                var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
-                Console.WriteLine($"realtime {Controller.RealTime}\tstate {Controller.ProductionState.ProductionStateIsOk}");
-                if (breakTimeIndex >= 0)
-                {
-                    var breakPair = productionDayBreaks[breakTimeIndex];
-                    var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
-                    Controller.StepLog.Add(new DTO.BaseStepModel() { Message=$"Break time (duration {breakDuration})"});
-                    if (WarehouseReorganizer != null)
-                    {
-                        WarehouseReorganizer.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
-                    }                    
-                    Controller.RealTime += breakDuration;
-                }
-                else
-                {
-                    Controller.NextStep();
-                }
-                while (logIndex < Controller.StepLog.Count)
-                {
-                    Console.WriteLine(Controller.StepLog[logIndex++]);
-                }
-                
+                NextStep();
             }
 
             Console.WriteLine($"\nTotal delay time {Controller.Delay}\n");
+        }
+
+        public void NextStep()
+        {
+            var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
+            if (breakTimeIndex >= 0)
+            {
+                var breakPair = productionDayBreaks[breakTimeIndex];
+                var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
+                WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
+                Controller.RealTime += breakDuration;
+            }
+            else
+            {
+                Controller.NextStep();
+            }
         }
     }
 }
