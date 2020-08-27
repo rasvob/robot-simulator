@@ -232,6 +232,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
 
+    <Content Include="DailyPlans\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="WeeklyPlans\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

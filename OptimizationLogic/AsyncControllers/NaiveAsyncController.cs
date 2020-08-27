@@ -11,7 +11,6 @@ namespace OptimizationLogic.AsyncControllers
         public int IntakeOuttakeDifference { get; private set; } = 36;
         public double SwapChainTime { get; private set; } = 10;
         public double TimeBase { get; private set; } = 9;
-        public double RealTime { get; set; } = 9;
         public ItemState IntakeItem { get; set; } = ItemState.Empty;
         public ItemState OuttakeItem { get; set; } = ItemState.Empty;
         public ItemState Needed { get; set; }
@@ -39,28 +38,37 @@ namespace OptimizationLogic.AsyncControllers
 
         protected double GetClosestNextIntakeTime()
         {
+            if (RealTime < 9)
+            {
+                return 9;
+            }
+
             int currentIntakeSteps = (int)((RealTime - TimeBase) / IntakeClock);
-            return TimeBase + (currentIntakeSteps + 1)* IntakeClock;
+            return TimeBase + (currentIntakeSteps + 1) * IntakeClock;
         }
 
         protected double GetClosestNextOuttakeTime()
         {
-            if ((RealTime) < (45))
+            if (RealTime < TimeBase + 36)
             {
-                return 45;
+                return TimeBase + 36;
             }
 
-            int currentIntakeSteps = (int)((RealTime - 45) / IntakeClock);
-            return (currentIntakeSteps+1) * IntakeClock + 45;
+            int currentIntakeSteps = (int)((RealTime - (TimeBase + 36)) / IntakeClock);
+            return (currentIntakeSteps+1) * IntakeClock + TimeBase + 36;
         }
 
-        //TODO:  Check times for in-take/out-take operations
         public override bool NextStep()
         {
             if (ProductionState.FutureProductionPlan.Count == 0)
             {
                 CurrentState = AsyncControllerState.End;
-                return false;
+                StepLog.Add(new AsyncStepModel
+                {
+                    CurrentState = AsyncControllerState.Start,
+                    Message = $"RealTime: {RealTime}, No more items to process, Going to state: {CurrentState}"
+                });
+                return true;
             }
 
             History.Push(ProductionState.Copy());
@@ -141,6 +149,13 @@ namespace OptimizationLogic.AsyncControllers
                                 {
                                     OuttakeItem = Needed;
                                     CurrentState = AsyncControllerState.Get;
+
+                                    double closestIntake = GetClosestNextIntakeTime();
+                                    if (RealTime < closestIntake)
+                                    {
+                                        RealTime = closestIntake + TimePadding;
+                                        step.Message += $", Skipped to intake: {RealTime}";
+                                    }
                                 }
                                 break;
 
@@ -247,7 +262,7 @@ namespace OptimizationLogic.AsyncControllers
         public override void RenewControllerState()
         {
             base.RenewControllerState();
-            RealTime = 9;
+            RealTime = 0;
             IntakeItem = ItemState.Empty;
             OuttakeItem = ItemState.Empty;
             CurrentState = AsyncControllerState.Start;

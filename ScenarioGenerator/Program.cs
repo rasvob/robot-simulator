@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic.DAL;
+using OptimizationLogic.DTO;
 using OptimizationLogic.StateGenerating;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace ScenarioGenerator
 {
     class Program
     {
-        static void Main(string[] args)
+        private static void GenerateNewScenariosWith100Items()
         {
             var historyGenerator = new ProductionHistoryGenerator(0.5)
             {
@@ -49,11 +50,11 @@ namespace ScenarioGenerator
                 {
                     for (int warehouseCount = 0; warehouseCount < 10; warehouseCount++)
                     {
-                        prodStateGenerator.ProductionHistoryGenerator.MqbToMebTransitionProbability = historyProb/10.0;
-                        prodStateGenerator.FutureProductionPlanGenerator.MqbToMebTransitionProbability = futureProb/10.0;
-                        prodStateGenerator.UniformProbabilityWeight = prodStateGenerator.RandomGenerator.Next(0, 101)/100.0;
-                        prodStateGenerator.MebDistanceWeight = prodStateGenerator.RandomGenerator.Next(0, 101)/100.0;
-                        prodStateGenerator.MqbDistanceWeight = prodStateGenerator.RandomGenerator.Next(0, 101)/100.0;
+                        prodStateGenerator.ProductionHistoryGenerator.MqbToMebTransitionProbability = historyProb / 10.0;
+                        prodStateGenerator.FutureProductionPlanGenerator.MqbToMebTransitionProbability = futureProb / 10.0;
+                        prodStateGenerator.UniformProbabilityWeight = prodStateGenerator.RandomGenerator.Next(0, 101) / 100.0;
+                        prodStateGenerator.MebDistanceWeight = prodStateGenerator.RandomGenerator.Next(0, 101) / 100.0;
+                        prodStateGenerator.MqbDistanceWeight = prodStateGenerator.RandomGenerator.Next(0, 101) / 100.0;
                         var state = prodStateGenerator.GenerateProductionState();
                         state.SaveProductionState("gen", suffix.ToString());
                         logFile.WriteLine($"{suffix};{prodStateGenerator.FutureProductionPlanGenerator.ProbabilityOfStartingInMqbState};{prodStateGenerator.ProductionHistoryGenerator.MqbToMebTransitionProbability};{prodStateGenerator.FutureProductionPlanGenerator.MqbToMebTransitionProbability};{prodStateGenerator.UniformProbabilityWeight};{prodStateGenerator.MqbDistanceWeight};{prodStateGenerator.MebDistanceWeight}");
@@ -63,6 +64,46 @@ namespace ScenarioGenerator
                 }
             }
             logFile.Close();
+        }
+
+        private static void GenerateFromExistingPlans(int seqLen, string folder)
+        {
+            var futureGenerator = new FutureProductionPlanGenerator(0.5)
+            {
+                ProbabilityOfStartingInMqbState = 0.5,
+                SequenceLength = seqLen
+            };
+
+            var probabilities = File.ReadAllLines("probability_log.txt").Select(t => t.Split(';')).Select(t => t[3]).Skip(1).Select(double.Parse).ToArray();
+
+            var loaderFiles = Directory.GetDirectories("GeneratedInput", "generated_situation*")
+                .Select(Directory.GetFiles)
+                .Select(t =>
+                {
+                    return new ProductionScenarioPaths()
+                    {
+                        FutureProductionListCsv = t.FirstOrDefault(s => s.Contains("Future")),
+                        HistoricalProductionListCsv = t.FirstOrDefault(s => s.Contains("Historical")),
+                        WarehouseInitialStateCsv = t.FirstOrDefault(s => s.Contains("Warehouse"))
+                    };
+                })
+                .ToList();
+            var loader = new ProductionStateLoader(loaderFiles, "GeneratedInput/ProcessingTimeMatrix.csv");
+
+            for (int i = 0; i < loader.DefaultScenariosInMemory.Count; i++)
+            {
+                var state = loader.LoadScenarioFromMemory(i);
+                futureGenerator.MqbToMebTransitionProbability = probabilities[i];
+                var seq = futureGenerator.GenerateSequence();
+                state.FutureProductionPlan = new Queue<ItemState>(seq);
+                state.SaveProductionState(folder, $"_weekly{i}");
+                Console.WriteLine($"Processed: {i}");
+            }
+        }
+        
+        static void Main(string[] args)
+        {
+            GenerateFromExistingPlans(8968, "WeeklyPlans");
         }
     }
 }
