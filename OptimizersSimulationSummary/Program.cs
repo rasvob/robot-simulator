@@ -24,8 +24,10 @@ namespace OptimizersSimulationsSummary
             Console.ReadKey();
         }
 
-        static void AddSimulationToDict(Dictionary<string, RealProductionSimulator> simulationsDict, string key, string matrixFilename, string warehouseFilename, string historyFilename, string planFilename)
+        static Dictionary<string, RealProductionSimulator> GetSimulationsDict(string key, string matrixFilename, string warehouseFilename, string historyFilename, string planFilename)
         {
+            Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
+
             simulationsDict[$"naive-break_skip-{key}"] = new RealProductionSimulator(
                     new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
                     );
@@ -34,13 +36,13 @@ namespace OptimizersSimulationsSummary
                 new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
                 );*/
+            return simulationsDict;
         }
 
         static void SimulateAssignedScenarios()
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
-
+            List<SimulationResult> simulationResults = new List<SimulationResult>();
             for (int i = 1; i < 4; i++)
             {
                 var matrixFilename = Path.Combine(startupPath, @"robot-simulator\OptimizationLogic\InputFiles\ProcessingTimeMatrix.csv");
@@ -48,16 +50,16 @@ namespace OptimizersSimulationsSummary
                 var historyFilename = Path.Combine(startupPath, $@"robot-simulator\OptimizationLogic\InputFiles\situation{i}\HistoricalProductionList.txt");
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\OptimizationLogic\InputFiles\situation{i}\FutureProductionList.txt");
 
-                AddSimulationToDict(simulationsDict, i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
-            }
-            RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_assigned_output.csv"));
+                var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                RunSimulations(simulations, simulationResults);
+            }            
+            File.WriteAllLines(Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_assigned_output.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
         }
 
         static void SimulateGeneratedScenarios() 
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
-
+            List<SimulationResult> simulationResults = new List<SimulationResult>();
             for (int i = 1; i <= 1200; i++)
             {
                 var matrixFilename = Path.Combine(startupPath, @"robot-simulator\robot-simulator\GeneratedInput\ProcessingTimeMatrix.csv");
@@ -65,16 +67,16 @@ namespace OptimizersSimulationsSummary
                 var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\HistoricalProductionList{i}.txt");
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\GeneratedInput\generated_situation{i}\FutureProductionList{i}.txt");
 
-                AddSimulationToDict(simulationsDict, i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                RunSimulations(simulations, simulationResults);
             }
-            RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_100_output.csv"));
+            File.WriteAllLines(Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_100_output.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
         }
 
         static void SimulateGeneratedDayScenarios()
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
-
+            List<SimulationResult> simulationResults = new List<SimulationResult>();
             for (int i = 1; i <= 1200; i++)
             {
                 var matrixFilename = Path.Combine(startupPath, @"robot-simulator\robot-simulator\DailyPlans\ProcessingTimeMatrix.csv");
@@ -82,16 +84,16 @@ namespace OptimizersSimulationsSummary
                 var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\DailyPlans\generated_situation_daily{i}\HistoricalProductionList_daily{i}.txt");
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\DailyPlans\generated_situation_daily{i}\FutureProductionList_daily{i}.txt");
 
-                AddSimulationToDict(simulationsDict, i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                RunSimulations(simulations, simulationResults);
             }
-            RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_day_output.csv"));
+            File.WriteAllLines(Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_day_output.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
         }
 
         static void SimulateGeneratedWeekScenarios()
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
-
+            List<SimulationResult> simulationResults = new List<SimulationResult>();
             for (int i = 1; i <= 1200; i++)
             {
                 var matrixFilename = Path.Combine(startupPath, @"robot-simulator\robot-simulator\WeeklyPlans\ProcessingTimeMatrix.csv");
@@ -99,14 +101,14 @@ namespace OptimizersSimulationsSummary
                 var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\WeeklyPlans\generated_situation_weekly{i}\HistoricalProductionList_weekly{i}.txt");
                 var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\WeeklyPlans\generated_situation_weekly{i}\FutureProductionList_weekly{i}.txt");
 
-                AddSimulationToDict(simulationsDict, i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                RunSimulations(simulations, simulationResults);
             }
-            RunSimulations(simulationsDict, Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_week_output.csv"));
+            File.WriteAllLines(Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_week_output.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
         }
 
-        static void RunSimulations(Dictionary<string, RealProductionSimulator> simulationsDict, string outputFilename=null)
+        static void RunSimulations(Dictionary<string, RealProductionSimulator> simulationsDict, List<SimulationResult> simulationResults)
         {
-            List<SimulationResult> simulationResults = new List<SimulationResult>();
             foreach (var simulation in simulationsDict)
             {
                 var simulationName = simulation.Key;
@@ -115,11 +117,7 @@ namespace OptimizersSimulationsSummary
                 SimulationResult res = SimulateRun(simulator);
                 res.Name = simulationName;
                 simulationResults.Add(res);
-                Console.WriteLine(res);
-            }
-            if (outputFilename != null)
-            {
-                File.WriteAllLines(outputFilename, simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
+                Console.WriteLine(res);                
             }
         }
 
