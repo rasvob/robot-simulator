@@ -1,5 +1,7 @@
 ﻿using OptimizationLogic.DTO;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace OptimizationLogic.DAL
@@ -43,6 +45,26 @@ namespace OptimizationLogic.DAL
             productionState.WarehouseState = current.WarehouseState;
         }
 
+        public void LoadScenarioFromFolder(ProductionState productionState, string folder)
+        {
+            var files = Directory.GetFiles(folder);
+            var current = new ProductionScenarioPaths()
+            {
+                    FutureProductionListCsv = files.FirstOrDefault(s => s.Contains("Future")),
+                    HistoricalProductionListCsv = files.FirstOrDefault(s => s.Contains("Historical")),
+                    WarehouseInitialStateCsv = files.FirstOrDefault(s => s.Contains("Warehouse"))
+            };
+
+            if (!current.IsValid)
+            {
+                throw new ArgumentException($"Folder: {folder} does not contain required files");
+            }
+
+            productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
+            productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);
+            productionState.LoadProductionHistory(current.HistoricalProductionListCsv);
+        }
+
         public ProductionState LoadScenarioFromMemory(int scenarioIdx = 0)
         {
             return (ProductionState)DefaultScenariosInMemory[scenarioIdx].Clone();
@@ -54,5 +76,6 @@ namespace OptimizationLogic.DAL
         public string WarehouseInitialStateCsv { get; set; }
         public string HistoricalProductionListCsv { get; set; }
         public string FutureProductionListCsv { get; set; }
+        public bool IsValid => !(string.IsNullOrEmpty(WarehouseInitialStateCsv) || string.IsNullOrEmpty(HistoricalProductionListCsv) || string.IsNullOrEmpty(FutureProductionListCsv));
     }
 }

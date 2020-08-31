@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace robot_simulator.Dialogs
 {
-    public class OpenFileDialogService: IOpenFileService
+    public class OpenFolderDialogService: IOpenFileService
     {
         public string Open()
         {
-            var fileDialog = new OpenFileDialog
+            var fileDialog = new CommonOpenFileDialog
             {
-                Filter = "Text files (*.txt, *.csv) | *.txt; *.csv;"
+                IsFolderPicker = true,
             };
 
             var result = fileDialog.ShowDialog();
-            if (result == true)
+            if (result == CommonFileDialogResult.Ok)
             {
                 string file = fileDialog.FileName;
-                fileDialog.Reset();
+                fileDialog.ResetUserSelections();
                 return file;
             }
             return null;

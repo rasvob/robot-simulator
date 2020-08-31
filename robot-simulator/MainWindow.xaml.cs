@@ -23,10 +23,13 @@ namespace robot_simulator
             var productionState = new ProductionState();
             var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
             var naiveController = new NaiveController(productionState);
-            var asyncController = new NaiveAsyncController(productionState);
+            BaseController asyncController = new NaiveAsyncControllerWithHalfCycleDelay(productionState);
+            GreedyWarehouseReorganizer reorganizer = new GreedyWarehouseReorganizer();
+            RealProductionSimulator realProductionSimulator = new RealProductionSimulator(naiveController, null);
             //ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
             var openFileDialog = new OpenFileDialogService();
-            ViewModel = new MainWindowViewModel(asyncController, scenarioLoader, openFileDialog);
+            IOpenFileService openFolderDialog = new OpenFolderDialogService();
+            ViewModel = new MainWindowViewModel(naiveController, asyncController, reorganizer, realProductionSimulator, scenarioLoader, openFileDialog, openFolderDialog);
             DataContext = ViewModel;
         }
 

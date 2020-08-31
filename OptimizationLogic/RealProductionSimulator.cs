@@ -8,7 +8,7 @@ using OptimizationLogic.DTO;
 
 namespace OptimizationLogic
 {
-    public class RealProductionSimulator
+    public class RealProductionSimulator: IController
     {
         public BaseController Controller { get; set; }
         public GreedyWarehouseReorganizer WarehouseReorganizer { get; set; }
@@ -36,7 +36,7 @@ namespace OptimizationLogic
 
         private int GetBreakTimeIndex(double realTimeStamp)
         {
-            double time = (realTimeStamp+secondsInProductionDay) % secondsInProductionDay;
+            double time = (realTimeStamp + secondsInProductionDay) % secondsInProductionDay;
 
             for (int i = 0; i < productionDayBreaks.Count; i++)
             {
@@ -60,7 +60,7 @@ namespace OptimizationLogic
             Console.WriteLine($"\nTotal delay time {Controller.Delay}\n");
         }
 
-        public void NextStep()
+        public bool NextStep()
         {
             var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
             if (breakTimeIndex >= 0)
@@ -75,6 +75,8 @@ namespace OptimizationLogic
             {
                 Controller.NextStep();
             }
+
+            return true;
         }
     }
 }

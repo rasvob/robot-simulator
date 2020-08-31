@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="AsyncControllers\AsyncControllerState.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
+    <Compile Include="AsyncControllers\NaiveAsyncControllerWithHalfCycleDelay.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="GreedyWarehouseReorganizer.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
@@ -57,6 +58,7 @@
     <Compile Include="DTO\StepModel.cs" />
     <Compile Include="DTO\WarehouseReorganizationRecord.cs" />
     <Compile Include="Extensions\ProductionStateExt.cs" />
+    <Compile Include="IController.cs" />
     <Compile Include="NaiveController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RealProductionSimulator.cs" />
