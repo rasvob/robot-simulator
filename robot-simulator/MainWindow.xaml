@@ -11,6 +11,7 @@
         xmlns:views="clr-namespace:robot_simulator.Views"
         xmlns:converters="clr-namespace:robot_simulator.ViewModels.ValueConterters"
         xmlns:behaviours="clr-namespace:robot_simulator.ViewModels.Behaviours"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         BorderThickness="1" 
         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
@@ -19,6 +20,7 @@
         WindowStartupLocation="CenterScreen"
         NonActiveGlowBrush="#bbd196"
         ShowIconOnTitleBar="True"
+        Dialog:DialogParticipation.Register="{Binding}"
         GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
         Icon="icon.png"
         Title="Front stack optimization simulator" Height="600" Width="1024">

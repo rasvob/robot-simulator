@@ -18,7 +18,7 @@ namespace OptimizationLogic
         public int TimeLimitForOneStep { get => TimeLimit; }
         public int ClockTime { get => 55; }
 
-        public double RealTime { get; set; } = 0;
+        public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
 
         public void InitSortedPositionCodes()
@@ -65,7 +65,7 @@ namespace OptimizationLogic
             StepLog.Clear();
             History.Clear();
             Delay = 0;
-            RealTime = 0;
+            RealTime = -300;
         }
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)

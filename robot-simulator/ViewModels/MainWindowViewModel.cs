@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace robot_simulator.ViewModels
 {
@@ -176,8 +177,12 @@ namespace robot_simulator.ViewModels
         public GreedyWarehouseReorganizer Reorganizer { get; }
         public RealProductionSimulator RealProductionSimulator { get; }
         public IOpenFileService OpenFolderDialog { get; }
+        public IDialogCoordinator DialogCoordinator { get; }
+        public ProgressDialogController ProgressDialog { get; set; }
 
-        public MainWindowViewModel(BaseController naiveController, BaseController asyncController, GreedyWarehouseReorganizer reorganizer, RealProductionSimulator realProductionSimulator, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService, IOpenFileService openFolderDialog)
+        public bool WarehouserReorganizationIsRunning { get; set; } = false;
+
+        public MainWindowViewModel(BaseController naiveController, BaseController asyncController, GreedyWarehouseReorganizer reorganizer, RealProductionSimulator realProductionSimulator, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService, IOpenFileService openFolderDialog, MahApps.Metro.Controls.Dialogs.IDialogCoordinator dialogCoordinator)
         {
             NaiveController = naiveController;
             AsyncController = asyncController;
@@ -187,7 +192,7 @@ namespace robot_simulator.ViewModels
             ProductionState = SelectedController.ProductionState;
             ScenarioLoader = scenarioLoader;
             ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
-            NextStep = new SimpleCommand(NextStepClickedExecute, (_) => !ProductionState.SimulationFinished);
+            NextStep = new SimpleCommand(NextStepClickedExecuteAsync, (_) => !ProductionState.SimulationFinished && !WarehouserReorganizationIsRunning);
             LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
             SetSelectedOptimizer = new SimpleCommand(SetSelectedOptimizerExecute);
             LoadWarehouseState = new SimpleCommand(LoadWarehouseStateExecute);
@@ -199,6 +204,33 @@ namespace robot_simulator.ViewModels
             OpenFileDialogService = openFileDialogService;
             RealProductionSimulator = realProductionSimulator;
             OpenFolderDialog = openFolderDialog;
+            RealProductionSimulator.WarehouseReorganizationProgressUpdated += RealProductionSimulator_WarehouseReorganizationProgressUpdated;
+            DialogCoordinator = dialogCoordinator;
+        }
+
+        private async void RealProductionSimulator_WarehouseReorganizationProgressUpdated(object sender, ProgressEventArgs e)
+        {
+            switch (e.State)
+            {
+                case ProgressState.Start:
+                    ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Warehouse reorganization running", "Please wait...", false);
+                    ProgressDialog.Minimum = 0;
+                    ProgressDialog.Maximum = e.CurrentValue;
+                    WarehouserReorganizationIsRunning = true;
+                    break;
+                case ProgressState.End:
+                    WarehouserReorganizationIsRunning = false;
+                    await ProgressDialog?.CloseAsync();
+                    break;
+                case ProgressState.Update:
+                    ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
+                    ProgressDialog?.SetProgress(e.CurrentValue);
+                    break;
+                default:
+                    await ProgressDialog?.CloseAsync();
+                    WarehouserReorganizationIsRunning = false;
+                    break;
+            }
         }
 
         private void LoadProductionStateExecute(object obj)
@@ -298,10 +330,9 @@ namespace robot_simulator.ViewModels
             UpdateProductionStateInView();
         }
 
-        public void NextStepClickedExecute(object o)
+        public async void NextStepClickedExecuteAsync(object o)
         {
-            //SelectedController.NextStep();
-            RealProductionSimulator.NextStep();
+            await Task.Factory.StartNew(() => RealProductionSimulator.NextStep());
             UpdateProductionStateInView();
         }
 

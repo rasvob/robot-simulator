@@ -47,6 +47,7 @@
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncControllerWithHalfCycleDelay.cs" />
     <Compile Include="BaseController.cs" />
+    <Compile Include="DTO\ProgressEventArgs.cs" />
     <Compile Include="GreedyWarehouseReorganizer.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />
     <Compile Include="DTO\AsyncStepModel.cs" />

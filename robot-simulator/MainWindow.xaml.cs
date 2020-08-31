@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using OptimizationLogic;
 using OptimizationLogic.AsyncControllers;
 using OptimizationLogic.DAL;
@@ -29,7 +30,7 @@ namespace robot_simulator
             //ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
             var openFileDialog = new OpenFileDialogService();
             IOpenFileService openFolderDialog = new OpenFolderDialogService();
-            ViewModel = new MainWindowViewModel(naiveController, asyncController, reorganizer, realProductionSimulator, scenarioLoader, openFileDialog, openFolderDialog);
+            ViewModel = new MainWindowViewModel(naiveController, asyncController, reorganizer, realProductionSimulator, scenarioLoader, openFileDialog, openFolderDialog, DialogCoordinator.Instance);
             DataContext = ViewModel;
         }
 

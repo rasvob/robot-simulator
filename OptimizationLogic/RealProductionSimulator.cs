@@ -11,11 +11,39 @@ namespace OptimizationLogic
     public class RealProductionSimulator: IController
     {
         public BaseController Controller { get; set; }
-        public GreedyWarehouseReorganizer WarehouseReorganizer { get; set; }
+        public GreedyWarehouseReorganizer WarehouseReorganizer
+        {
+            get { return warehouseReorganizer; }
+            set
+            {
+                if (value == warehouseReorganizer)
+                {
+                    return;
+                }
+
+                if (warehouseReorganizer != null)
+                {
+                    warehouseReorganizer.ProgressTriggered -= WarehouseReorganizer_ProgressTriggered;
+                }
+                warehouseReorganizer = value;
+
+                if (value != null)
+                {
+                    warehouseReorganizer.ProgressTriggered += WarehouseReorganizer_ProgressTriggered;
+                }
+            }
+        }
+
+        private void WarehouseReorganizer_ProgressTriggered(object sender, ProgressEventArgs e)
+        {
+            WarehouseReorganizationProgressUpdated?.Invoke(this, e);
+        }
+
         private List<Tuple<double, double>> productionDayBreaks = new List<Tuple<double, double>>();
+        private GreedyWarehouseReorganizer warehouseReorganizer;
         private const int secondsInProductionDay = 86400;
         private const int tactTime = 55;
-
+        public event EventHandler<ProgressEventArgs> WarehouseReorganizationProgressUpdated;
         public RealProductionSimulator(BaseController controller, GreedyWarehouseReorganizer warehouseReorganizer = null)
         {
             Controller = controller;
@@ -65,11 +93,19 @@ namespace OptimizationLogic
             var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
             if (breakTimeIndex >= 0)
             {
+                if (WarehouseReorganizer != null)
+                {
+                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth});
+                }
                 var breakPair = productionDayBreaks[breakTimeIndex];
                 var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration;
+                if (WarehouseReorganizer != null)
+                {
+                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.End, CurrentValue = WarehouseReorganizer.MaxDepth });
+                }
             }
             else
             {
