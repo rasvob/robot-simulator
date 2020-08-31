@@ -15,8 +15,10 @@ namespace ConsoleApp
                    Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\WarehouseInitialState.csv"),
                    Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\HistoricalProductionList.txt"),
                    Path.Combine(startupPath, @"OptimizationLogic\InputFiles\situation1\FutureProductionList.txt"));
-            GreedyWarehouseReorganizer warehouseReorganizer = new GreedyWarehouseReorganizer(maxDepth: 5, selectBestCnt: 1);
+            GreedyWarehouseReorganizer warehouseReorganizer = new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1);
+            
             RealProductionSimulator productionSimulator = new RealProductionSimulator(naiveController, warehouseReorganizer);
+            
             productionSimulator.Run();
 
         }
