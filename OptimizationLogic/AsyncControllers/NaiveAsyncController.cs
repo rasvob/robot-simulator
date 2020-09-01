@@ -64,7 +64,7 @@ namespace OptimizationLogic.AsyncControllers
                 CurrentState = AsyncControllerState.End;
                 StepLog.Add(new AsyncStepModel
                 {
-                    CurrentState = AsyncControllerState.Start,
+                    CurrentState = AsyncControllerState.End,
                     Message = $"RealTime: {RealTime}, No more items to process, Going to state: {CurrentState}"
                 });
                 return true;
