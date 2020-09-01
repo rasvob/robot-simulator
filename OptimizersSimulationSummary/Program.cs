@@ -34,7 +34,7 @@ namespace OptimizersSimulationsSummary
 
             /*simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
-                new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
+                new GreedyWarehouseReorganizer(maxDepth: 3, selectBestCnt: 1)
                 );*/
             return simulationsDict;
         }
@@ -147,7 +147,7 @@ namespace OptimizersSimulationsSummary
                     result.FirstDelayProductionPlanCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
 
-                if (productionSimulator.Controller.RealTime >= plannedRealProcessingTime && result.PlannedTimeProductionPlanCount == 0)
+                if (productionSimulator.Controller.RealTime <= plannedRealProcessingTime)
                 {
                     result.PlannedTimeProductionPlanCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }

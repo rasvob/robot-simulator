@@ -86,51 +86,58 @@ namespace OptimizationLogic
                 MissingSimulationSteps = SimulateProcessing(productionState, 100)
             });
 
-            for (int depthIndex = 0; depthIndex < MaxDepth; depthIndex++)
+            if (warehouseReorganizationRecordsDict[0][0].MissingSimulationSteps > 0)
             {
-                warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
-                var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
-                warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
-
-                for (int topIndex = 0; topIndex < SelectBestCnt && topIndex < warehouseReorganizationRecords.Count; topIndex++)
+                for (int depthIndex = 0; depthIndex < MaxDepth; depthIndex++)
                 {
-                    var currentRecord = warehouseReorganizationRecords[topIndex];
-                    var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
-                    foreach (var swap in availableSwaps)
+                    warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
+                    var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
+                    warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
+                    if (warehouseReorganizationRecords[0].MissingSimulationSteps == 0) 
                     {
-                        ProductionState newProductionState = (ProductionState)currentRecord.ProductionState.Clone();
-                        var swapTimeConsumed = newProductionState.SwapWarehouseItems(swap.Item1, swap.Item2);
-                        PositionCodes previousPosition;
-                        if (currentRecord.PreviousRecord == null)
+                        break;
+                    }
+
+                    for (int topIndex = 0; topIndex < SelectBestCnt && topIndex < warehouseReorganizationRecords.Count; topIndex++)
+                    {
+                        var currentRecord = warehouseReorganizationRecords[topIndex];
+                        var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
+                        foreach (var swap in availableSwaps)
                         {
-                            previousPosition = PositionCodes.Stacker;
-                        }
-                        else
-                        {
-                            if (currentRecord.PreviousRecord.Swap == null)
+                            ProductionState newProductionState = (ProductionState)currentRecord.ProductionState.Clone();
+                            var swapTimeConsumed = newProductionState.SwapWarehouseItems(swap.Item1, swap.Item2);
+                            PositionCodes previousPosition;
+                            if (currentRecord.PreviousRecord == null)
                             {
                                 previousPosition = PositionCodes.Stacker;
                             }
                             else
                             {
-                                previousPosition = currentRecord.PreviousRecord.Swap.Item2;
-                            }                            
-                        }
-                        var moveTime = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(previousPosition), productionState.GetTimeMatrixIndex(swap.Item1)];
-                        var timeToStacker = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(swap.Item2), productionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
-                        var timeRemaining = currentRecord.RemainingTime - moveTime - swapTimeConsumed;
+                                if (currentRecord.PreviousRecord.Swap == null)
+                                {
+                                    previousPosition = PositionCodes.Stacker;
+                                }
+                                else
+                                {
+                                    previousPosition = currentRecord.PreviousRecord.Swap.Item2;
+                                }
+                            }
+                            var moveTime = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(previousPosition), productionState.GetTimeMatrixIndex(swap.Item1)];
+                            var timeToStacker = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(swap.Item2), productionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
+                            var timeRemaining = currentRecord.RemainingTime - moveTime - swapTimeConsumed;
 
-                        if (timeRemaining-timeToStacker > 0)
-                        {
-                            int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
-                            warehouseReorganizationRecordsDict[depthIndex + 1].Add(new WarehouseReorganizationRecord
+                            if (timeRemaining - timeToStacker > 0)
                             {
-                                ProductionState = newProductionState,
-                                Swap = swap,
-                                PreviousRecord = currentRecord,
-                                RemainingTime = timeRemaining,
-                                MissingSimulationSteps = numberOfMissingSteps
-                            });
+                                int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
+                                warehouseReorganizationRecordsDict[depthIndex + 1].Add(new WarehouseReorganizationRecord
+                                {
+                                    ProductionState = newProductionState,
+                                    Swap = swap,
+                                    PreviousRecord = currentRecord,
+                                    RemainingTime = timeRemaining,
+                                    MissingSimulationSteps = numberOfMissingSteps
+                                });
+                            }
                         }
                     }
                 }
