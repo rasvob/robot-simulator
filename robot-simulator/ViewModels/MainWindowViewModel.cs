@@ -213,21 +213,27 @@ namespace robot_simulator.ViewModels
             switch (e.State)
             {
                 case ProgressState.Start:
+                    WarehouserReorganizationIsRunning = true;
                     ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Warehouse reorganization running", "Please wait...", false);
                     ProgressDialog.Minimum = 0;
                     ProgressDialog.Maximum = e.CurrentValue;
-                    WarehouserReorganizationIsRunning = true;
                     break;
                 case ProgressState.End:
+                    if (ProgressDialog?.IsOpen == true)
+                    {
+                        await ProgressDialog?.CloseAsync();
+                    }
                     WarehouserReorganizationIsRunning = false;
-                    await ProgressDialog?.CloseAsync();
                     break;
                 case ProgressState.Update:
                     ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
                     ProgressDialog?.SetProgress(e.CurrentValue);
                     break;
                 default:
-                    await ProgressDialog?.CloseAsync();
+                    if (ProgressDialog?.IsOpen == true)
+                    {
+                        await ProgressDialog?.CloseAsync();
+                    }
                     WarehouserReorganizationIsRunning = false;
                     break;
             }

@@ -224,6 +224,21 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
 
+                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Current timestamp"
+                                     IsDocumentEnabled="True"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding RealTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
                                 <!--<RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
@@ -239,7 +254,7 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>-->
 
-                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                <!--<RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
                                      mah:TextBoxHelper.Watermark="Total time in simulation"
@@ -253,7 +268,7 @@
                                             </Paragraph>
                                         </FlowDocument>
                                     </RichTextBox.Document>
-                                </RichTextBox>
+                                </RichTextBox>-->
 
                                 <RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
@@ -271,21 +286,7 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
 
-                                <RichTextBox Width="150" Margin="0 0 5 5"
-                                     IsReadOnly="True"
-                                     mah:TextBoxHelper.UseFloatingWatermark="True"
-                                     mah:TextBoxHelper.Watermark="Current timestamp"
-                                     IsDocumentEnabled="True"
-                                     Style="{StaticResource ControllerStateItemVisibilityForAsync}"
-                                     >
-                                    <RichTextBox.Document>
-                                        <FlowDocument>
-                                            <Paragraph>
-                                                <Run Text="{Binding RealTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Paragraph>
-                                        </FlowDocument>
-                                    </RichTextBox.Document>
-                                </RichTextBox>
+                                
 
                                 <RichTextBox Width="200" Margin="0 0 5 5"
                                      IsReadOnly="True"
