@@ -77,18 +77,7 @@ namespace OptimizationLogic
             return -1;
         }
 
-        public void NextStep()
-        {
-            Controller.RealTime = -300;
-            while (Controller.ProductionState.FutureProductionPlan.Count > 0)
-            {
-                NextStep();
-            }
-
-            Console.WriteLine($"\nTotal delay time {Controller.Delay}\n");
-        }
-
-        public void NextStep()
+        public bool NextStep()
         {
             var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
             if (breakTimeIndex >= 0)

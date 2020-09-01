@@ -147,8 +147,7 @@ namespace OptimizationLogic
                             }
                         }
                     }
-                }
-                }
+                }                
             }
 
             var allRecords = warehouseReorganizationRecordsDict.Values.SelectMany(x => x).ToList();
