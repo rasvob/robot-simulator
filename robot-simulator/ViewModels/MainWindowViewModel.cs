@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace robot_simulator.ViewModels
 {
@@ -17,7 +18,7 @@ namespace robot_simulator.ViewModels
     {
         private ObservableCollection<WarehouseItemViewModel> currentWarehouseState;
 
-        public BaseController NaiveController { get; set; }
+        public BaseController SelectedController { get; set; }
         public ProductionState ProductionState { get; set; }
 
         public ICommand NextStep { get; private set; }
@@ -27,6 +28,7 @@ namespace robot_simulator.ViewModels
         public ICommand LoadFutureProductionPlan { get; private set; }
         public ICommand LoadProductionHistory { get; private set; }
         public ICommand Undo { get; private set; }
+        public ICommand LoadProductionState { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -104,17 +106,34 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private int _selectedOptimizerComboBox = 0;
+
+        public int SelectedOptimizerComboBox
+        {
+            get => _selectedOptimizerComboBox;
+
+            set
+            {
+                if (_selectedOptimizerComboBox != value)
+                {
+                    _selectedOptimizerComboBox = value;
+                    OnPropertyChanged(nameof(SelectedOptimizerComboBox));
+                }
+            }
+        }
+
+
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
         public double TimeSpentInSimulation { get => ProductionState.TimeSpentInSimulation; }
-        public int TotalSimulationTime { get => NaiveController.ProductionState.StepCounter * NaiveController.ClockTime; }
+        public int TotalSimulationTime { get => SelectedController.ProductionState.StepCounter * SelectedController.ClockTime; }
         public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
         public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
-        public double CurrentDelay { get => NaiveController.Delay; }
-        public double RealTime { get => NaiveController.RealTime; }
-        public double NextItemFromFlow { get => (NaiveController as NaiveAsyncController)?.GetClosestNextIntakeTime() ?? 0; }
-        public double NextItemFromQueue { get => (NaiveController as NaiveAsyncController)?.GetClosestNextOuttakeTime() ?? 0; }
-        public IEnumerable<string> StepLog { get => NaiveController.StepLog.Select((t, i) => $"#{i}\t{t}").Reverse(); }
+        public double CurrentDelay { get => SelectedController.Delay; }
+        public double RealTime { get => SelectedController.RealTime; }
+        public double NextItemFromFlow { get => (SelectedController as NaiveAsyncController)?.GetClosestNextIntakeTime() ?? 0; }
+        public double NextItemFromQueue { get => (SelectedController as NaiveAsyncController)?.GetClosestNextOuttakeTime() ?? 0; }
+        public IEnumerable<string> StepLog { get => SelectedController.StepLog.Select((t, i) => $"#{i}\t{t}").Reverse(); }
 
         public string NotificationText
         {
@@ -153,21 +172,91 @@ namespace robot_simulator.ViewModels
         public ProductionStateLoader ScenarioLoader { get; }
         public OpenFileDialogService OpenFileDialogService { get; }
 
-        public MainWindowViewModel(BaseController naiveController, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService)
+        public BaseController NaiveController { get; }
+        public BaseController AsyncController { get; }
+        public GreedyWarehouseReorganizer Reorganizer { get; }
+        public RealProductionSimulator RealProductionSimulator { get; }
+        public IOpenFileService OpenFolderDialog { get; }
+        public IDialogCoordinator DialogCoordinator { get; }
+        public ProgressDialogController ProgressDialog { get; set; }
+
+        public bool WarehouserReorganizationIsRunning { get; set; } = false;
+
+        public MainWindowViewModel(BaseController naiveController, BaseController asyncController, GreedyWarehouseReorganizer reorganizer, RealProductionSimulator realProductionSimulator, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService, IOpenFileService openFolderDialog, MahApps.Metro.Controls.Dialogs.IDialogCoordinator dialogCoordinator)
         {
             NaiveController = naiveController;
-            ProductionState = NaiveController.ProductionState;
+            AsyncController = asyncController;
+            Reorganizer = reorganizer;
+
+            SelectedController = naiveController;
+            ProductionState = SelectedController.ProductionState;
             ScenarioLoader = scenarioLoader;
             ScenarioLoader.LoadScenarioFromDisk(ProductionState, 0);
-            NextStep = new SimpleCommand(NextStepClickedExecute, (_) => !ProductionState.SimulationFinished);
+            NextStep = new SimpleCommand(NextStepClickedExecuteAsync, (_) => !ProductionState.SimulationFinished && !WarehouserReorganizationIsRunning);
             LoadSelectedScenario = new SimpleCommand(LoadSelectedScenarioExecute);
             SetSelectedOptimizer = new SimpleCommand(SetSelectedOptimizerExecute);
             LoadWarehouseState = new SimpleCommand(LoadWarehouseStateExecute);
             LoadFutureProductionPlan = new SimpleCommand(LoadFutureProductionPlanExecute);
             LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
-            Undo = new SimpleCommand(UndoExecute, _ => NaiveController.CanUndo());
+            LoadProductionState = new SimpleCommand(LoadProductionStateExecute);
+            Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
             UpdateProductionStateInView();
             OpenFileDialogService = openFileDialogService;
+            RealProductionSimulator = realProductionSimulator;
+            OpenFolderDialog = openFolderDialog;
+            RealProductionSimulator.WarehouseReorganizationProgressUpdated += RealProductionSimulator_WarehouseReorganizationProgressUpdated;
+            DialogCoordinator = dialogCoordinator;
+        }
+
+        private async void RealProductionSimulator_WarehouseReorganizationProgressUpdated(object sender, ProgressEventArgs e)
+        {
+            switch (e.State)
+            {
+                case ProgressState.Start:
+                    WarehouserReorganizationIsRunning = true;
+                    ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Warehouse reorganization running", "Please wait...", false);
+                    ProgressDialog.Minimum = 0;
+                    ProgressDialog.Maximum = e.CurrentValue;
+                    break;
+                case ProgressState.End:
+                    if (ProgressDialog?.IsOpen == true)
+                    {
+                        await ProgressDialog?.CloseAsync();
+                    }
+                    WarehouserReorganizationIsRunning = false;
+                    break;
+                case ProgressState.Update:
+                    ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
+                    ProgressDialog?.SetProgress(e.CurrentValue);
+                    break;
+                default:
+                    if (ProgressDialog?.IsOpen == true)
+                    {
+                        await ProgressDialog?.CloseAsync();
+                    }
+                    WarehouserReorganizationIsRunning = false;
+                    break;
+            }
+        }
+
+        private void LoadProductionStateExecute(object obj)
+        {
+            try
+            {
+                string folder = OpenFolderDialog.Open();
+                if (string.IsNullOrEmpty(folder))
+                {
+                    ShowNotification("Folder does not exist");
+                    return;
+                }
+                ScenarioLoader.LoadScenarioFromFolder(ProductionState, folder);
+                UpdateProductionStateInView();
+                ShowNotification("Scenario loaded");
+            }
+            catch (ArgumentException exc)
+            {
+                ShowNotification(exc.Message);
+            }
         }
 
         private void LoadProductionHistoryExecute(object obj)
@@ -187,7 +276,7 @@ namespace robot_simulator.ViewModels
 
         private void LoadCurrentStateFromFile(Action<string> loadAction, string message)
         {
-            var file = OpenFileDialogService.OpenFile();
+            var file = OpenFileDialogService.Open();
 
             if (file == null)
             {
@@ -195,29 +284,61 @@ namespace robot_simulator.ViewModels
                 return;
             }
 
-            loadAction(file);
-            ShowNotification(message);
-            UpdateProductionStateInView();
+            try
+            {
+                loadAction(file);
+                ShowNotification(message);
+                UpdateProductionStateInView();
+            }
+            catch (Exception exc)
+            {
+                ShowNotification(exc.Message);
+            }
         }
 
         private void SetSelectedOptimizerExecute(object obj)
         {
-            //TODO: Create optimizer list
+            switch (SelectedOptimizerComboBox)
+            {
+                case 0:
+                    RealProductionSimulator.Controller = NaiveController;
+                    RealProductionSimulator.WarehouseReorganizer = null;
+                    break;
+                case 1:
+                    RealProductionSimulator.Controller = NaiveController;
+                    RealProductionSimulator.WarehouseReorganizer = Reorganizer;
+                    break;
+                case 2:
+                    RealProductionSimulator.Controller = AsyncController;
+                    RealProductionSimulator.WarehouseReorganizer = null;
+                    break;
+                case 3:
+                    RealProductionSimulator.Controller = AsyncController;
+                    RealProductionSimulator.WarehouseReorganizer = Reorganizer;
+                    break;
+                default:
+                    RealProductionSimulator.Controller = NaiveController;
+                    RealProductionSimulator.WarehouseReorganizer = null;
+                    break;
+            }
+            RealProductionSimulator.Controller.ProductionState = ProductionState;
+            SelectedController = RealProductionSimulator.Controller;
             ProductionState.ResetState();
-            NaiveController.RenewControllerState();
-            return;
+            SelectedController.RenewControllerState();
+            UpdateProductionStateInView();
+            SelectedOptimizer = SelectedOptimizerComboBox;
         }
 
         public void UndoExecute(object o)
         {
-            NaiveController.Undo();
-            ProductionState = NaiveController.ProductionState;
+            SelectedController.Undo();
+            ProductionState = SelectedController.ProductionState;
             UpdateProductionStateInView();
         }
 
-        public void NextStepClickedExecute(object o)
+        public async void NextStepClickedExecuteAsync(object o)
         {
-            NaiveController.NextStep();
+            await Task.Factory.StartNew(() => RealProductionSimulator.NextStep());
             UpdateProductionStateInView();
         }
 
@@ -225,7 +346,7 @@ namespace robot_simulator.ViewModels
         {
             ScenarioLoader.LoadScenarioFromMemory(ProductionState, SelectedPredefinedScenario);
             ProductionState.ResetState();
-            NaiveController.RenewControllerState();
+            SelectedController.RenewControllerState();
             UpdateProductionStateInView();
         }
 

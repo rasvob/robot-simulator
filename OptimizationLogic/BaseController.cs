@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic
 {
-    public abstract class BaseController
+    public abstract class BaseController: IController
     {
         public ProductionState ProductionState { get; set; }
         public List<BaseStepModel> StepLog { get; set; } = new List<BaseStepModel>();
@@ -18,7 +18,7 @@ namespace OptimizationLogic
         public int TimeLimitForOneStep { get => TimeLimit; }
         public int ClockTime { get => 55; }
 
-        public double RealTime { get; set; } = 0;
+        public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
 
         public void InitSortedPositionCodes()
@@ -65,6 +65,7 @@ namespace OptimizationLogic
             StepLog.Clear();
             History.Clear();
             Delay = 0;
+            RealTime = -300;
         }
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)

@@ -11,6 +11,7 @@
         xmlns:views="clr-namespace:robot_simulator.Views"
         xmlns:converters="clr-namespace:robot_simulator.ViewModels.ValueConterters"
         xmlns:behaviours="clr-namespace:robot_simulator.ViewModels.Behaviours"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
         BorderThickness="1" 
         BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
@@ -19,6 +20,7 @@
         WindowStartupLocation="CenterScreen"
         NonActiveGlowBrush="#bbd196"
         ShowIconOnTitleBar="True"
+        Dialog:DialogParticipation.Register="{Binding}"
         GlowBrush="{DynamicResource MahApps.Brushes.Accent}"
         Icon="icon.png"
         Title="Front stack optimization simulator" Height="600" Width="1024">
@@ -150,7 +152,7 @@
                                 <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" Margin="5 0 0 0">
                                     <TextBlock Text="Optimizers" Style="{StaticResource SmallSectionHeader}" />
                                     <StackPanel Orientation="Horizontal" >
-                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedOptimizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedOptimizerComboBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                             <ComboBoxItem Content="Naive" />
                                             <ComboBoxItem Content="Naive with using pauses" />
                                             <ComboBoxItem Content="Async" />
@@ -167,6 +169,7 @@
                                     <Button Content="Load production queue" Margin="0 0 0 0" Command="{Binding LoadFutureProductionPlan}"/>
                                     <Button Content="Load past flow" Margin="5 0 0 0" Command="{Binding LoadProductionHistory}"/>
                                     <Button Content="Load warehouse state" Margin="5 0 0 0" Command="{Binding LoadWarehouseState}"/>
+                                    <Button Content="Load scenario from folder" Margin="5 0 0 0" Command="{Binding LoadProductionState}"/>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -221,6 +224,21 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
 
+                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.UseFloatingWatermark="True"
+                                     mah:TextBoxHelper.Watermark="Current timestamp"
+                                     IsDocumentEnabled="True"
+                                     >
+                                    <RichTextBox.Document>
+                                        <FlowDocument>
+                                            <Paragraph>
+                                                <Run Text="{Binding RealTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Paragraph>
+                                        </FlowDocument>
+                                    </RichTextBox.Document>
+                                </RichTextBox>
+
                                 <!--<RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
@@ -236,7 +254,7 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>-->
 
-                                <RichTextBox Width="150" Margin="0 0 5 5"
+                                <!--<RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
                                      mah:TextBoxHelper.UseFloatingWatermark="True"
                                      mah:TextBoxHelper.Watermark="Total time in simulation"
@@ -250,7 +268,7 @@
                                             </Paragraph>
                                         </FlowDocument>
                                     </RichTextBox.Document>
-                                </RichTextBox>
+                                </RichTextBox>-->
 
                                 <RichTextBox Width="150" Margin="0 0 5 5"
                                      IsReadOnly="True"
@@ -268,21 +286,7 @@
                                     </RichTextBox.Document>
                                 </RichTextBox>
 
-                                <RichTextBox Width="150" Margin="0 0 5 5"
-                                     IsReadOnly="True"
-                                     mah:TextBoxHelper.UseFloatingWatermark="True"
-                                     mah:TextBoxHelper.Watermark="Current timestamp"
-                                     IsDocumentEnabled="True"
-                                     Style="{StaticResource ControllerStateItemVisibilityForAsync}"
-                                     >
-                                    <RichTextBox.Document>
-                                        <FlowDocument>
-                                            <Paragraph>
-                                                <Run Text="{Binding RealTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Paragraph>
-                                        </FlowDocument>
-                                    </RichTextBox.Document>
-                                </RichTextBox>
+                                
 
                                 <RichTextBox Width="200" Margin="0 0 5 5"
                                      IsReadOnly="True"
@@ -329,7 +333,7 @@
                             <TextBlock Text="Simulation control panel" Style="{StaticResource SmallSectionHeader}" Grid.Row="0" />
                             <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0">
                                 <Button Content="Next step" ToolTip="Ctlr+N" Command="{Binding NextStep}" />
-                                <Button Content="Undo" ToolTip="Ctlr+Z" Command="{Binding Undo}" Margin="{StaticResource LeftControlMargin}" />
+                                <!--<Button Content="Undo" ToolTip="Ctlr+Z" Command="{Binding Undo}" Margin="{StaticResource LeftControlMargin}" />-->
                             </StackPanel>
                         </StackPanel>
                     </Expander>

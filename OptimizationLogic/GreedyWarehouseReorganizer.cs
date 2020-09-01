@@ -10,8 +10,9 @@ namespace OptimizationLogic
 {
     public class GreedyWarehouseReorganizer
     {
-        private int MaxDepth;
-        private int SelectBestCnt;
+        public int MaxDepth { get; }
+        public int SelectBestCnt { get; }
+        public event EventHandler<ProgressEventArgs> ProgressTriggered;
 
         public GreedyWarehouseReorganizer(int maxDepth=5, int selectBestCnt=5)
         {
@@ -23,6 +24,15 @@ namespace OptimizationLogic
         {
             var bestSwaps = GetBestSwaps(productionState, reservedTime);
             var previousPosition = PositionCodes.Stacker;
+
+            if (bestSwaps.Count == 0)
+            {
+                logger.Add(new BaseStepModel()
+                {
+                    Message = "No better warehouse item organization was found during the break"
+                });
+            }
+
             for (int i = 0; i < bestSwaps.Count; i++)
             {
                 WarehouseSwap(productionState, bestSwaps[i], previousPosition, logger, isLastSwap: i == bestSwaps.Count - 1);
@@ -90,13 +100,10 @@ namespace OptimizationLogic
             {
                 for (int depthIndex = 0; depthIndex < MaxDepth; depthIndex++)
                 {
+                    ProgressTriggered?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Update, CurrentValue = depthIndex });
                     warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
                     var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
                     warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
-                    if (warehouseReorganizationRecords[0].MissingSimulationSteps == 0) 
-                    {
-                        break;
-                    }
 
                     for (int topIndex = 0; topIndex < SelectBestCnt && topIndex < warehouseReorganizationRecords.Count; topIndex++)
                     {
@@ -140,6 +147,7 @@ namespace OptimizationLogic
                             }
                         }
                     }
+                }
                 }
             }
 
