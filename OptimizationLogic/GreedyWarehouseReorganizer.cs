@@ -103,11 +103,11 @@ namespace OptimizationLogic
                     ProgressTriggered?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Update, CurrentValue = depthIndex });
                     warehouseReorganizationRecordsDict[depthIndex + 1] = new List<WarehouseReorganizationRecord>();
                     var warehouseReorganizationRecords = warehouseReorganizationRecordsDict[depthIndex].Where(record => record.RemainingTime > 0).ToList();
-                    warehouseReorganizationRecords = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).ToList();
+                    warehouseReorganizationRecordsDict[depthIndex] = warehouseReorganizationRecords.OrderBy(record => record.MissingSimulationSteps).ThenByDescending(record => record.RemainingTime).Take(SelectBestCnt).ToList();
 
-                    for (int topIndex = 0; topIndex < SelectBestCnt && topIndex < warehouseReorganizationRecords.Count; topIndex++)
+                    for (int topIndex = 0; topIndex < SelectBestCnt && topIndex < warehouseReorganizationRecordsDict[depthIndex].Count; topIndex++)
                     {
-                        var currentRecord = warehouseReorganizationRecords[topIndex];
+                        var currentRecord = warehouseReorganizationRecordsDict[depthIndex][topIndex];
                         var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
                         foreach (var swap in availableSwaps)
                         {

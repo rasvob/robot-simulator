@@ -30,6 +30,7 @@ namespace OptimizationLogic.AsyncControllers
             var nextOuttake = GetClosestNextOuttakeTime();
             RealTime += stackerRoundtripForItem;
             Current = ProductionState.ProductionHistory.Peek();
+            IsReadyForBreak = false;
 
             AsyncStepModel step = new AsyncStepModel
             {
@@ -108,6 +109,7 @@ namespace OptimizationLogic.AsyncControllers
             var nextIntake = GetClosestNextIntakeTime();
             var realTimeBeforeOp = RealTime;
             RealTime += stackerRoundtripForItem;
+            IsReadyForBreak = true;
 
             AsyncStepModel step = new AsyncStepModel
             {

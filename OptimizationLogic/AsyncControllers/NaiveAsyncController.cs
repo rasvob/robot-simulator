@@ -135,6 +135,7 @@ namespace OptimizationLogic.AsyncControllers
             var realTimeBeforeOp = RealTime;
             RealTime += SwapChainTime;
             ProductionState.ProductionHistory.Dequeue();
+            IsReadyForBreak = true;
 
             if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
             {
@@ -166,6 +167,7 @@ namespace OptimizationLogic.AsyncControllers
             IntakeItem = Current;
             CurrentState = Needed == Current ? AsyncControllerState.SwapChain : AsyncControllerState.Put;
             PreviousStateForPut = AsyncControllerState.Start;
+            IsReadyForBreak = true;
 
             StepLog.Add(new AsyncStepModel
             {
@@ -183,6 +185,7 @@ namespace OptimizationLogic.AsyncControllers
             var nextOuttake = GetClosestNextOuttakeTime();
             RealTime += stackerRoundtripForItem;
             Current = ProductionState.ProductionHistory.Peek();
+            IsReadyForBreak = false;
 
             AsyncStepModel step = new AsyncStepModel
             {
@@ -257,6 +260,7 @@ namespace OptimizationLogic.AsyncControllers
             var nextIntake = GetClosestNextIntakeTime();
             var realTimeBeforeOp = RealTime;
             RealTime += stackerRoundtripForItem;
+            IsReadyForBreak = true;
 
             AsyncStepModel step = new AsyncStepModel
             {

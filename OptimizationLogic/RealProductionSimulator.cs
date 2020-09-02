@@ -80,7 +80,7 @@ namespace OptimizationLogic
         public bool NextStep()
         {
             var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
-            if (breakTimeIndex >= 0)
+            if (breakTimeIndex >= 0 && Controller.IsReadyForBreak)
             {
                 if (WarehouseReorganizer != null)
                 {

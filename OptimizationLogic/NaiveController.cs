@@ -1,4 +1,5 @@
-﻿using OptimizationLogic.DTO;
+﻿//#define HISTORY
+using OptimizationLogic.DTO;
 using OptimizationLogic.Extensions;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,9 @@ namespace OptimizationLogic
                 return false;
             }
 
+#if HISTORY
             History.Push(ProductionState.Copy());
+#endif
 
             var needed = ProductionState.FutureProductionPlan.Dequeue();
             var current = ProductionState.ProductionHistory.Dequeue();
