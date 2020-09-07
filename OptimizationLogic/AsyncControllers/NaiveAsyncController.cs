@@ -69,7 +69,7 @@ namespace OptimizationLogic.AsyncControllers
                 });
                 return true;
             }
-
+       
             //History.Push(ProductionState.Copy());
 
             switch (CurrentState)
