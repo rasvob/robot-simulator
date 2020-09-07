@@ -20,6 +20,7 @@ namespace OptimizationLogic
 
         public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
+        public bool IsReadyForBreak { get; set; } = true;
 
         public void InitSortedPositionCodes()
         {
@@ -66,6 +67,7 @@ namespace OptimizationLogic
             History.Clear();
             Delay = 0;
             RealTime = -300;
+            IsReadyForBreak = true;
         }
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)
