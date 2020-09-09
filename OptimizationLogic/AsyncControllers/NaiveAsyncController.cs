@@ -11,7 +11,7 @@ namespace OptimizationLogic.AsyncControllers
         public int IntakeOuttakeDifference { get; private set; } = 36;
         public double SwapChainTime { get; private set; } = 10;
         public double TimeBase { get => _timeBaseShift + Delay; }
-        private readonly double _timeBaseShift = 9;
+        private double _timeBaseShift = 9;
         public ItemState IntakeItem { get; set; } = ItemState.Empty;
         public ItemState OuttakeItem { get; set; } = ItemState.Empty;
         public ItemState Needed { get; set; }
@@ -19,6 +19,11 @@ namespace OptimizationLogic.AsyncControllers
         public double StackerOperationTime { get; private set; } = 2.5;
         public AsyncControllerState CurrentState { get; set; } = AsyncControllerState.Start;
         public AsyncControllerState PreviousStateForPut { get; set; }
+
+        public void SetTimebaseShift(double value)
+        {
+            _timeBaseShift = value;
+        }
 
         public NaiveAsyncController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
@@ -69,7 +74,7 @@ namespace OptimizationLogic.AsyncControllers
                 });
                 return true;
             }
-
+       
             //History.Push(ProductionState.Copy());
 
             switch (CurrentState)
