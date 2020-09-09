@@ -66,7 +66,7 @@ namespace ScenarioGenerator
             logFile.Close();
         }
 
-        private static void GenerateFromExistingPlans(int seqLen, string folder)
+        private static void GenerateFromExistingPlans(int seqLen, string folder, string suffix)
         {
             var futureGenerator = new FutureProductionPlanGenerator(0.5)
             {
@@ -96,14 +96,14 @@ namespace ScenarioGenerator
                 futureGenerator.MqbToMebTransitionProbability = probabilities[i];
                 var seq = futureGenerator.GenerateSequence();
                 state.FutureProductionPlan = new Queue<ItemState>(seq);
-                state.SaveProductionState(folder, $"_weekly{i}");
+                state.SaveProductionState(folder, $"{suffix}{i}");
                 Console.WriteLine($"Processed: {i}");
             }
         }
         
         static void Main(string[] args)
         {
-            GenerateFromExistingPlans(8968, "WeeklyPlans");
+            GenerateFromExistingPlans(1440, "DailyPlans", "_daily");
         }
     }
 }
