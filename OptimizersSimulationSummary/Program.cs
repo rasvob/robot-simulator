@@ -139,9 +139,10 @@ namespace OptimizersSimulationsSummary
         {
             switch (plannedProductionLength)
             {
+                // TODO: modify to match correct numbers 
                 case 100: return plannedProductionLength * 55;
-                case 1416: return 86400;
-                case 8968: return 19 * 28800;
+                case 1440: return 86400;
+                case 7200: return 5 * 86400;
                 default: throw new ArgumentException("Wrong production length");
             }
         }

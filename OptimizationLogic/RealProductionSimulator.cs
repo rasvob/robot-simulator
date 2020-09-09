@@ -49,27 +49,35 @@ namespace OptimizationLogic
             Controller = controller;
             WarehouseReorganizer = warehouseReorganizer;
 
+            productionDayBreaks.Add(new Tuple<double, double>(-300, 0));
             productionDayBreaks.Add(new Tuple<double, double>(7200, 7500));
             productionDayBreaks.Add(new Tuple<double, double>(15300, 17100));
             productionDayBreaks.Add(new Tuple<double, double>(21600, 21900));
-            productionDayBreaks.Add(new Tuple<double, double>(28500, 28800));
             productionDayBreaks.Add(new Tuple<double, double>(36000, 36300));
             productionDayBreaks.Add(new Tuple<double, double>(44100, 45900));
             productionDayBreaks.Add(new Tuple<double, double>(50400, 50700));
             productionDayBreaks.Add(new Tuple<double, double>(64800, 65100));
             productionDayBreaks.Add(new Tuple<double, double>(72900, 74700));
             productionDayBreaks.Add(new Tuple<double, double>(79200, 79500));
-            productionDayBreaks.Add(new Tuple<double, double>(86100, 86400));
+            /*productionDayBreaks.Add(new Tuple<double, double>(7200, 7505));
+            productionDayBreaks.Add(new Tuple<double, double>(15300, 17115));
+            productionDayBreaks.Add(new Tuple<double, double>(21600, 21925));
+            productionDayBreaks.Add(new Tuple<double, double>(36000, 36305));
+            productionDayBreaks.Add(new Tuple<double, double>(44100, 45915));
+            productionDayBreaks.Add(new Tuple<double, double>(50400, 50725));
+            productionDayBreaks.Add(new Tuple<double, double>(64800, 65105));
+            productionDayBreaks.Add(new Tuple<double, double>(72900, 74715));
+            productionDayBreaks.Add(new Tuple<double, double>(79200, 79525));*/
         }
 
         private int GetBreakTimeIndex(double realTimeStamp)
         {
-            double time = (realTimeStamp + secondsInProductionDay) % secondsInProductionDay;
+            double time = (realTimeStamp) % secondsInProductionDay;
 
             for (int i = 0; i < productionDayBreaks.Count; i++)
             {
                 var breakPair = productionDayBreaks[i];
-                if (time >= breakPair.Item1 - tactTime && time < breakPair.Item2)
+                if (time >= breakPair.Item1 && time < breakPair.Item2)
                 {
                     return i;
                 }
@@ -87,7 +95,8 @@ namespace OptimizationLogic
                     WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth});
                 }
                 var breakPair = productionDayBreaks[breakTimeIndex];
-                var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                //var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                var breakDuration = breakPair.Item2 - breakPair.Item1;
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration;
