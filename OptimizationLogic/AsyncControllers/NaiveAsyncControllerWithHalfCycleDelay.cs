@@ -28,6 +28,7 @@ namespace OptimizationLogic.AsyncControllers
             ProductionState[nearestNeededPosition] = ItemState.Empty;
             var realTimeBeforeOp = RealTime;
             var nextOuttake = GetClosestNextOuttakeTime();
+            var nextIntake = GetClosestNextIntakeTime();
             RealTime += stackerRoundtripForItem;
             Current = ProductionState.ProductionHistory.Peek();
             IsReadyForBreak = false;
@@ -61,12 +62,20 @@ namespace OptimizationLogic.AsyncControllers
                         }
                     }
                     break;
+                
 
+                //TODO: 7205 ma byt 131 tzn 1309 je zbytek
+                //TODO: 2750 ma byt 50 aut a 1390 zbyva
                 case AsyncControllerState.SwapChain:
                     var deq = ProductionState.FutureProductionPlan.Dequeue();
                     ProductionState.ProductionHistory.Enqueue(deq);
                     CurrentState = AsyncControllerState.Get;
-                    RealTime = GetClosestNextIntakeTime();
+
+                    if (RealTime < nextIntake)
+                    {
+                        RealTime = GetClosestNextIntakeTime();
+                    }
+                    
                     OuttakeItem = Needed;
                     Current = ProductionState.ProductionHistory.Peek();
                     IntakeItem = Current;
@@ -114,7 +123,7 @@ namespace OptimizationLogic.AsyncControllers
             AsyncStepModel step = new AsyncStepModel
             {
                 CurrentState = AsyncControllerState.Get,
-                Message = $"RealTime: {RealTime}, Current: {Current}, Took item to position: {nearestNeededPosition} with time {stackerRoundtripForItem}, Next intake in: {nextIntake}, Time before put: {realTimeBeforeOp}"
+                Message = $"RealTime: {RealTime}, Current: {Current}, Took item to position: {nearestNeededPosition} with time {stackerRoundtripForItem}, Next intake in: {nextIntake}, Time before get: {realTimeBeforeOp}"
             };
 
             if (RealTime > nextIntake)
