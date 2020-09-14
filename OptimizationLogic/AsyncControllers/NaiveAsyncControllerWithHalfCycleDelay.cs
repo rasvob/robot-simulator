@@ -54,7 +54,8 @@ namespace OptimizationLogic.AsyncControllers
                         OuttakeItem = Needed;
                         CurrentState = AsyncControllerState.Get;
 
-                        double closestIntake = GetClosestNextIntakeTime();
+                        //double closestIntake = GetClosestNextIntakeTime();
+                        double closestIntake = nextIntake;
                         if (RealTime < closestIntake)
                         {
                             RealTime = closestIntake;
@@ -71,9 +72,11 @@ namespace OptimizationLogic.AsyncControllers
                     ProductionState.ProductionHistory.Enqueue(deq);
                     CurrentState = AsyncControllerState.Get;
 
-                    if (RealTime < nextIntake)
+                    if (RealTime <= nextIntake)
                     {
-                        RealTime = GetClosestNextIntakeTime();
+                        //RealTime = GetClosestNextIntakeTime();
+                        RealTime = nextIntake;
+                        step.Message += $", Skipped to intake: {RealTime}";
                     }
                     
                     OuttakeItem = Needed;
@@ -138,7 +141,7 @@ namespace OptimizationLogic.AsyncControllers
                 CurrentState = AsyncControllerState.Start;
                 RealTime = nextIntake;
                 IntakeItem = ItemState.Empty;
-                step.Message += $", Going to state: {CurrentState}";
+                step.Message += $", Going to state: {CurrentState}, Skipped to intake {nextIntake}";
                 StepLog.Add(step);
                 return;
             }

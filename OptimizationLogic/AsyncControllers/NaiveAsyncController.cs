@@ -146,7 +146,7 @@ namespace OptimizationLogic.AsyncControllers
             var realTimeBeforeOp = RealTime;
             RealTime += SwapChainTime;
             ProductionState.ProductionHistory.Dequeue();
-            ProductionState.FutureProductionPlan.Dequeue();
+            //ProductionState.FutureProductionPlan.Dequeue();
             IsReadyForBreak = true;
 
             if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
