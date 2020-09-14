@@ -18,9 +18,10 @@ namespace OptimizersSimulationsSummary
     {
         static readonly int SimulatorsConfigurationNum = 4;
         static readonly int AssignedScenariosNum = 4;
-        static readonly int GeneratedScenariosNum = 200;
+        static readonly int GeneratedScenariosNum = 100;
         static Random rnd = new Random(13);
         static List<int> RandomSequence = Enumerable.Repeat(0, GeneratedScenariosNum).Select(t => rnd.Next(0, 1199)).ToList();
+        //static List<int> RandomSequence = Enumerable.Range(0, GeneratedScenariosNum).ToList();
 
         static void Main(string[] args)
         {
@@ -38,18 +39,18 @@ namespace OptimizersSimulationsSummary
         {
             Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
 
-            simulationsDict[$"naive-skip_break-{key}"] = new RealProductionSimulator(
-                    new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
-                    );
+            //simulationsDict[$"naive-skip_break-{key}"] = new RealProductionSimulator(
+            //        new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
+            //        );
 
             simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
                 );
 
-            simulationsDict[$"async-skip_break-{key}"] = new RealProductionSimulator(
-                new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
-                );
+            //simulationsDict[$"async-skip_break-{key}"] = new RealProductionSimulator(
+            //    new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
+            //    );
 
             simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
@@ -96,6 +97,8 @@ namespace OptimizersSimulationsSummary
         {
             string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
             int completed = 0;
+            var sw = new Stopwatch();
+            sw.Start();
             var result = Parallel.For(0, GeneratedScenariosNum, (j) =>
             {
                 int i = RandomSequence[j];
@@ -110,9 +113,10 @@ namespace OptimizersSimulationsSummary
                 Interlocked.Increment(ref completed);
                 Trace.WriteLine($"Completed: {completed}");
                 Console.WriteLine($"Completed: {completed}");
-                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_day_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
+                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_day_break_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
             });
-            
+            sw.Stop();
+            Trace.WriteLine($"Time for one run: {sw.ElapsedMilliseconds}");
         }
 
         static void SimulateGeneratedWeekScenarios()
@@ -133,13 +137,14 @@ namespace OptimizersSimulationsSummary
                 Interlocked.Increment(ref completed);
                 Trace.WriteLine($"Completed: {completed}");
                 Console.WriteLine($"Completed: {completed}");
-                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_week_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
+                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_week_break_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
             });
         }
 
         static void RunSimulations(Dictionary<string, RealProductionSimulator> simulationsDict, List<SimulationResult> simulationResults)
         {
             int simulationCounter = 0;
+            
             foreach (var simulation in simulationsDict)
             {
                 var simulationName = simulation.Key;
@@ -150,6 +155,7 @@ namespace OptimizersSimulationsSummary
                 simulationResults.Add(res);
                 Console.WriteLine(res);                
             }
+            
         }
 
         static int GetPlanedTime(int plannedProductionLength)
@@ -183,7 +189,6 @@ namespace OptimizersSimulationsSummary
                 {
                     result.PlannedTimeProductionPlanCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
-                Console.WriteLine($"{productionSimulator.Controller.RealTime} {productionSimulator.Controller.Delay} {productionSimulator.Controller.ProductionState.FutureProductionPlan.Count}");
             }
             result.DelayTime = productionSimulator.Controller.Delay;
 
