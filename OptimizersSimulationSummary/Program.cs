@@ -18,7 +18,7 @@ namespace OptimizersSimulationsSummary
     {
         static readonly int SimulatorsConfigurationNum = 4;
         static readonly int AssignedScenariosNum = 4;
-        static readonly int GeneratedScenariosNum = 100;
+        static readonly int GeneratedScenariosNum = 200;
         static Random rnd = new Random(13);
         static List<int> RandomSequence = Enumerable.Repeat(0, GeneratedScenariosNum).Select(t => rnd.Next(0, 1199)).ToList();
         //static List<int> RandomSequence = Enumerable.Range(0, GeneratedScenariosNum).ToList();
