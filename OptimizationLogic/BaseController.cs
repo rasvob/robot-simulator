@@ -69,6 +69,10 @@ namespace OptimizationLogic
             RealTime = -300;
             IsReadyForBreak = true;
         }
+        public virtual void SetTimebaseShift(double value)
+        {
+        }
+
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)
         {

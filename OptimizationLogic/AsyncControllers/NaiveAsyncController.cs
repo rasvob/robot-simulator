@@ -20,7 +20,7 @@ namespace OptimizationLogic.AsyncControllers
         public AsyncControllerState CurrentState { get; set; } = AsyncControllerState.Start;
         public AsyncControllerState PreviousStateForPut { get; set; }
 
-        public void SetTimebaseShift(double value)
+        public override void SetTimebaseShift(double value)
         {
             _timeBaseShift = value;
         }
