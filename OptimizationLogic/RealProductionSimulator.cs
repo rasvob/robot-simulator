@@ -87,6 +87,7 @@ namespace OptimizationLogic
 
         public bool NextStep()
         {
+            //return NextStepOriginal();
             return NextStepTimeShiftBreak();
         }
 
@@ -129,9 +130,9 @@ namespace OptimizationLogic
                     WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth });
                 }
                 var breakPair = productionDayBreaks[breakTimeIndex];
-                //var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
                 var timeUsedInBreak = Controller.RealTime - breakPair.Item1;
-                var breakDuration = breakPair.Item2 - breakPair.Item1;
+                //var breakDuration = breakPair.Item2 - breakPair.Item1;
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration + timeUsedInBreak;

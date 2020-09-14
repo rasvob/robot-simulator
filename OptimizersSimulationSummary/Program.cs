@@ -15,13 +15,26 @@ namespace OptimizersSimulationsSummary
     {
         static readonly int SimulatorsConfigurationNum = 4;
         static readonly int AssignedScenariosNum = 4;
-        static readonly int GeneratedScenariosNum = 1200;
+        static readonly int GeneratedScenariosNum = 20;
 
         static void Main(string[] args)
         {
+            string startupPath = Directory.GetParent(System.IO.Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            SimulationResult[] simulationResults = new SimulationResult[AssignedScenariosNum * SimulatorsConfigurationNum];
+            for (int i = 8; i < 9; i++)
+            {
+                var matrixFilename = Path.Combine(startupPath, @"robot-simulator\robot-simulator\DailyPlans\ProcessingTimeMatrix.csv");
+                var warehouseFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\DailyPlans\generated_situation_daily{i}\WarehouseInitialState_daily{i}.csv");
+                var historyFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\DailyPlans\generated_situation_daily{i}\HistoricalProductionList_daily{i}.txt");
+                var planFilename = Path.Combine(startupPath, $@"robot-simulator\robot-simulator\DailyPlans\generated_situation_daily{i}\FutureProductionList_daily{i}.txt");
+
+                var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
+                RunSimulations(simulations, simulationResults, 0);
+            }
+
             //SimulateAssignedScenarios();
             //SimulateGeneratedScenarios();
-            SimulateGeneratedDayScenarios();
+            //SimulateGeneratedDayScenarios();
             //SimulateGeneratedWeekScenarios();
 
             Console.WriteLine("Finished. Press any key to close.");
@@ -32,23 +45,23 @@ namespace OptimizersSimulationsSummary
         {
             Dictionary<string, RealProductionSimulator> simulationsDict = new Dictionary<string, RealProductionSimulator>();
 
-            simulationsDict[$"naive-skip_break-{key}"] = new RealProductionSimulator(
+            /*simulationsDict[$"naive-skip_break-{key}"] = new RealProductionSimulator(
                     new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
                     );
 
             simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
-                );
+                );*/
 
             simulationsDict[$"async-skip_break-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
                 );
 
-            simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
+            /*simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
-                );
+                );*/
             return simulationsDict;
         }
 
@@ -65,7 +78,7 @@ namespace OptimizersSimulationsSummary
 
                 var simulations = GetSimulationsDict(i.ToString(), matrixFilename, warehouseFilename, historyFilename, planFilename);
                 RunSimulations(simulations, simulationResults, i);
-            }            
+            }
             File.WriteAllLines(Path.Combine(startupPath, @"robot-simulator\OptimizersSimulationSummary\simulations_assigned_output.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
         }
 
@@ -162,10 +175,11 @@ namespace OptimizersSimulationsSummary
                     result.FirstDelayProductionPlanCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
 
-                if (productionSimulator.Controller.RealTime < plannedRealProcessingTime)
+                if (productionSimulator.Controller.RealTime <= plannedRealProcessingTime)
                 {
                     result.PlannedTimeProductionPlanCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
+                Console.WriteLine($"{productionSimulator.Controller.RealTime} {productionSimulator.Controller.Delay} {productionSimulator.Controller.ProductionState.FutureProductionPlan.Count}");
             }
             result.DelayTime = productionSimulator.Controller.Delay;
 
