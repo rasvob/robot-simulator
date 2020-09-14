@@ -87,12 +87,17 @@ namespace OptimizationLogic
 
         public bool NextStep()
         {
+            return NextStepTimeShiftBreak();
+        }
+
+        public bool NextStepOriginal()
+        {
             var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
             if (breakTimeIndex >= 0 && Controller.IsReadyForBreak)
             {
                 if (WarehouseReorganizer != null)
                 {
-                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth});
+                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth });
                 }
                 var breakPair = productionDayBreaks[breakTimeIndex];
                 //var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
@@ -100,6 +105,37 @@ namespace OptimizationLogic
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration;
+                if (WarehouseReorganizer != null)
+                {
+                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.End, CurrentValue = WarehouseReorganizer.MaxDepth });
+                }
+            }
+            else
+            {
+                Controller.NextStep();
+            }
+
+            return true;
+        }
+
+        // Daily 17 fails
+        public bool NextStepTimeShiftBreak()
+        {
+            var breakTimeIndex = GetBreakTimeIndex(Controller.RealTime);
+            if (breakTimeIndex >= 0 && Controller.IsReadyForBreak)
+            {
+                if (WarehouseReorganizer != null)
+                {
+                    WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.Start, CurrentValue = WarehouseReorganizer.MaxDepth });
+                }
+                var breakPair = productionDayBreaks[breakTimeIndex];
+                //var breakDuration = (breakPair.Item2 - (Controller.RealTime % secondsInProductionDay)) % secondsInProductionDay;
+                var timeUsedInBreak = Controller.RealTime - breakPair.Item1;
+                var breakDuration = breakPair.Item2 - breakPair.Item1;
+                Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
+                WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
+                Controller.RealTime += breakDuration + timeUsedInBreak;
+                Controller.IncreaseTimebaseShift(timeUsedInBreak);
                 if (WarehouseReorganizer != null)
                 {
                     WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.End, CurrentValue = WarehouseReorganizer.MaxDepth });

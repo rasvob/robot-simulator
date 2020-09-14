@@ -73,6 +73,10 @@ namespace OptimizationLogic
         {
         }
 
+        public virtual void IncreaseTimebaseShift(double value)
+        {
+        }
+
 
         protected PositionCodes GetNearestEmptyPosition(ProductionState actualProductionState)
         {

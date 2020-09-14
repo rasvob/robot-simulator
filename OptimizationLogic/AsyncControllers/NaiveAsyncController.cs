@@ -25,6 +25,11 @@ namespace OptimizationLogic.AsyncControllers
             _timeBaseShift = value;
         }
 
+        public override void IncreaseTimebaseShift(double value)
+        {
+            _timeBaseShift += value;
+        }
+
         public NaiveAsyncController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
 
@@ -116,6 +121,7 @@ namespace OptimizationLogic.AsyncControllers
             IntakeItem = ItemState.Empty;
             OuttakeItem = ItemState.Empty;
             CurrentState = AsyncControllerState.Start;
+            _timeBaseShift = 9;
         }
 
         public override bool CanUndo()
