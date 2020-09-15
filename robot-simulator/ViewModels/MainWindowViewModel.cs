@@ -129,7 +129,7 @@ namespace robot_simulator.ViewModels
         public int TotalSimulationTime { get => SelectedController.ProductionState.StepCounter * SelectedController.ClockTime; }
         public bool ProductionStateIsOk { get => ProductionState.ProductionStateIsOk; }
         public double CurrentStepTime { get => ProductionState.CurrentStepTime; }
-        public double CurrentDelay { get => SelectedController.Delay; }
+        public double CurrentDelay { get => Math.Floor(SelectedController.Delay); }
         public double RealTime { get => SelectedController.RealTime; }
         public double NextItemFromFlow { get => (SelectedController as NaiveAsyncController)?.GetClosestNextIntakeTime() ?? 0; }
         public double NextItemFromQueue { get => (SelectedController as NaiveAsyncController)?.GetClosestNextOuttakeTime() ?? 0; }
