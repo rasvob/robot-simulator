@@ -20,8 +20,9 @@ namespace robot_simulator.ViewModels.ValueConterters
             {
                 "Forbidden" => new SolidColorBrush(Color.FromRgb(217, 32, 39)),
                 "Empty" => new SolidColorBrush(Color.FromRgb(221, 221, 221)),
-                "MEB" => new SolidColorBrush(Color.FromRgb(53, 208, 186)),
-                "MQB" => new SolidColorBrush(Color.FromRgb(255, 205, 60)),
+                "MEB" => new SolidColorBrush(Color.FromRgb(255, 192, 0)),
+                "MQB" => new SolidColorBrush(Color.FromRgb(230, 230, 0)),
+                "Shuttle" => new SolidColorBrush(Color.FromRgb(128, 128, 128)),
                 _ => new SolidColorBrush(Color.FromRgb(213, 64, 98))
             };
         }

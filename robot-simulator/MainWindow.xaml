@@ -342,7 +342,7 @@
                 <ItemsControl ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid Rows="4" />
+                            <UniformGrid Rows="5" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 

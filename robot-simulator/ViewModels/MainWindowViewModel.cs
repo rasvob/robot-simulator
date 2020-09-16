@@ -372,7 +372,7 @@ namespace robot_simulator.ViewModels
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()
         {
             var whColls = Enumerable.Range(0, ProductionState.WarehouseColls);
-            return Enumerable.Range(0, ProductionState.WarehouseRows)
+            var res = Enumerable.Range(0, ProductionState.WarehouseRows)
                 .SelectMany(row => whColls.Select(col => (row, col)))
                 .Select(cell => new WarehouseItemViewModel()
                 {
@@ -380,7 +380,15 @@ namespace robot_simulator.ViewModels
                     Col = cell.col,
                     PositionCode = ProductionState.GetWarehouseCell(cell.row, cell.col).ToGuiString(),
                     StateStr = ProductionState.WarehouseState[cell.row, cell.col].ToString(),
-                });
+                }).ToList();
+            res.InsertRange(24, Enumerable.Range(0, ProductionState.WarehouseColls).Select(cell => new WarehouseItemViewModel()
+                {
+                    Row = 0,
+                    Col = 0,
+                    PositionCode = string.Empty,
+                    StateStr = "Shuttle",
+                }));
+            return res;
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateItemStateCollectionFromQueue(Queue<ItemState> queue) => queue.ToArray().Select((t, idx) => new WarehouseItemViewModel { StateStr = t.ToString(), PositionCode = idx == 0 ? "Next" : $"Next+{idx}" });
