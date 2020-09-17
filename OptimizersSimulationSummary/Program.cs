@@ -18,17 +18,17 @@ namespace OptimizersSimulationsSummary
     {
         static readonly int SimulatorsConfigurationNum = 4;
         static readonly int AssignedScenariosNum = 4;
-        static readonly int GeneratedScenariosNum = 200;
+        static readonly int GeneratedScenariosNum = 1200;
         static Random rnd = new Random(13);
-        static List<int> RandomSequence = Enumerable.Repeat(0, GeneratedScenariosNum).Select(t => rnd.Next(0, 1199)).ToList();
-        //static List<int> RandomSequence = Enumerable.Range(0, GeneratedScenariosNum).ToList();
+        //static List<int> RandomSequence = Enumerable.Repeat(0, GeneratedScenariosNum).Select(t => rnd.Next(0, 1199)).ToList();
+        static List<int> RandomSequence = Enumerable.Range(0, GeneratedScenariosNum).ToList();
 
         static void Main(string[] args)
         {
-            SimulateAssignedScenarios();
+            //SimulateAssignedScenarios();
             //SimulateGeneratedScenarios();
             //SimulateGeneratedDayScenarios();
-            //SimulateGeneratedWeekScenarios();
+            SimulateGeneratedWeekScenarios();
 
             Console.WriteLine("Finished. Press any key to close.");
             Trace.WriteLine("Finished. Press any key to close.");
@@ -43,19 +43,19 @@ namespace OptimizersSimulationsSummary
                     new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
                     );
 
-            simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
+            /*simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveController(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
-                );
+                );*/
 
             simulationsDict[$"async-skip_break-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename)
                 );
 
-            simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
+            /*simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(), matrixFilename, warehouseFilename, historyFilename, planFilename),
                 new GreedyWarehouseReorganizer(maxDepth: 10, selectBestCnt: 1)
-                );
+                );*/
             return simulationsDict;
         }
 
@@ -137,7 +137,7 @@ namespace OptimizersSimulationsSummary
                 Interlocked.Increment(ref completed);
                 Trace.WriteLine($"Completed: {completed}");
                 Console.WriteLine($"Completed: {completed}");
-                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_week_break_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
+                File.WriteAllLines(Path.Combine(startupPath, $@"robot-simulator\OptimizersSimulationSummary\simulations_week_output_{i}.csv"), simulationResults.Select(x => x.GetCsvRecord(";")).ToList());
             });
         }
 
