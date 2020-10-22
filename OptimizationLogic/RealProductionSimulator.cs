@@ -97,6 +97,7 @@ namespace OptimizationLogic
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration;
+                Controller.BreakTime += breakDuration;
                 if (WarehouseReorganizer != null)
                 {
                     WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.End, CurrentValue = WarehouseReorganizer.MaxDepth });
@@ -127,7 +128,12 @@ namespace OptimizationLogic
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration + timeUsedInBreak;
-                Controller.IncreaseTimebaseShift(timeUsedInBreak);
+                var timeShift = (breakDuration + timeUsedInBreak) % tactTime;
+                if (Controller.RealTime > 0)
+                {
+                    Controller.IncreaseTimebaseShift(timeShift);
+                }                
+                Controller.BreakTime += breakDuration + timeUsedInBreak;
                 if (WarehouseReorganizer != null)
                 {
                     WarehouseReorganizationProgressUpdated?.Invoke(this, new ProgressEventArgs() { State = ProgressState.End, CurrentValue = WarehouseReorganizer.MaxDepth });

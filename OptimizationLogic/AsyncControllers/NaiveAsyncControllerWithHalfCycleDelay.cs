@@ -21,6 +21,17 @@ namespace OptimizationLogic.AsyncControllers
         {
         }
 
+        public double GetPreviousOuttakeTime()
+        {
+            if (RealTime < TimeBase + IntakeOuttakeDifference)
+            {
+                return TimeBase + IntakeOuttakeDifference;
+            }
+
+            int currentIntakeSteps = ProductionState.InitialFutureProductionPlanLen - ProductionState.FutureProductionPlan.Count;
+            return (currentIntakeSteps-1) * IntakeClock + 9 + IntakeOuttakeDifference + BreakTime;
+        }
+
         public override void PutHandler()
         {
             var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, Needed);
@@ -101,7 +112,8 @@ namespace OptimizationLogic.AsyncControllers
                         ProductionState.ProductionHistory.Enqueue(deq1);
 
                         double closestIntake = GetClosestNextIntakeTime();
-                        if (RealTime < closestIntake)
+                        double previousIntake = GetPreviousOuttakeTime() - IntakeOuttakeDifference;
+                        if (RealTime < closestIntake & RealTime < previousIntake)
                         {
                             RealTime = closestIntake;
                             step.Message += $", Skipped to intake: {RealTime}";
@@ -129,11 +141,11 @@ namespace OptimizationLogic.AsyncControllers
                 Message = $"RealTime: {RealTime}, Current: {Current}, Took item to position: {nearestNeededPosition} with time {stackerRoundtripForItem}, Next intake in: {nextIntake}, Time before get: {realTimeBeforeOp}"
             };
 
-            if (RealTime > nextIntake)
+            /*if (RealTime > nextIntake)
             {
                 Delay += RealTime - nextIntake;
                 nextIntake = GetClosestNextIntakeTime();
-            }
+            }*/
 
             ProductionState.ProductionHistory.Dequeue();
             if (ProductionState.FutureProductionPlan.Peek() == ProductionState.ProductionHistory.Peek())
@@ -147,7 +159,8 @@ namespace OptimizationLogic.AsyncControllers
             }
 
             double closestOuttake = GetClosestNextOuttakeTime();
-            if (RealTime < closestOuttake)
+            double previousOuttake = GetPreviousOuttakeTime();
+            if (RealTime < closestOuttake && RealTime < previousOuttake)
             {
                 RealTime = closestOuttake;
                 step.Message += $", Skipped to outtake: {RealTime}";

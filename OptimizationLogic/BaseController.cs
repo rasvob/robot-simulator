@@ -20,6 +20,7 @@ namespace OptimizationLogic
 
         public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
+        public double BreakTime { get; set; } = -300;
         public bool IsReadyForBreak { get; set; } = true;
 
         public void InitSortedPositionCodes()

@@ -1,12 +1,12 @@
 naive-skip_break-1;75;9;451,36
 naive-reorganization-1;67;8;432,1
-async-skip_break-1;39;2;0,800000000000182
-async-reorganization-1;39;2;0,800000000000182
+async-skip_break-1;0;0;0
+async-reorganization-1;0;0;0
 naive-skip_break-2;0;0;0
 naive-reorganization-2;0;0;0
 async-skip_break-2;0;0;0
 async-reorganization-2;0;0;0
 naive-skip_break-3;82;17;1198,7
 naive-reorganization-3;80;17;1195,75
-async-skip_break-3;42;4;9
-async-reorganization-3;42;4;9
+async-skip_break-3;0;0;0
+async-reorganization-3;0;0;0

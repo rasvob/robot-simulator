@@ -19,6 +19,7 @@ namespace OptimizationLogic.DTO
         public int StepCounter { get; set; } = 1;
         public double CurrentStepTime { get; set; } = 0;
         public double TimeSpentInSimulation { get; set; } = 0;
+        public int InitialFutureProductionPlanLen { get; set; } = 0;
 
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
 
@@ -217,7 +218,12 @@ namespace OptimizationLogic.DTO
         }
 
         public void LoadProductionHistory(string csvPath) => ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
-        public void LoadFutureProductionPlan(string csvPath) => FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
+        public void LoadFutureProductionPlan(string csvPath)
+        {            
+            FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
+            InitialFutureProductionPlanLen = FutureProductionPlan.Count;
+        }
+
         public void SaveProductionState(string path, string suffix)
         {
             Directory.CreateDirectory(Path.Combine(path, $@"generated_situation{suffix}"));
