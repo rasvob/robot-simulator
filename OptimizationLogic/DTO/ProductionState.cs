@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OptimizationLogic.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -105,7 +106,7 @@ namespace OptimizationLogic.DTO
 
         private Dictionary<PositionCodes, (int row, int col)> BuildWarehousePositionMappingDict()
         {
-            return ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code =>
+            return ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(WarehouseRows, WarehouseColls).ToDictionary(code => code, code =>
             {
                 if (code == PositionCodes.Stacker)
                 {
@@ -215,10 +216,10 @@ namespace OptimizationLogic.DTO
 
         public void BuildTimeDictionary()
         {
-            foreach (var position1 in (PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
+            foreach (var position1 in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(WarehouseRows, WarehouseColls))
             {
                 TimeDictionary[position1] = new Dictionary<PositionCodes, double>();
-                foreach (var position2 in (PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
+                foreach (var position2 in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(WarehouseRows, WarehouseColls))
                 {
                     TimeDictionary[position1][position2] = CalculateTime(position1, position2);
                 }
@@ -286,7 +287,7 @@ namespace OptimizationLogic.DTO
             {
                 dict[itemState] = new List<PositionCodes>();
             }
-            foreach (PositionCodes positionCode in Enum.GetValues(typeof(PositionCodes)))
+            foreach (PositionCodes positionCode in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(this.WarehouseRows, this.WarehouseColls))
             {
                 if (positionCode != PositionCodes.Service && positionCode != PositionCodes.Stacker)
                 {

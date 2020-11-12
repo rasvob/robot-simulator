@@ -1,4 +1,5 @@
 ﻿using OptimizationLogic.DTO;
+using OptimizationLogic.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +27,11 @@ namespace OptimizationLogic
         public void InitSortedPositionCodes()
         {
             SortedPositionCodes = new Dictionary<PositionCodes, List<PositionCodes>>();
-            foreach (PositionCodes sourcePosition in Enum.GetValues(typeof(PositionCodes)))
+            foreach (PositionCodes sourcePosition in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(ProductionState.WarehouseRows, ProductionState.WarehouseColls))
             {
                 Dictionary<PositionCodes, double> cellsTimes = new Dictionary<PositionCodes, double>();
 
-                foreach (PositionCodes destinationPosition in Enum.GetValues(typeof(PositionCodes)))
+                foreach (PositionCodes destinationPosition in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(ProductionState.WarehouseRows, ProductionState.WarehouseColls))
                 {
                     cellsTimes[destinationPosition] = ProductionState[PositionCodes.Stacker, destinationPosition];
                 }
