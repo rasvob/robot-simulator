@@ -72,6 +72,11 @@ namespace OptimizationLogic.DTO
             }
         }
 
+        public double GetDistanceFromStacker(int row, int col)
+        {
+            return TimeDictionary[PositionCodes.Stacker][GetWarehouseCell(row, col)];
+        }
+
         public ProductionState(int WarehouseXDimension, int WarehouseYDimension)
         {
             WarehouseState = new ItemState[WarehouseYDimension, WarehouseXDimension];

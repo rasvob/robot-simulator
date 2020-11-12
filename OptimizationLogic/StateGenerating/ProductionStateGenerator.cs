@@ -47,15 +47,15 @@ namespace OptimizationLogic.StateGenerating
             double DistanceFunc(double time, double maxTime) => (1 + (-time/maxTime));
             double UniformFunc(int validCount) => (1.0 / validCount);
             // TODO: prodiskutovat s Radkem, netusim co ta DistanceFunc dela
-            //Dictionary<(int row, int col), double> ComputeTimeAdvantageForCells(List<(int row, int col)> validPositions, double maximum) => validPositions.ToDictionary(k => ((k.row, k.col)), t => DistanceFunc(state.TimeMatrix[t.row, t.col], maximum));
+            Dictionary<(int row, int col), double> ComputeTimeAdvantageForCells(List<(int row, int col)> validPositions, double maximum) => validPositions.ToDictionary(k => ((k.row, k.col)), t => DistanceFunc(state.GetDistanceFromStacker(t.row, t.col), maximum));
             var validPositions = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
-                    .FilterPositions(state.WarehouseRows, state.WarehouseColls)
+                   .FilterPositions(state.WarehouseRows, state.WarehouseColls)
                    .Where(t => t != PositionCodes.Service && t != PositionCodes.Stacker)
                    .Select(t => state.GetWarehouseIndex(t))
                    .ToList();
 
-            //var timeMatrixMaximum = state.TimeMatrix.Cast<double>().Max();
-            //var timeAdvantageForCell = ComputeTimeAdvantageForCells(validPositions, timeMatrixMaximum);
+            var timeMatrixMaximum = state.TimeDictionary[PositionCodes.Stacker].Select(t => t.Value).Max();
+            var timeAdvantageForCell = ComputeTimeAdvantageForCells(validPositions, timeMatrixMaximum);
             int numberOfMqbItems = MaximumOfMqbItems - state.ProductionHistory.Count(t => t == ItemState.MQB);
             int numberOfMebItems = MaximumOfMebItems - state.ProductionHistory.Count(t => t == ItemState.MEB);
             int numberOfFreeSlots = MaximumFreeSlotsInWarehouse - numberOfMqbItems - numberOfMebItems;
@@ -69,8 +69,8 @@ namespace OptimizationLogic.StateGenerating
             {
                 double uniformProb = UniformFunc(validPositions.Count);
                 double weight = item == ItemState.MEB ? MebDistanceWeight : MqbDistanceWeight;
-                //var validProbs = validPositions.Select(t => UniformProbabilityWeight * uniformProb + timeAdvantageForCell[(t.row, t.col)] * weight).Softmax();
-                var validProbs = validPositions.Select(t => UniformProbabilityWeight * uniformProb).Softmax();
+                var validProbs = validPositions.Select(t => UniformProbabilityWeight * uniformProb + timeAdvantageForCell[(t.row, t.col)] * weight).Softmax();
+                //var validProbs = validPositions.Select(t => UniformProbabilityWeight * uniformProb).Softmax();
                 var cumsum = validProbs.CumulativeSum().Select((value, index) => (index, value));
                 var rndDouble = RandomGenerator.NextDouble();
                 var positionIndex = cumsum.FirstOrDefault(t => rndDouble < t.value).index;
