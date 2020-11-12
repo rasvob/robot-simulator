@@ -13,8 +13,7 @@ namespace OptimizationLogic.DAL
             DefaultScenarios = scenarios;
             TimeMatrixCsvPath = timeMatrixCsvPath;
             DefaultScenariosInMemory = DefaultScenarios.Select(current => {
-                var productionState = new ProductionState();
-                productionState.LoadTimeMatrix(TimeMatrixCsvPath);
+                var productionState = new ProductionState(12, 4);
                 productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
                 productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);
                 productionState.LoadProductionHistory(current.HistoricalProductionListCsv);
@@ -22,15 +21,12 @@ namespace OptimizationLogic.DAL
             }).ToList();
         }
 
-        public double[,] TimeMatrix { get => DefaultScenariosInMemory[0].TimeMatrix; }
-
         public List<ProductionScenarioPaths> DefaultScenarios { get; set; }
         public List<ProductionState> DefaultScenariosInMemory { get; set; }
         public string TimeMatrixCsvPath { get; set; }
         public void LoadScenarioFromDisk(ProductionState productionState, int scenarioIdx=0)
         {
             var current = DefaultScenarios[scenarioIdx];
-            productionState.LoadTimeMatrix(TimeMatrixCsvPath);
             productionState.LoadWarehouseState(current.WarehouseInitialStateCsv);
             productionState.LoadFutureProductionPlan(current.FutureProductionListCsv);
             productionState.LoadProductionHistory(current.HistoricalProductionListCsv);
@@ -39,7 +35,6 @@ namespace OptimizationLogic.DAL
         public void LoadScenarioFromMemory(ProductionState productionState, int scenarioIdx = 0)
         {
             var current = (ProductionState)DefaultScenariosInMemory[scenarioIdx].Clone();
-            productionState.TimeMatrix = current.TimeMatrix;
             productionState.FutureProductionPlan = current.FutureProductionPlan;
             productionState.ProductionHistory = current.ProductionHistory;
             productionState.WarehouseState = current.WarehouseState;

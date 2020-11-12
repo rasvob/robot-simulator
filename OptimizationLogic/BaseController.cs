@@ -14,9 +14,9 @@ namespace OptimizationLogic
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
-        protected const int TimeLimit = 36;
+        public int TimeLimit { get; set; } = 36;
         public int TimeLimitForOneStep { get => TimeLimit; }
-        public int ClockTime { get => 55; }
+        public int ClockTime { get; set; } = 55;
 
         public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
@@ -32,27 +32,19 @@ namespace OptimizationLogic
 
                 foreach (PositionCodes destinationPosition in Enum.GetValues(typeof(PositionCodes)))
                 {
-                    cellsTimes[destinationPosition] = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(destinationPosition)];
+                    cellsTimes[destinationPosition] = ProductionState[PositionCodes.Stacker, destinationPosition];
                 }
 
                 SortedPositionCodes[sourcePosition] = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
             }            
         }
 
-        public BaseController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
+        public BaseController(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
         {
             ProductionState = productionState;
             ProductionState.LoadFutureProductionPlan(csvFutureProductionPlan);
             ProductionState.LoadProductionHistory(csvHistroicalProduction);
-            ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
             ProductionState.LoadWarehouseState(csvWarehouseInitialState);
-            InitSortedPositionCodes();
-        }
-
-        public BaseController(ProductionState state, string csvProcessingTimeMatrix)
-        {
-            ProductionState = state;
-            ProductionState.LoadTimeMatrix(csvProcessingTimeMatrix);
             InitSortedPositionCodes();
         }
 
@@ -61,6 +53,7 @@ namespace OptimizationLogic
             ProductionState = state;
             InitSortedPositionCodes();
         }
+
         public virtual void RenewControllerState()
         {
             InitSortedPositionCodes();

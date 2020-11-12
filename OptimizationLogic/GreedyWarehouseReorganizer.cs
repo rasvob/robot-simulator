@@ -14,7 +14,7 @@ namespace OptimizationLogic
         public int SelectBestCnt { get; }
         public event EventHandler<ProgressEventArgs> ProgressTriggered;
 
-        public GreedyWarehouseReorganizer(int maxDepth=5, int selectBestCnt=5)
+        public GreedyWarehouseReorganizer(int maxDepth = 5, int selectBestCnt = 5)
         {
             MaxDepth = maxDepth;
             SelectBestCnt = selectBestCnt;
@@ -40,24 +40,18 @@ namespace OptimizationLogic
             }
         }
 
-        private void WarehouseSwap(ProductionState productionState, Tuple<PositionCodes, PositionCodes> currentSwap, PositionCodes previousPosition, List<BaseStepModel> logger, bool isLastSwap=false)
+        private void WarehouseSwap(ProductionState productionState, Tuple<PositionCodes, PositionCodes> currentSwap, PositionCodes previousPosition, List<BaseStepModel> logger, bool isLastSwap = false)
         {
             (int r, int c) = productionState.GetWarehouseIndex(currentSwap.Item1);
             var itemType = productionState.WarehouseState[r, c];
             var swapTime = productionState.SwapWarehouseItems(currentSwap.Item1, currentSwap.Item2);
             double moveToDifferentCellTime;
 
-            moveToDifferentCellTime = productionState.TimeMatrix[
-                productionState.GetTimeMatrixIndex(previousPosition),
-                productionState.GetTimeMatrixIndex(currentSwap.Item1)
-                ];
+            moveToDifferentCellTime = productionState[previousPosition, currentSwap.Item1];
 
             if (isLastSwap)
             {
-                var extraTime = productionState.TimeMatrix[
-                    productionState.GetTimeMatrixIndex(currentSwap.Item2),
-                    productionState.GetTimeMatrixIndex(PositionCodes.Stacker)
-                    ];
+                var extraTime = productionState[currentSwap.Item2, PositionCodes.Stacker];
 
                 logger.Add(new WarehouseSwapStepModel
                 {
@@ -129,8 +123,8 @@ namespace OptimizationLogic
                                     previousPosition = currentRecord.PreviousRecord.Swap.Item2;
                                 }
                             }
-                            var moveTime = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(previousPosition), productionState.GetTimeMatrixIndex(swap.Item1)];
-                            var timeToStacker = productionState.TimeMatrix[productionState.GetTimeMatrixIndex(swap.Item2), productionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
+                            var moveTime = productionState[previousPosition, swap.Item1];
+                            var timeToStacker = productionState[swap.Item2, PositionCodes.Stacker];
                             var timeRemaining = currentRecord.RemainingTime - moveTime - swapTimeConsumed;
 
                             if (timeRemaining - timeToStacker > 0)
@@ -147,7 +141,7 @@ namespace OptimizationLogic
                             }
                         }
                     }
-                }                
+                }
             }
 
             var allRecords = warehouseReorganizationRecordsDict.Values.SelectMany(x => x).ToList();
@@ -164,7 +158,7 @@ namespace OptimizationLogic
                 localProductionState.FutureProductionPlan.Enqueue(localProductionState.FutureProductionPlan.ElementAt(counter++));
             }
             NaiveController naiveController = new NaiveController(localProductionState);
-            while (naiveController.NextStep() && naiveController.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) {}
+            while (naiveController.NextStep() && naiveController.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) { }
             return numberOfImagenarySteps;
         }
     }

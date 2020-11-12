@@ -39,7 +39,7 @@ namespace ScenarioGenerator
                 })
                 .ToList();
             var loader = new ProductionStateLoader(loaderFiles, "InputFiles/ProcessingTimeMatrix.csv");
-            var prodStateGenerator = new ProductionStateGenerator(historyGenerator, futureGenerator, loader.TimeMatrix, 0.5, 0.5, 1.0);
+            var prodStateGenerator = new ProductionStateGenerator(historyGenerator, futureGenerator, 0.5, 0.5, 1.0);
 
             var logFile = File.CreateText("probability_log.txt");
             logFile.WriteLine("Id;ProbabilityOfStartingInMqbState;MqbToMebTransitionProbabilityHistory;MqbToMebTransitionProbabilityFuture;UniformProbabilityWeight;MqbDistanceWeight;MebDistanceWeight");
