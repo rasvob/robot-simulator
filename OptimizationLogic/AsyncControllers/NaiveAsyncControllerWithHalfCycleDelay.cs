@@ -9,11 +9,7 @@ namespace OptimizationLogic.AsyncControllers
 {
     public class NaiveAsyncControllerWithHalfCycleDelay: NaiveAsyncController
     {
-        public NaiveAsyncControllerWithHalfCycleDelay(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
-        {
-        }
-
-        public NaiveAsyncControllerWithHalfCycleDelay(ProductionState state, string csvProcessingTimeMatrix) : base(state, csvProcessingTimeMatrix)
+        public NaiveAsyncControllerWithHalfCycleDelay(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
         }
 

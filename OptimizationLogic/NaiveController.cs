@@ -11,11 +11,7 @@ namespace OptimizationLogic
 {
     public class NaiveController: BaseController
     {
-        public NaiveController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan): base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
-        {
-        }
-
-        public NaiveController(ProductionState state, string csvProcessingTimeMatrix): base(state, csvProcessingTimeMatrix)
+        public NaiveController(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan): base(productionState, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
         }
 
@@ -46,10 +42,10 @@ namespace OptimizationLogic
             (r, c) = ProductionState.GetWarehouseIndex(nearestNeededPosition);
             ProductionState.WarehouseState[r, c] = ItemState.Empty;
 
-            var insertTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker), ProductionState.GetTimeMatrixIndex(nearestFreePosition)];
-            var moveToDifferentCellTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestFreePosition), ProductionState.GetTimeMatrixIndex(nearestNeededPosition)] - 5; // TODO: Validate this calculation
+            var insertTime = ProductionState[PositionCodes.Stacker, nearestFreePosition];
+            var moveToDifferentCellTime = ProductionState[nearestFreePosition, nearestNeededPosition] - 5; // TODO: Validate this calculation
             moveToDifferentCellTime = moveToDifferentCellTime < 0 ? 0 : moveToDifferentCellTime; 
-            var withdrawTime = ProductionState.TimeMatrix[ProductionState.GetTimeMatrixIndex(nearestNeededPosition), ProductionState.GetTimeMatrixIndex(PositionCodes.Stacker)];
+            var withdrawTime = ProductionState[nearestNeededPosition, PositionCodes.Stacker];
             var totalTime = insertTime + moveToDifferentCellTime + withdrawTime;
             ProductionState.CurrentStepTime = totalTime;
             ProductionState.TimeSpentInSimulation += totalTime;

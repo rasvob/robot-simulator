@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace OptimizationLogic.DTO
-{
+{ // TODO: reimplement thsi to class or dll with dynamically created Enum; https://stackoverflow.com/questions/857414/dynamically-create-an-enum
     public enum PositionCodes: int
     {
         Stacker,

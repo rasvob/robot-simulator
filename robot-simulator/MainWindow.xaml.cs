@@ -21,7 +21,7 @@ namespace robot_simulator
         public MainWindow()
         {
             InitializeComponent();
-            var productionState = new ProductionState();
+            var productionState = new ProductionState(12, 4);
             var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
             var naiveController = new NaiveController(productionState);
             BaseController asyncController = new NaiveAsyncControllerWithHalfCycleDelay(productionState);

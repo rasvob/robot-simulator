@@ -12,24 +12,13 @@ namespace OptimizationUnitTests
     public class ProductionStateUnitTest
     {
         [DataTestMethod]
-        [DataRow(PositionCodes.Stacker, 0)]
-        [DataRow(PositionCodes.Service, 44)]
-        [DataRow(PositionCodes._2A, 3)]
-        public void TestGetTimeMatrixIndex(PositionCodes code, int expected)
-        {
-            var state = new ProductionState();
-            var res = state.GetTimeMatrixIndex(code);
-            Assert.AreEqual(expected, res);
-        }
-
-        [DataTestMethod]
         [DataRow(PositionCodes.Stacker, 2, 0)]
         [DataRow(PositionCodes.Service, 2, 11)]
         [DataRow(PositionCodes._2A, 3, 1)]
         [DataRow(PositionCodes._5B, 0, 2)]
         public void TestGetWarehouseIndex(PositionCodes code, int expectedRow, int expectedCol)
         {
-            var state = new ProductionState();
+            var state = new ProductionState(12, 4);
             var res = state.GetWarehouseIndex(code);
             Assert.AreEqual((expectedRow, expectedCol), res);
         }
@@ -93,7 +82,7 @@ namespace OptimizationUnitTests
             .ToList();
             var loader = new ProductionStateLoader(loaderFiles, "Input/ProcessingTimeMatrix.csv");
 
-            var prodStateGenerator = new ProductionStateGenerator(historyGenerator, futureGenerator, loader.TimeMatrix, mqbDistanceWeight, mebDistanceWeight, uniformProbabilityWeight);
+            var prodStateGenerator = new ProductionStateGenerator(historyGenerator, futureGenerator, mqbDistanceWeight, mebDistanceWeight, uniformProbabilityWeight);
             var state = prodStateGenerator.GenerateProductionState();
             Assert.AreEqual(expected, state.WarehouseState.Cast<ItemState>().Count(t => t == ItemState.Empty));
         }

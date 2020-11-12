@@ -30,12 +30,7 @@ namespace OptimizationLogic.AsyncControllers
             _timeBaseShift += value;
         }
 
-        public NaiveAsyncController(ProductionState productionState, string csvProcessingTimeMatrix, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvProcessingTimeMatrix, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
-        {
-
-        }
-
-        public NaiveAsyncController(ProductionState state, string csvProcessingTimeMatrix) : base(state, csvProcessingTimeMatrix)
+        public NaiveAsyncController(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
 
         }

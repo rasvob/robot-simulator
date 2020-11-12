@@ -13,13 +13,16 @@ namespace OptimizationLogic.DTO
     {
         public Queue<ItemState> FutureProductionPlan { get; set; } = new Queue<ItemState>();
         public Queue<ItemState> ProductionHistory { get; set; } = new Queue<ItemState>();
-        public ItemState[,] WarehouseState { get; set; } = new ItemState[WarehouseYDimension, WarehouseXDimension];
-        public double[,] TimeMatrix { get; set; } = new double[TimeMatrixDimension, TimeMatrixDimension];
+        public ItemState[,] WarehouseState { get; set; }
+        public Dictionary<PositionCodes, Dictionary<PositionCodes, double>> TimeDictionary { get; set; }
         public bool ProductionStateIsOk { get; set; } = true;
         public int StepCounter { get; set; } = 1;
         public double CurrentStepTime { get; set; } = 0;
         public double TimeSpentInSimulation { get; set; } = 0;
         public int InitialFutureProductionPlanLen { get; set; } = 0;
+        public int WarehouseXDimension { get; }
+        public int WarehouseYDimension { get; }
+
 
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
 
@@ -31,37 +34,25 @@ namespace OptimizationLogic.DTO
             }
         }
 
-        public int WarehouseRows 
-        { 
+        public int WarehouseRows
+        {
             get
             {
                 return WarehouseYDimension;
             }
         }
 
-        public int TimeMatrixDimensionPub
-        {
-            get
-            {
-                return TimeMatrixDimension;
-            }
-        }
-
-        private const int TimeMatrixDimension = 47;
-        private const int WarehouseXDimension = 12;
-        private const int WarehouseYDimension = 4;
         private Dictionary<PositionCodes, (int row, int col)> _warehousePositionMapping;
         private Dictionary<(int row, int col), PositionCodes> _warehousePositionMappingReverse;
-        private Dictionary<PositionCodes, int> _timeMatrixMapping;
 
         public ItemState this[PositionCodes index]
         {
-            get 
+            get
             {
                 (int r, int c) = GetWarehouseIndex(index);
                 return WarehouseState[r, c];
             }
-            set 
+            set
             {
                 (int r, int c) = GetWarehouseIndex(index);
                 WarehouseState[r, c] = value;
@@ -70,31 +61,38 @@ namespace OptimizationLogic.DTO
 
         public double this[PositionCodes from, PositionCodes to]
         {
-            get 
+            get
             {
-                return TimeMatrix[GetTimeMatrixIndex(from), GetTimeMatrixIndex(to)];
+                return TimeDictionary[from][to];
             }
-            private set 
+            private set
             {
-                TimeMatrix[GetTimeMatrixIndex(from), GetTimeMatrixIndex(to)] = value;
+                TimeDictionary[from][to] = value;
             }
         }
 
-        public ProductionState()
+        public ProductionState(int WarehouseXDimension, int WarehouseYDimension)
         {
+            WarehouseState = new ItemState[WarehouseYDimension, WarehouseXDimension];
+            TimeDictionary = new Dictionary<PositionCodes, Dictionary<PositionCodes, double>>();
+            //TimeMatrix = new double[TimeMatrixDimension, TimeMatrixDimension];
+            this.WarehouseXDimension = WarehouseXDimension;
+            this.WarehouseYDimension = WarehouseYDimension;
             _warehousePositionMapping = BuildWarehousePositionMappingDict();
             var s = _warehousePositionMapping.Select(t => t.Value).GroupBy(t => t);
             _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
-            _timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
+            //_timeMatrixMapping = BuildTimeMatrixPositionMappingDict();
+            BuildTimeDictionary();
             FillForbidden();
         }
 
         public void FillForbidden()
         {
-            WarehouseState[2, 0] = ItemState.Forbidden;
-            WarehouseState[3, 0] = ItemState.Forbidden;
-            WarehouseState[2, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
-            WarehouseState[3, WarehouseState.GetLength(1) - 1] = ItemState.Forbidden;
+            for (int i = WarehouseYDimension / 2; i < WarehouseYDimension; i++)
+            {
+                WarehouseState[i, 0] = ItemState.Forbidden;
+                WarehouseState[i, WarehouseXDimension - 1] = ItemState.Forbidden;
+            }
         }
 
         public void ResetState()
@@ -107,20 +105,21 @@ namespace OptimizationLogic.DTO
 
         private Dictionary<PositionCodes, (int row, int col)> BuildWarehousePositionMappingDict()
         {
-            return ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code => {
+            return ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code =>
+            {
                 if (code == PositionCodes.Stacker)
                 {
-                    return (2, 0);
+                    return (WarehouseYDimension - 1, 0);
                 }
                 else if (code == PositionCodes.Service)
                 {
-                    return (2, 11);
+                    return (WarehouseYDimension - 1, WarehouseXDimension - 1);
                 }
                 else
                 {
                     (int numericalPart, char alphabetPart) = ParsePositionCode(code);
                     int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
-                    int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
+                    int row = (numericalPart % 2 == 0 ? WarehouseYDimension - 1 : WarehouseYDimension / 2 - 1) - (alphabetPart - 'A');
                     return (row, col);
                 }
             });
@@ -128,26 +127,35 @@ namespace OptimizationLogic.DTO
 
         private Dictionary<(int row, int col), PositionCodes> BuildWarehousePositionMappingReverseDict()
         {
+
             var res = _warehousePositionMapping.ToDictionary(x => x.Value, x => x.Key);
-            foreach (char alphabetPart in new[] { 'A', 'B' })
+            for (int i = WarehouseYDimension / 2; i < WarehouseYDimension; i++)
+            {
+                res[(i, WarehouseXDimension - 1)] = PositionCodes.Service;
+                res[(i, 0)] = PositionCodes.Stacker;
+            }
+
+            // TODO: verify this method; nejsem si jist co tady zmenit v cem se lisi oproti pouhemu otoceni, tzn proc pridavat na num part 22 Service a na 3,0 Stacker (pravdepodobne doplneni pro kompletnost)
+            /*foreach (char alphabetPart in new[] { 'A', 'B' })
             {
                 int numericalPart = 22;
                 int col = (numericalPart - (numericalPart % 2 == 0 ? 0 : 1)) / 2;
                 int row = (alphabetPart == 'A' ? 1 : 0) + (numericalPart % 2 == 0 ? 2 : 0);
                 res[(row, col)] = PositionCodes.Service;
             }
-            res[(3, 0)] = PositionCodes.Stacker;
+            res[(3, 0)] = PositionCodes.Stacker;*/
             return res;
         }
 
-        private (int numericalPart, char alphabetPart) ParsePositionCode(PositionCodes code) {
+        private (int numericalPart, char alphabetPart) ParsePositionCode(PositionCodes code)
+        {
             var pureCode = code.ToString().Remove(0, 1);
             var numericalPart = int.Parse(pureCode.Remove(pureCode.Length - 1));
             var alphabetPart = pureCode[pureCode.Length - 1];
             return (numericalPart, alphabetPart);
         }
 
-        private Dictionary<PositionCodes, int> BuildTimeMatrixPositionMappingDict() => _timeMatrixMapping = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code =>
+        /*private Dictionary<PositionCodes, int> BuildTimeMatrixPositionMappingDict() => _timeMatrixMapping = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).ToDictionary(code => code, code =>
         {
             if (code == PositionCodes.Stacker)
             {
@@ -162,9 +170,9 @@ namespace OptimizationLogic.DTO
                 (int numericalPart, char alphabetPart) = ParsePositionCode(code);
                 return numericalPart * 2 - (alphabetPart == 'A' ? 1 : 0);
             }
-        });
+        });*/
 
-        public int GetTimeMatrixIndex(PositionCodes code) => _timeMatrixMapping[code];
+        //public int GetTimeMatrixIndex(PositionCodes code) => _timeMatrixMapping[code];
         public (int row, int col) GetWarehouseIndex(PositionCodes code) => _warehousePositionMapping[code];
         public PositionCodes GetWarehouseCell(int row, int col) => _warehousePositionMappingReverse[(row, col)];
 
@@ -176,18 +184,43 @@ namespace OptimizationLogic.DTO
             }
         }
 
-        public void LoadTimeMatrix(string csvPath)
+        private double CalculateTime(PositionCodes from, PositionCodes to)
         {
-            string[] lines = File.ReadAllLines(csvPath);
-            CheckCorrectInputDimension(lines, TimeMatrixDimension);
-            
-            for (int i = 0; i < lines.Length; i++)
+            if (from == to)
             {
-                string[] row = lines[i].Split(';');
-                CheckCorrectInputDimension(row, TimeMatrixDimension); 
-                for (int j = 0; j < row.Length; j++)
+                return 0;
+            }
+
+            (int fromRow, int fromCol) = GetWarehouseIndex(from);
+            (int toRow, int toCol) = GetWarehouseIndex(to);
+            const double operationTime = 5;
+            const double xMoveTime = 2.3;
+            const double yMoveTime = 3.5;
+
+            int yMiddleSize = WarehouseYDimension / 2;
+            int xMovement = Math.Abs(fromCol - toCol);
+            int yMovement = Math.Abs(Math.Abs(fromRow % yMiddleSize) - Math.Abs(toRow % yMiddleSize));
+
+            double time = operationTime + xMovement * xMoveTime;
+            if (xMovement < 8 && yMovement > 1)
+            {
+                time += 2 * yMoveTime;
+            }
+            else if (xMovement < 4 && yMovement > 0)
+            {
+                time += yMoveTime;
+            }
+            return time;
+        }
+
+        public void BuildTimeDictionary()
+        {
+            foreach (var position1 in (PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
+            {
+                TimeDictionary[position1] = new Dictionary<PositionCodes, double>();
+                foreach (var position2 in (PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
                 {
-                    TimeMatrix[i, j] = double.Parse(row[j], CultureInfo.InvariantCulture);
+                    TimeDictionary[position1][position2] = CalculateTime(position1, position2);
                 }
             }
         }
@@ -202,7 +235,7 @@ namespace OptimizationLogic.DTO
         };
 
         public void LoadWarehouseState(string csvPath)
-        {
+        { // TODO : zkontrolovat zda je nutny refactoring
             string[] lines = File.ReadAllLines(csvPath);
             CheckCorrectInputDimension(lines, WarehouseYDimension);
 
@@ -219,7 +252,7 @@ namespace OptimizationLogic.DTO
 
         public void LoadProductionHistory(string csvPath) => ProductionHistory = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
         public void LoadFutureProductionPlan(string csvPath)
-        {            
+        {
             FutureProductionPlan = new Queue<ItemState>(File.ReadLines(csvPath).Select(GetItemState));
             InitialFutureProductionPlanLen = FutureProductionPlan.Count;
         }
@@ -240,7 +273,7 @@ namespace OptimizationLogic.DTO
                     {
                         sb.Append(';');
                     }
-                    sb.Append(WarehouseState[i, j].ToString());            
+                    sb.Append(WarehouseState[i, j].ToString());
                 }
                 lines[i] = sb.ToString();
             }
@@ -285,16 +318,16 @@ namespace OptimizationLogic.DTO
             var item2 = WarehouseState[row2, col2];
             WarehouseState[row1, col1] = item2;
             WarehouseState[row2, col2] = item1;
-            return TimeMatrix[GetTimeMatrixIndex(pos1), GetTimeMatrixIndex(pos2)];
+            return TimeDictionary[pos1][pos2];
         }
 
         public object Clone()
         {
-            ProductionState productionStateCopy = new ProductionState();
+            ProductionState productionStateCopy = new ProductionState(WarehouseXDimension, WarehouseYDimension);
             productionStateCopy.FutureProductionPlan = new Queue<ItemState>(this.FutureProductionPlan);
             productionStateCopy.ProductionHistory = new Queue<ItemState>(this.ProductionHistory);
             productionStateCopy.WarehouseState = (ItemState[,])this.WarehouseState.Clone();
-            productionStateCopy.TimeMatrix = this.TimeMatrix;
+            productionStateCopy.TimeDictionary = this.TimeDictionary;
             productionStateCopy.ProductionStateIsOk = this.ProductionStateIsOk;
             productionStateCopy.StepCounter = this.StepCounter;
             productionStateCopy.CurrentStepTime = this.CurrentStepTime;
