@@ -4,8 +4,8 @@ namespace OptimizationLogic.AsyncControllers
 {
     public class NaiveAsyncController : BaseController
     {
-        public int IntakeClock { get; private set; } = 55;
-        public int IntakeOuttakeDifference { get; private set; } = 36;
+        public int IntakeClock { get { return base.ClockTime; } }
+        public int IntakeOuttakeDifference { get { return base.TimeLimit; } }
         public double SwapChainTime { get; private set; } = 10;
         public double TimeBase { get => _timeBaseShift + Delay; }
         private double _timeBaseShift = 9;
