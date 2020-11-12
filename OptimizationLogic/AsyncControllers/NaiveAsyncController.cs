@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using OptimizationLogic.DTO;
-using OptimizationLogic.Extensions;
+﻿using OptimizationLogic.DTO;
 
 namespace OptimizationLogic.AsyncControllers
 {
