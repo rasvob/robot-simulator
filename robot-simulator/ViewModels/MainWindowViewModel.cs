@@ -122,6 +122,71 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private List<int> _frontStackLevelsCollection = new List<int> { 1, 2, 3 };
+
+        public List<int> FrontStackLevelCollection
+        {
+            get { return _frontStackLevelsCollection; }
+
+            set
+            {
+                if (_frontStackLevelsCollection != value)
+                {
+                    _frontStackLevelsCollection = value;
+                    OnPropertyChanged(nameof(FrontStackLevelCollection));
+                }
+            }
+        }
+
+        private int _frontStackLevelsCount = 2;
+
+        public int FrontStackLevelsCount
+        {
+            get { return _frontStackLevelsCount; }
+
+            set
+            {
+                if (_frontStackLevelsCount != value)
+                {
+                    _frontStackLevelsCount = value;
+                    OnPropertyChanged(nameof(FrontStackLevelsCount));
+                }
+            }
+        }
+
+        private int _numberOfFreePositionsInStacker = 7;
+
+        public int NumberOfFreePositionsInStacker
+        {
+            get { return _numberOfFreePositionsInStacker; }
+
+            set
+            {
+                if (_numberOfFreePositionsInStacker != value)
+                {
+                    _numberOfFreePositionsInStacker = value;
+                    OnPropertyChanged(nameof(NumberOfFreePositionsInStacker));
+                }
+            }
+        }
+
+        private int _numberOfItemsInPastProductionQueue = 50;
+
+        public int NumberOfItemsInPastProductionQueue
+        {
+            get { return _numberOfItemsInPastProductionQueue; }
+
+            set
+            {
+                if (_numberOfItemsInPastProductionQueue != value)
+                {
+                    _numberOfItemsInPastProductionQueue = value;
+                    OnPropertyChanged(nameof(NumberOfItemsInPastProductionQueue));
+                }
+            }
+        }
+
+
 
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }

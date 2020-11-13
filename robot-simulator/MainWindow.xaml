@@ -407,6 +407,39 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="Batch simulation">
+                <StackPanel Margin="0 15 15 0" >
+                    <Expander Header="Stacker configuration" IsExpanded="True">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Number of levels in front stack" Style="{StaticResource SmallSectionHeader}" />
+                                <ComboBox Width="250" SelectedValue="{Binding FrontStackLevelsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FrontStackLevelCollection, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical" Margin="15 0 0 0">
+                                <TextBlock Text="Number of free positions in front stack" Style="{StaticResource SmallSectionHeader}" />
+                                <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        Minimum="1"
+                                        Speedup="True"
+                                        Width="250"
+                                        Value="{Binding NumberOfFreePositionsInStacker, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical" Margin="15 0 0 0">
+                                <TextBlock Text="Number of positions in past production queue" Style="{StaticResource SmallSectionHeader}" />
+                                <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        Minimum="5"
+                                        Speedup="True"
+                                        Width="320"
+                                        Value="{Binding NumberOfItemsInPastProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </mah:MetroTabItem>
         </TabControl>
     </ScrollViewer>
 </mah:MetroWindow>
