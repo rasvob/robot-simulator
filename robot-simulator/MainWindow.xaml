@@ -411,31 +411,58 @@
             <mah:MetroTabItem Header="Batch simulation">
                 <StackPanel Margin="0 15 15 0" >
                     <Expander Header="Stacker configuration" IsExpanded="True">
-                        <StackPanel Orientation="Horizontal">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="Number of levels in front stack" Style="{StaticResource SmallSectionHeader}" />
-                                <ComboBox Width="250" SelectedValue="{Binding FrontStackLevelsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FrontStackLevelCollection, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
+                        <StackPanel Orientation="Vertical">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Orientation="Vertical" Margin="15 0 0 0">
-                                <TextBlock Text="Number of free positions in front stack" Style="{StaticResource SmallSectionHeader}" />
-                                <mah:NumericUpDown
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="Number of levels in front stack storage" Style="{StaticResource SmallSectionHeader}" />
+                                    <ComboBox SelectedValue="{Binding FrontStackLevelsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FrontStackLevelCollection, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="15 0 0 0" Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Text="Number of free positions in the front stack" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
                                         mah:TextBoxHelper.ClearTextButton="False"
                                         Minimum="1"
                                         Speedup="True"
-                                        Width="250"
                                         Value="{Binding NumberOfFreePositionsInStacker, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
+                                </StackPanel>
 
-                            <StackPanel Orientation="Vertical" Margin="15 0 0 0">
-                                <TextBlock Text="Number of positions in past production queue" Style="{StaticResource SmallSectionHeader}" />
-                                <mah:NumericUpDown
+                                <StackPanel Orientation="Vertical" Margin="15 0 0 0" Grid.Row="0" Grid.Column="2">
+                                    <TextBlock Text="Number of items in past production queue" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
                                         mah:TextBoxHelper.ClearTextButton="False"
                                         Minimum="5"
                                         Speedup="True"
-                                        Width="320"
                                         Value="{Binding NumberOfItemsInPastProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            </StackPanel>
+                                </StackPanel>
+
+                                <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="1" Grid.Column="0"
+                                   Header="Select dominant production type"
+                                   IsOn="{Binding IsMqbDominant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   OffContent="MEB"
+                                   OnContent="MQB" />
+
+                                    <StackPanel Orientation="Vertical" Margin="17 10 0 0 " Grid.Row="1" Grid.Column="1">
+                                        <TextBlock Text="Select restriction for production queue" Style="{StaticResource SmallSectionHeader}" Margin="0 0 8 6" />
+                                    <ComboBox SelectedIndex="{Binding RestrictionSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ProductionQueueRestrictions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                            </Grid>
+
+                            
+
+                            
                         </StackPanel>
                     </Expander>
                 </StackPanel>

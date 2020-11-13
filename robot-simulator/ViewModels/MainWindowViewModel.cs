@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using MahApps.Metro.Controls.Dialogs;
+using System.Windows.Documents;
+using System.Web.UI;
 
 namespace robot_simulator.ViewModels
 {
@@ -186,6 +188,53 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private bool _isMqbDominant = true;
+
+        public bool IsMqbDominant
+        {
+            get { return _isMqbDominant; }
+
+            set
+            {
+                if (_isMqbDominant != value)
+                {
+                    _isMqbDominant = value;
+                    OnPropertyChanged(nameof(IsMqbDominant));
+                }
+            }
+        }
+
+        private int _restrictionSelectedIndex = 1;
+
+        public int RestrictionSelectedIndex
+        {
+            get { return _restrictionSelectedIndex; }
+
+            set
+            {
+                if (_restrictionSelectedIndex != value)
+                {
+                    _restrictionSelectedIndex = value;
+                    OnPropertyChanged(nameof(RestrictionSelectedIndex));
+                }
+            }
+        }
+
+        private List<string> _productionQueueRestrictions;
+
+        public List<string> ProductionQueueRestrictions
+        {
+            get { return _productionQueueRestrictions; }
+
+            set
+            {
+                if (_productionQueueRestrictions != value)
+                {
+                    _productionQueueRestrictions = value;
+                    OnPropertyChanged(nameof(ProductionQueueRestrictions));
+                }
+            }
+        }
 
 
         public int CurrentStep { get => ProductionState.StepCounter; }
@@ -271,6 +320,17 @@ namespace robot_simulator.ViewModels
             OpenFolderDialog = openFolderDialog;
             RealProductionSimulator.WarehouseReorganizationProgressUpdated += RealProductionSimulator_WarehouseReorganizationProgressUpdated;
             DialogCoordinator = dialogCoordinator;
+
+            //TODO: Add item-to-command for dominant type change
+            ProductionQueueRestrictions = CreateProductionQueueRestrictions();
+        }
+
+        private List<string> CreateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)
+        {
+            ItemState nonDominant = !IsMqbDominant ? ItemState.MQB : ItemState.MEB;
+            var res = new List<string> { "Full production of dominant type" };
+            res.AddRange(Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"));
+            return res;
         }
 
         private async void RealProductionSimulator_WarehouseReorganizationProgressUpdated(object sender, ProgressEventArgs e)
