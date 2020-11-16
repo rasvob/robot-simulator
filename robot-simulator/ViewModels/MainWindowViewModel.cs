@@ -13,10 +13,11 @@ using System.Windows.Input;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Documents;
 using System.Web.UI;
+using System.ComponentModel;
 
 namespace robot_simulator.ViewModels
 {
-    public class MainWindowViewModel : BaseViewModel
+    public class MainWindowViewModel : BaseViewModel, IDataErrorInfo
     {
         private ObservableCollection<WarehouseItemViewModel> currentWarehouseState;
 
@@ -62,7 +63,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        public ObservableCollection<WarehouseItemViewModel> FutureQueue 
+        public ObservableCollection<WarehouseItemViewModel> FutureQueue
         {
             get => futureQueue;
             set
@@ -200,6 +201,7 @@ namespace robot_simulator.ViewModels
                 {
                     _isMqbDominant = value;
                     OnPropertyChanged(nameof(IsMqbDominant));
+                    UpdateProductionQueueRestrictions();
                 }
             }
         }
@@ -220,9 +222,9 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        private List<string> _productionQueueRestrictions;
+        private ObservableCollection<ObservableString> _productionQueueRestrictions;
 
-        public List<string> ProductionQueueRestrictions
+        public ObservableCollection<ObservableString> ProductionQueueRestrictions
         {
             get { return _productionQueueRestrictions; }
 
@@ -277,6 +279,86 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private bool _areCoefficientValuesFixed = true;
+
+        public bool AreCoefficientValuesFixed
+        {
+            get { return _areCoefficientValuesFixed; }
+
+            set
+            {
+                if (_areCoefficientValuesFixed != value)
+                {
+                    _areCoefficientValuesFixed = value;
+                    OnPropertyChanged(nameof(AreCoefficientValuesFixed));
+                }
+            }
+        }
+
+        private double _nextNonDominantItemProbability = 0.5;
+
+        public double NextNonDominantItemProbability
+        {
+            get { return _nextNonDominantItemProbability; }
+
+            set
+            {
+                if (_nextNonDominantItemProbability != value)
+                {
+                    _nextNonDominantItemProbability = value;
+                    OnPropertyChanged(nameof(NextNonDominantItemProbability));
+                }
+            }
+        }
+
+        private double _dominantDistanceWeight = 1.0;
+
+        public double DominantDistanceWeight
+        {
+            get { return _dominantDistanceWeight; }
+
+            set
+            {
+                if (_dominantDistanceWeight != value)
+                {
+                    _dominantDistanceWeight = value;
+                    OnPropertyChanged(nameof(DominantDistanceWeight));
+                }
+            }
+        }
+
+        private double _nonDominantDistanceWeight = 1.0;
+
+        public double NonDominantDistanceWeight
+        {
+            get { return _nonDominantDistanceWeight; }
+
+            set
+            {
+                if (_nonDominantDistanceWeight != value)
+                {
+                    _nonDominantDistanceWeight = value;
+                    OnPropertyChanged(nameof(NonDominantDistanceWeight));
+                }
+            }
+        }
+
+        private double _uniformProbabilityWeight = 1.0;
+
+        public double UniformProbabilityWeight
+        {
+            get { return _uniformProbabilityWeight; }
+
+            set
+            {
+                if (_uniformProbabilityWeight != value)
+                {
+                    _uniformProbabilityWeight = value;
+                    OnPropertyChanged(nameof(UniformProbabilityWeight));
+                }
+            }
+        }
+
         public void ShowNotification(string message)
         {
             NotificationText = message;
@@ -295,6 +377,17 @@ namespace robot_simulator.ViewModels
         public ProgressDialogController ProgressDialog { get; set; }
 
         public bool WarehouserReorganizationIsRunning { get; set; } = false;
+
+        public string Error => string.Empty;
+
+        public string this[string columnName] => columnName switch
+        {
+            nameof(NumberOfFreePositionsInStacker) => NumberOfFreePositionsInStacker < 1 ? "Number of free positions in stacker has to be >= 1" : null,
+            nameof(NumberOfItemsInPastProductionQueue) => NumberOfItemsInPastProductionQueue < 5 ? "Number of items in pas production queue has to be >= 5" : null,
+            nameof(NextNonDominantItemProbability) => NextNonDominantItemProbability < 0 || NextNonDominantItemProbability > 1 ? "Probability must be in range from 0 to 1" : null,
+            nameof(UniformProbabilityWeight) => UniformProbabilityWeight < 0  ? "Uniform placing probability weight must be >= 0" : null,
+            _ => null
+        };
 
         public MainWindowViewModel(BaseController naiveController, BaseController asyncController, GreedyWarehouseReorganizer reorganizer, RealProductionSimulator realProductionSimulator, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService, IOpenFileService openFolderDialog, MahApps.Metro.Controls.Dialogs.IDialogCoordinator dialogCoordinator)
         {
@@ -320,17 +413,29 @@ namespace robot_simulator.ViewModels
             OpenFolderDialog = openFolderDialog;
             RealProductionSimulator.WarehouseReorganizationProgressUpdated += RealProductionSimulator_WarehouseReorganizationProgressUpdated;
             DialogCoordinator = dialogCoordinator;
-
-            //TODO: Add item-to-command for dominant type change
-            ProductionQueueRestrictions = CreateProductionQueueRestrictions();
+            ProductionQueueRestrictions = new ObservableCollection<ObservableString>();
+            UpdateProductionQueueRestrictions();
         }
 
-        private List<string> CreateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)
+        private void UpdateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)
         {
             ItemState nonDominant = !IsMqbDominant ? ItemState.MQB : ItemState.MEB;
-            var res = new List<string> { "Full production of dominant type" };
-            res.AddRange(Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"));
-            return res;
+
+            if(ProductionQueueRestrictions.Any())
+            {
+                foreach (var item in ProductionQueueRestrictions)
+                {
+                    item.Value = item.Value.Replace(IsMqbDominant ? ItemState.MQB.ToString() : ItemState.MEB.ToString(), nonDominant.ToString());
+                }
+                return;
+            }
+
+            ProductionQueueRestrictions.Clear();
+            ProductionQueueRestrictions.Add(new ObservableString() { Value = "Full production of dominant type" });
+            foreach (var item in Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"))
+            {
+                ProductionQueueRestrictions.Add(new ObservableString() { Value = item });
+            }
         }
 
         private async void RealProductionSimulator_WarehouseReorganizationProgressUpdated(object sender, ProgressEventArgs e)

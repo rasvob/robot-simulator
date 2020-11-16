@@ -52,7 +52,6 @@
     <WarningLevel>4</WarningLevel>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
-  
   <ItemGroup>
     <Reference Include="ControlzEx, Version=4.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.4.3.2\lib\net462\ControlzEx.dll</HintPath>
@@ -177,7 +176,9 @@
     <Compile Include="Dialogs\OpenFolderDialogService.cs" />
     <Compile Include="ViewModels\Behaviours\IgnoreMouseWheelBehavior.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\ObservableString.cs" />
     <Compile Include="ViewModels\SimpleCommand.cs" />
+    <Compile Include="ViewModels\ValueConterters\ObservableStringValueConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\QueueDisplayLimitConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\TileColorValueConterter.cs" />
     <Compile Include="ViewModels\WarehouseItemViewModel.cs" />
