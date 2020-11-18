@@ -157,6 +157,23 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private int _frontStackColumnsCount = 12;
+
+        public int FrontStackColumnsCount
+        {
+            get { return _frontStackColumnsCount; }
+
+            set
+            {
+                if (_frontStackColumnsCount != value)
+                {
+                    _frontStackColumnsCount = value;
+                    OnPropertyChanged(nameof(FrontStackColumnsCount));
+                }
+            }
+        }
+
+
         private int _numberOfFreePositionsInStacker = 7;
 
         public int NumberOfFreePositionsInStacker
@@ -415,6 +432,18 @@ namespace robot_simulator.ViewModels
             DialogCoordinator = dialogCoordinator;
             ProductionQueueRestrictions = new ObservableCollection<ObservableString>();
             UpdateProductionQueueRestrictions();
+
+            this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var warehouseSizeMasterProperties = new List<string>() { nameof(FrontStackLevelsCount), nameof(NumberOfItemsInPastProductionQueue), nameof(NumberOfFreePositionsInStacker) };
+            if (warehouseSizeMasterProperties.Contains(e.PropertyName))
+            {
+                //TODO: Dopracovat vypocet pres pocty MQB a MEB
+                FrontStackColumnsCount = ProductionState.ComputeNeededColumnsInWarehouse(FrontStackColumnsCount * 2, NumberOfItemsInPastProductionQueue + 2, NumberOfItemsInPastProductionQueue / 2 + 2, NumberOfFreePositionsInStacker, NumberOfItemsInPastProductionQueue);
+            }
         }
 
         private void UpdateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)

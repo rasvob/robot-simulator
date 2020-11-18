@@ -103,6 +103,7 @@
             <converters:TileColorEnumValueConterter x:Key="TileColorEnumValueConterter" />
             <converters:QueueDisplayLimitConverter x:Key="QueueDisplayLimitConverter" />
             <converters:ObservableStringValueConverter x:Key="ObservableStringValueConverter" />
+            <converters:NumberTimesNumberCoverter x:Key="NumberTimesNumberCoverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -426,6 +427,7 @@
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
                                     <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
                                 
                                 <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
@@ -451,7 +453,7 @@
                                         Value="{Binding NumberOfItemsInPastProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                                 </StackPanel>
 
-                                <Button Content="Refresh warehouse size" Command="" Grid.Row="0" Grid.Column="3" Margin="10 17 10 0" Height="28" />
+                                
 
                                 <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="1" Grid.Column="0"
                                    Header="Select dominant production type"
@@ -535,6 +537,24 @@
                                 </Expander>
 
                                 
+
+                                <Expander Header="Parameters overview" IsExpanded="True" Grid.Row="3" Grid.ColumnSpan="4" Margin="0 10 0 0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox Width="200" Margin="0"
+                                             IsReadOnly="True"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Number of total rows in warehouse"
+                                             Text="{Binding FrontStackLevelsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumberTimesNumberCoverter}, ConverterParameter=2}" />
+
+                                        <TextBox Width="200" Margin="10 0 0 0"
+                                             IsReadOnly="True"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Number of total columns in warehouse"
+                                             Text="{Binding FrontStackColumnsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </StackPanel>
+                                </Expander>
+
+                                <!--<Button Content="Refresh overview" Command="" Grid.Row="4" Grid.Column="0" Margin="0 10 0 0" />-->
                             </Grid>
                         </StackPanel>
                     </Expander>
