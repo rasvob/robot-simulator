@@ -451,6 +451,8 @@
                                         Value="{Binding NumberOfItemsInPastProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                                 </StackPanel>
 
+                                <Button Content="Refresh warehouse size" Command="" Grid.Row="0" Grid.Column="3" Margin="10 17 10 0" Height="28" />
+
                                 <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="1" Grid.Column="0"
                                    Header="Select dominant production type"
                                    IsOn="{Binding IsMqbDominant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -492,6 +494,7 @@
                                              mah:TextBoxHelper.UseFloatingWatermark="True"
                                              mah:TextBoxHelper.Watermark="Probability of non-dominant item as the next one"
                                              IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="Future and past production queues are generated sequentially, this probability states how probable is that the next item in sequence will be non-dominant one"
                                              Text="{Binding NextNonDominantItemProbability, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
                                              >
                                             </TextBox>
@@ -520,7 +523,7 @@
                                              IsReadOnly="False"
                                              mah:TextBoxHelper.UseFloatingWatermark="True"
                                              mah:TextBoxHelper.Watermark="Uniform placing probability weight"
-                                             ToolTip="Bigger number means more randomness will be present in the items placing in warehouse"
+                                             ToolTip="Bigger number means more randomness will be present in the items placing in the warehouse"
                                              IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                              Text="{Binding UniformProbabilityWeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
                                              >
@@ -531,13 +534,13 @@
                                     </Grid>
                                 </Expander>
 
-                                <Button Content="Update parameters" Command="" Grid.Row="3" Grid.Column="0" Margin="0 10 0 0" />
+                                
                             </Grid>
-
-                            
-
-                            
                         </StackPanel>
+                    </Expander>
+
+                    <Expander Header="Simulation configuration" IsExpanded="True" Margin="0 8 0 0">
+                        
                     </Expander>
                 </StackPanel>
             </mah:MetroTabItem>

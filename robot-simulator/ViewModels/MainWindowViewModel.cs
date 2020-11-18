@@ -279,7 +279,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        private bool _areCoefficientValuesFixed = true;
+        private bool _areCoefficientValuesFixed = false;
 
         public bool AreCoefficientValuesFixed
         {
