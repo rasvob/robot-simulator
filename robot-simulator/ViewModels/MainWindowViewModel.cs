@@ -174,7 +174,7 @@ namespace robot_simulator.ViewModels
         }
 
 
-        private int _numberOfFreePositionsInStacker = 7;
+        private int _numberOfFreePositionsInStacker = 9;
 
         public int NumberOfFreePositionsInStacker
         {
@@ -190,7 +190,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        private int _numberOfItemsInPastProductionQueue = 50;
+        private int _numberOfItemsInPastProductionQueue = 63;
 
         public int NumberOfItemsInPastProductionQueue
         {
@@ -218,7 +218,6 @@ namespace robot_simulator.ViewModels
                 {
                     _isMqbDominant = value;
                     OnPropertyChanged(nameof(IsMqbDominant));
-                    UpdateProductionQueueRestrictions();
                 }
             }
         }
@@ -376,6 +375,14 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        public int NumberOfDominantItems { get => ProductionState.ComputeDominantTypeItemsCount(NumberOfItemsInPastProductionQueue); }
+        public int NumberOfNonDominantItems { get => ProductionState.ComputeNonDominantTypeItemsCount(NumberOfItemsInPastProductionQueue, RestrictionSelectedIndex); }
+        public string DominantItemString { get => IsMqbDominant ? "MQB" : "MEB"; }
+        public string NonDominantItemString { get => !IsMqbDominant ? "MQB" : "MEB"; }
+
+        public string NumberOfDominantItemsHeader { get => $"Number of {DominantItemString} items"; }
+        public string NumberOfNonDominantItemsHeader { get => $"Number of {NonDominantItemString} items"; }
+
         public void ShowNotification(string message)
         {
             NotificationText = message;
@@ -441,8 +448,17 @@ namespace robot_simulator.ViewModels
             var warehouseSizeMasterProperties = new List<string>() { nameof(FrontStackLevelsCount), nameof(NumberOfItemsInPastProductionQueue), nameof(NumberOfFreePositionsInStacker) };
             if (warehouseSizeMasterProperties.Contains(e.PropertyName))
             {
-                //TODO: Dopracovat vypocet pres pocty MQB a MEB
-                FrontStackColumnsCount = ProductionState.ComputeNeededColumnsInWarehouse(FrontStackColumnsCount * 2, NumberOfItemsInPastProductionQueue + 2, NumberOfItemsInPastProductionQueue / 2 + 2, NumberOfFreePositionsInStacker, NumberOfItemsInPastProductionQueue);
+                FrontStackColumnsCount = ProductionState.ComputeNeededColumnsInWarehouse(FrontStackLevelsCount * 2, NumberOfDominantItems, NumberOfNonDominantItems, NumberOfFreePositionsInStacker, NumberOfItemsInPastProductionQueue);
+                OnPropertyChanged(nameof(NumberOfDominantItems));
+                OnPropertyChanged(nameof(NumberOfNonDominantItems));
+            }
+            else if (e.PropertyName == nameof(IsMqbDominant))
+            {
+                UpdateProductionQueueRestrictions();
+                OnPropertyChanged(nameof(NumberOfDominantItems));
+                OnPropertyChanged(nameof(NumberOfNonDominantItems));
+                OnPropertyChanged(nameof(NumberOfDominantItemsHeader));
+                OnPropertyChanged(nameof(NumberOfNonDominantItemsHeader));
             }
         }
 

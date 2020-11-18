@@ -78,7 +78,11 @@ namespace OptimizationLogic.DTO
             return TimeDictionary[PositionCodes.Stacker][GetWarehouseCell(row, col)];
         }
 
-        public static int ComputeNeededColumnsInWarehouse(int rows, int dominantTypeCount, int nonDominantTypeCount, int freeSpots, int pastProductionQueueLength) => (int)Math.Ceiling((dominantTypeCount + nonDominantTypeCount + freeSpots + 4 + _forbiddedSpotsCount - pastProductionQueueLength)/(double)rows);
+        public static int ComputeNeededColumnsInWarehouse(int rows, int dominantTypeCount, int nonDominantTypeCount, int freeSpots, int pastProductionQueueLength) => (int)Math.Ceiling((dominantTypeCount + nonDominantTypeCount + freeSpots + _forbiddedSpotsCount - pastProductionQueueLength) / (double)rows);
+        //TODO: Check computations
+        public static int ComputeDominantTypeItemsCount(int pastProductionQueueLength) => pastProductionQueueLength + 2;
+        //TODO: Check computations
+        public static int ComputeNonDominantTypeItemsCount(int pastProductionQueueLength, int maxNonDominantInARow) => maxNonDominantInARow == 0 ? ComputeDominantTypeItemsCount(pastProductionQueueLength) : (int)Math.Ceiling(ComputeDominantTypeItemsCount(pastProductionQueueLength) / (double)(maxNonDominantInARow + 1)) + 2;
 
         public ProductionState(int WarehouseXDimension, int WarehouseYDimension)
         {
