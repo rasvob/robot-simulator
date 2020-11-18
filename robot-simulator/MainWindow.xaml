@@ -463,7 +463,7 @@
                                 </mah:ToggleSwitch>
 
                                 <StackPanel Orientation="Vertical" Margin="15 10 0 0 " Grid.Row="1" Grid.Column="1">
-                                        <TextBlock Text="Select restriction for production queue" Style="{StaticResource SmallSectionHeader}" Margin="0 0 8 6" />
+                                    <TextBlock Text="Select restriction for production queue" Style="{StaticResource SmallSectionHeader}" Margin="0 0 8 6" />
                                     <ComboBox DisplayMemberPath="Value"  SelectedIndex="{Binding RestrictionSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ProductionQueueRestrictions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                                     </ComboBox>
                                 </StackPanel>
@@ -537,34 +537,59 @@
                                 </Expander>
 
                                 <Expander Header="Parameters overview" IsExpanded="True" Grid.Row="3" Grid.ColumnSpan="4" Margin="0 10 0 0">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBox Width="200" Margin="0"
-                                             IsReadOnly="True"
-                                             mah:TextBoxHelper.UseFloatingWatermark="True"
-                                             mah:TextBoxHelper.Watermark="Number of total rows in warehouse"
-                                             Text="{Binding FrontStackLevelsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumberTimesNumberCoverter}, ConverterParameter=2}" />
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Width="200" Margin="0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="Number of total rows in warehouse"
+                                                 Text="{Binding FrontStackLevelsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumberTimesNumberCoverter}, ConverterParameter=2}" />
 
-                                        <TextBox Width="200" Margin="10 0 0 0"
-                                             IsReadOnly="True"
-                                             mah:TextBoxHelper.UseFloatingWatermark="True"
-                                             mah:TextBoxHelper.Watermark="Number of total columns in warehouse"
-                                             Text="{Binding FrontStackColumnsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="Number of total columns in warehouse"
+                                                 Text="{Binding FrontStackColumnsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                                        <TextBox Width="200" Margin="10 0 0 0"
-                                             IsReadOnly="True"
-                                             mah:TextBoxHelper.UseFloatingWatermark="True"
-                                             mah:TextBoxHelper.Watermark="{Binding NumberOfDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                             Text="{Binding NumberOfDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="{Binding NumberOfDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Text="{Binding NumberOfDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                                        <TextBox Width="200" Margin="10 0 0 0"
-                                             IsReadOnly="True"
-                                             mah:TextBoxHelper.UseFloatingWatermark="True"
-                                             mah:TextBoxHelper.Watermark="{Binding NumberOfNonDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                                             Text="{Binding NumberOfNonDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="{Binding NumberOfNonDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Text="{Binding NumberOfNonDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="Example of generated sequence" Style="{StaticResource HeadingStyle}" Margin="0 0 0 8"/>
+                                        <ItemsControl ItemsSource="{Binding ExampleOfGeneratedSequence, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <UniformGrid Rows="1" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <mah:Tile Title="{Binding PositionCode, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       Background="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TileColorValueConterter}}"
+                                                       Count="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       CountFontSize="15"
+                                                       HorizontalTitleAlignment="Left"
+                                                       IsEnabled="True"
+                                                       Style="{StaticResource SmallTileStyle}"
+                                                       TitleFontSize="12"
+                                                       HorizontalContentAlignment="Center"
+                                                       Width="Auto"
+                                                       VerticalTitleAlignment="Top" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
                                 </Expander>
-
-                                <!--<Button Content="Refresh overview" Command="" Grid.Row="4" Grid.Column="0" Margin="0 10 0 0" />-->
                             </Grid>
                         </StackPanel>
                     </Expander>

@@ -383,6 +383,26 @@ namespace robot_simulator.ViewModels
         public string NumberOfDominantItemsHeader { get => $"Number of {DominantItemString} items"; }
         public string NumberOfNonDominantItemsHeader { get => $"Number of {NonDominantItemString} items"; }
 
+        public IEnumerable<WarehouseItemViewModel> ExampleOfGeneratedSequence {
+            get {
+                int resLen = 12;
+                var res = new List<WarehouseItemViewModel>();
+
+                while (res.Count < resLen)
+                {
+                    res.Add(new WarehouseItemViewModel { StateStr = DominantItemString });
+                    res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, RestrictionSelectedIndex));
+                }
+
+                for (int i = 0; i < res.Count; i++)
+                {
+                    res[i].PositionCode = $"#{i + 1}";
+                }
+
+                return res.Take(resLen);
+            }
+        }
+
         public void ShowNotification(string message)
         {
             NotificationText = message;
@@ -459,6 +479,11 @@ namespace robot_simulator.ViewModels
                 OnPropertyChanged(nameof(NumberOfNonDominantItems));
                 OnPropertyChanged(nameof(NumberOfDominantItemsHeader));
                 OnPropertyChanged(nameof(NumberOfNonDominantItemsHeader));
+                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
+            }
+            else if (e.PropertyName == nameof(RestrictionSelectedIndex))
+            {
+                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
             }
         }
 
@@ -656,7 +681,7 @@ namespace robot_simulator.ViewModels
                     PositionCode = ProductionState.GetWarehouseCell(cell.row, cell.col).ToGuiString(),
                     StateStr = ProductionState.WarehouseState[cell.row, cell.col].ToString(),
                 }).ToList();
-            res.InsertRange(24, Enumerable.Range(0, ProductionState.WarehouseColls).Select(cell => new WarehouseItemViewModel()
+            res.InsertRange(ProductionState.WarehouseRows/2 * ProductionState.WarehouseColls, Enumerable.Range(0, ProductionState.WarehouseColls).Select(_ => new WarehouseItemViewModel()
                 {
                     Row = 0,
                     Col = 0,
