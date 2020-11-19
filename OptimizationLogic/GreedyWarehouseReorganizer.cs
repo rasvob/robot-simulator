@@ -103,6 +103,7 @@ namespace OptimizationLogic
                     {
                         var currentRecord = warehouseReorganizationRecordsDict[depthIndex][topIndex];
                         var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
+                        // TODO: reimplement to parallel processing - for speeding up processing
                         foreach (var swap in availableSwaps)
                         {
                             ProductionState newProductionState = (ProductionState)currentRecord.ProductionState.Clone();
