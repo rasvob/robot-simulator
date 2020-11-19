@@ -65,10 +65,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RealProductionSimulator.cs" />
     <Compile Include="StateGenerating\FutureProductionPlanGenerator.cs" />
-    <Compile Include="StateGenerating\IPlanGenerator.cs" />
     <Compile Include="StateGenerating\ProductionHistoryGenerator.cs" />
     <Compile Include="StateGenerating\ProductionStateGenerator.cs" />
     <Compile Include="StateGenerating\RestrictivePlanGenerator.cs" />
+    <Compile Include="StateGenerating\RestrictiveProductionStateGenerator.cs" />
     <Compile Include="WarehouseSwapStepModel.cs" />
   </ItemGroup>
   <ItemGroup>
