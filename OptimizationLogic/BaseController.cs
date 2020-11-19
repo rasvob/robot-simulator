@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic
 {
-    public abstract class BaseController: IController
+    public abstract class BaseController : IController
     {
         public ProductionState ProductionState { get; set; }
         public List<BaseStepModel> StepLog { get; set; } = new List<BaseStepModel>();
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
-        public int TimeLimit { get; set; } = 36;
+        public int TimeLimit { get; protected set; }
         public int TimeLimitForOneStep { get => TimeLimit; }
-        public int ClockTime { get; set; } = 55;
+        public int ClockTime { get; protected set; }
 
         public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
@@ -37,7 +37,7 @@ namespace OptimizationLogic
                 }
 
                 SortedPositionCodes[sourcePosition] = cellsTimes.OrderBy(i => i.Value).Select(x => x.Key).ToList();
-            }            
+            }
         }
 
         public BaseController(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan)
@@ -47,12 +47,25 @@ namespace OptimizationLogic
             ProductionState.LoadProductionHistory(csvHistroicalProduction);
             ProductionState.LoadWarehouseState(csvWarehouseInitialState);
             InitSortedPositionCodes();
+            SetControllerTimes();
         }
 
         public BaseController(ProductionState state)
         {
             ProductionState = state;
             InitSortedPositionCodes();
+            SetControllerTimes();
+        }
+
+        public virtual void SetControllerTimes(int tactTime = 55, int operationLimit = 36)
+        {
+            TimeLimit = operationLimit;
+            ClockTime = tactTime;
+        }
+
+        public int InitialIntakeTime
+        {
+            get { return (int)((ClockTime - TimeLimit) / 2); }
         }
 
         public virtual void RenewControllerState()

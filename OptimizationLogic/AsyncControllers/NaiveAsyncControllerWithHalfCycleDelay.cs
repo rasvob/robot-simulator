@@ -25,7 +25,7 @@ namespace OptimizationLogic.AsyncControllers
             }
 
             int currentIntakeSteps = ProductionState.InitialFutureProductionPlanLen - ProductionState.FutureProductionPlan.Count;
-            return (currentIntakeSteps-1) * IntakeClock + 9 + IntakeOuttakeDifference + BreakTime;
+            return (currentIntakeSteps-1) * IntakeClock + InitialIntakeTime + IntakeOuttakeDifference + BreakTime;
         }
 
         public override void PutHandler()

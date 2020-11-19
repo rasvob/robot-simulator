@@ -8,7 +8,7 @@ namespace OptimizationLogic.AsyncControllers
         public int IntakeOuttakeDifference { get { return base.TimeLimit; } }
         public double SwapChainTime { get; private set; } = 10;
         public double TimeBase { get => _timeBaseShift + Delay; }
-        private double _timeBaseShift = 9;
+        private double _timeBaseShift;
         public ItemState IntakeItem { get; set; } = ItemState.Empty;
         public ItemState OuttakeItem { get; set; } = ItemState.Empty;
         public ItemState Needed { get; set; }
@@ -35,6 +35,13 @@ namespace OptimizationLogic.AsyncControllers
         public NaiveAsyncController(ProductionState state) : base(state)
         {
 
+        }
+
+        public override void SetControllerTimes(int tactTime = 55, int operationLimit = 36)
+        {
+            TimeLimit = operationLimit;
+            ClockTime = tactTime;
+            _timeBaseShift = InitialIntakeTime;
         }
 
         public double GetClosestNextIntakeTime()
