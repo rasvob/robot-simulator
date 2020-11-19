@@ -48,6 +48,7 @@
     <Compile Include="AsyncControllers\NaiveAsyncControllerWithHalfCycleDelay.cs" />
     <Compile Include="BaseController.cs" />
     <Compile Include="DTO\ProgressEventArgs.cs" />
+    <Compile Include="DTO\SimulationResultModel.cs" />
     <Compile Include="Extensions\PositionCodesExt.cs" />
     <Compile Include="GreedyWarehouseReorganizer.cs" />
     <Compile Include="DAL\ProductionStateLoader.cs" />

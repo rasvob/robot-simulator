@@ -626,13 +626,32 @@
                             </Expander>
 
                             <StackPanel Orientation="Horizontal">
-                                <Button Content="Run simulations" Margin="0 10 0 0 " Width="150" />
+                                <Button Content="Run simulations" Command="{Binding RunSimulations}" Margin="0 10 0 0 " Width="150" />
                             </StackPanel>
                         </StackPanel>
                     </Expander>
 
                     <Expander Header="Simulation resuls" IsExpanded="True" Margin="0 10 0 0">
-                        
+                        <DataGrid ItemsSource="{Binding SimulationResults, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedSimulationResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    AutoGenerateColumns="False"
+                                    CanUserAddRows="False"
+                                    CanUserDeleteRows="False"
+                                    CanUserReorderColumns="True"
+                                    CanUserResizeColumns="True"
+                                    CanUserResizeRows="True"
+                                    CanUserSortColumns="True">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Load selected simulation" Command="{Binding LoadSelectedSimulation}" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding SimulationNumber}" Header="#" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Delay}" Header="Delay" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding NumberOfNonProducedCars}" Header="Number Of non-produced cars" />
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </Expander>
                 </StackPanel>
             </mah:MetroTabItem>

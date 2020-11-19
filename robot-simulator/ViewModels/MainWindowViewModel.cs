@@ -32,6 +32,8 @@ namespace robot_simulator.ViewModels
         public ICommand LoadProductionHistory { get; private set; }
         public ICommand Undo { get; private set; }
         public ICommand LoadProductionState { get; private set; }
+        public ICommand RunSimulations { get; private set; }
+        public ICommand LoadSelectedSimulation { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -408,6 +410,8 @@ namespace robot_simulator.ViewModels
         }
 
         private double _uniformProbabilityWeight = 1.0;
+        private List<SimulationResultModel> _simulationResults;
+        private SimulationResultModel _selectedSimulationResult;
 
         public double UniformProbabilityWeight
         {
@@ -419,6 +423,34 @@ namespace robot_simulator.ViewModels
                 {
                     _uniformProbabilityWeight = value;
                     OnPropertyChanged(nameof(UniformProbabilityWeight));
+                }
+            }
+        }
+
+        public List<SimulationResultModel> SimulationResults
+        {
+            get { return _simulationResults; }
+
+            set
+            {
+                if (_simulationResults != value)
+                {
+                    _simulationResults = value;
+                    OnPropertyChanged(nameof(SimulationResults));
+                }
+            }
+        }
+
+        public SimulationResultModel SelectedSimulationResult
+        {
+            get { return _selectedSimulationResult; }
+
+            set
+            {
+                if (_selectedSimulationResult != value)
+                {
+                    _selectedSimulationResult = value;
+                    OnPropertyChanged(nameof(SelectedSimulationResult));
                 }
             }
         }
@@ -499,6 +531,8 @@ namespace robot_simulator.ViewModels
             LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
             LoadProductionState = new SimpleCommand(LoadProductionStateExecute);
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
+            RunSimulations = new SimpleCommand(RunSimulationsExecute);
+            LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
             UpdateProductionStateInView();
             OpenFileDialogService = openFileDialogService;
             RealProductionSimulator = realProductionSimulator;
@@ -507,8 +541,18 @@ namespace robot_simulator.ViewModels
             DialogCoordinator = dialogCoordinator;
             ProductionQueueRestrictions = new ObservableCollection<ObservableString>();
             UpdateProductionQueueRestrictions();
-
+            SimulationResults = new List<SimulationResultModel>() { new SimulationResultModel { Delay = 0, NumberOfNonProducedCars = 0, SimulationNumber = 0 }, new SimulationResultModel { Delay = 10, NumberOfNonProducedCars = 10, SimulationNumber = 1 } };
             this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private void LoadSelectedSimulationExecute(object obj)
+        {
+            ShowNotification($"Simulation {SelectedSimulationResult.SimulationNumber} clicked");
+        }
+
+        private void RunSimulationsExecute(object obj)
+        {
+            ShowNotification("Simulation run button clicked");
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
