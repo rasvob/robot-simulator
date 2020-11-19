@@ -157,7 +157,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        private int _frontStackColumnsCount = 12;
+        private int _frontStackColumnsCount = 13;
 
         public int FrontStackColumnsCount
         {
@@ -250,6 +250,54 @@ namespace robot_simulator.ViewModels
                 {
                     _productionQueueRestrictions = value;
                     OnPropertyChanged(nameof(ProductionQueueRestrictions));
+                }
+            }
+        }
+
+        private bool _areSimulationSequencesRandom;
+
+        public bool AreSimulationSequencesRandom
+        {
+            get { return _areSimulationSequencesRandom; }
+
+            set
+            {
+                if (_areSimulationSequencesRandom != value)
+                {
+                    _areSimulationSequencesRandom = value;
+                    OnPropertyChanged(nameof(AreSimulationSequencesRandom));
+                }
+            }
+        }
+
+        private int _numberOfSimulations = 10;
+
+        public int NumberOfSimulations
+        {
+            get { return _numberOfSimulations; }
+
+            set
+            {
+                if (_numberOfSimulations != value)
+                {
+                    _numberOfSimulations = value;
+                    OnPropertyChanged(nameof(NumberOfSimulations));
+                }
+            }
+        }
+
+        private int _numberOfItemsInFutureProductionQueue = 100;
+
+        public int NumberOfItemsInFutureProductionQueue
+        {
+            get { return _numberOfItemsInFutureProductionQueue; }
+
+            set
+            {
+                if (_numberOfItemsInFutureProductionQueue != value)
+                {
+                    _numberOfItemsInFutureProductionQueue = value;
+                    OnPropertyChanged(nameof(NumberOfItemsInFutureProductionQueue));
                 }
             }
         }
