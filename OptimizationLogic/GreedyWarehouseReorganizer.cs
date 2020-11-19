@@ -14,7 +14,7 @@ namespace OptimizationLogic
         public int SelectBestCnt { get; }
         public event EventHandler<ProgressEventArgs> ProgressTriggered;
 
-        public GreedyWarehouseReorganizer(int maxDepth = 5, int selectBestCnt = 5)
+        public GreedyWarehouseReorganizer(int maxDepth = 5, int selectBestCnt = 1)
         {
             MaxDepth = maxDepth;
             SelectBestCnt = selectBestCnt;
