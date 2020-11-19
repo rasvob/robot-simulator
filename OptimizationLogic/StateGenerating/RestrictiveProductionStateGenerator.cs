@@ -26,10 +26,21 @@ namespace OptimizationLogic.StateGenerating
         public int FutureProductionQueueLength { get; set; }
         public int PastProductionQueueLength { get; set; }
 
+        public RestrictiveProductionStateGenerator(RestrictivePlanGenerator restrictivePlanGenerator, int maximumOfDominantItems, int maximumOfNonDominantItems, int warehouseRows, int warehouseCols, int futureProductionQueueLength, int pastProductionQueueLength)
+        {
+            RestrictivePlanGenerator = restrictivePlanGenerator;
+            MaximumOfDominantItems = maximumOfDominantItems;
+            MaximumOfNonDominantItems = maximumOfNonDominantItems;
+            WarehouseRows = warehouseRows;
+            WarehouseCols = warehouseCols;
+            FutureProductionQueueLength = futureProductionQueueLength;
+            PastProductionQueueLength = pastProductionQueueLength;
+        }
+
         public ProductionState GenerateProductionState()
         {
             var res = new ProductionState(WarehouseCols, WarehouseRows);
-            var sequence = RestrictivePlanGenerator.GenerateSequence();
+            var sequence = RestrictivePlanGenerator.GenerateSequence(FutureProductionQueueLength + PastProductionQueueLength);
             res.FutureProductionPlan = new Queue<ItemState>(sequence.Take(FutureProductionQueueLength));
             res.ProductionHistory = new Queue<ItemState>(sequence.Skip(FutureProductionQueueLength));
             GenerateWarehouseState(res);
