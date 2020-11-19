@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OptimizationLogic.StateGenerating
 {
-    public class FutureProductionPlanGenerator
+    public class FutureProductionPlanGenerator: IPlanGenerator
     {
         public double MqbToMebTransitionProbability { get; set; } = 0.5;
         public double ProbabilityOfStartingInMqbState { get; set; } = 1.0;
