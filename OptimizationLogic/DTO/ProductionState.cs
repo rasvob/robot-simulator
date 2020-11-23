@@ -24,6 +24,7 @@ namespace OptimizationLogic.DTO
         public int WarehouseXDimension { get; }
         public int WarehouseYDimension { get; }
 
+        public static readonly int ForbiddedSpotsCount = 4;
 
         public bool SimulationFinished { get => FutureProductionPlan.Count == 0; }
 
@@ -76,6 +77,12 @@ namespace OptimizationLogic.DTO
         {
             return TimeDictionary[PositionCodes.Stacker][GetWarehouseCell(row, col)];
         }
+
+        public static int ComputeNeededColumnsInWarehouse(int rows, int dominantTypeCount, int nonDominantTypeCount, int freeSpots, int pastProductionQueueLength) => (int)Math.Ceiling((dominantTypeCount + nonDominantTypeCount + freeSpots + ForbiddedSpotsCount - pastProductionQueueLength) / (double)rows);
+        //TODO: Check computations
+        public static int ComputeDominantTypeItemsCount(int pastProductionQueueLength) => pastProductionQueueLength + 2;
+        //TODO: Check computations
+        public static int ComputeNonDominantTypeItemsCount(int pastProductionQueueLength, int maxNonDominantInARow) => maxNonDominantInARow == 0 ? ComputeDominantTypeItemsCount(pastProductionQueueLength) : (int)Math.Ceiling(ComputeDominantTypeItemsCount(pastProductionQueueLength) / (double)(maxNonDominantInARow + 1)) + 2;
 
         public ProductionState(int WarehouseXDimension, int WarehouseYDimension)
         {

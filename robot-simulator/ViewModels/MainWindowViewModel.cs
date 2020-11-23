@@ -11,10 +11,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using MahApps.Metro.Controls.Dialogs;
+using System.Windows.Documents;
+using System.Web.UI;
+using System.ComponentModel;
 
 namespace robot_simulator.ViewModels
 {
-    public class MainWindowViewModel : BaseViewModel
+    public class MainWindowViewModel : BaseViewModel, IDataErrorInfo
     {
         private ObservableCollection<WarehouseItemViewModel> currentWarehouseState;
 
@@ -29,6 +32,9 @@ namespace robot_simulator.ViewModels
         public ICommand LoadProductionHistory { get; private set; }
         public ICommand Undo { get; private set; }
         public ICommand LoadProductionState { get; private set; }
+        public ICommand RunSimulations { get; private set; }
+        public ICommand LoadSelectedSimulation { get; private set; }
+        public ICommand SetIntervalLengthConfiguration { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -60,7 +66,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        public ObservableCollection<WarehouseItemViewModel> FutureQueue 
+        public ObservableCollection<WarehouseItemViewModel> FutureQueue
         {
             get => futureQueue;
             set
@@ -122,6 +128,183 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private List<int> _frontStackLevelsCollection = new List<int> { 1, 2, 3 };
+
+        public List<int> FrontStackLevelCollection
+        {
+            get { return _frontStackLevelsCollection; }
+
+            set
+            {
+                if (_frontStackLevelsCollection != value)
+                {
+                    _frontStackLevelsCollection = value;
+                    OnPropertyChanged(nameof(FrontStackLevelCollection));
+                }
+            }
+        }
+
+        private int _frontStackLevelsCount = 2;
+
+        public int FrontStackLevelsCount
+        {
+            get { return _frontStackLevelsCount; }
+
+            set
+            {
+                if (_frontStackLevelsCount != value)
+                {
+                    _frontStackLevelsCount = value;
+                    OnPropertyChanged(nameof(FrontStackLevelsCount));
+                }
+            }
+        }
+
+        private int _frontStackColumnsCount = 13;
+
+        public int FrontStackColumnsCount
+        {
+            get { return _frontStackColumnsCount; }
+
+            set
+            {
+                if (_frontStackColumnsCount != value)
+                {
+                    _frontStackColumnsCount = value;
+                    OnPropertyChanged(nameof(FrontStackColumnsCount));
+                }
+            }
+        }
+
+
+        private int _numberOfFreePositionsInStacker = 9;
+
+        public int NumberOfFreePositionsInStacker
+        {
+            get { return _numberOfFreePositionsInStacker; }
+
+            set
+            {
+                if (_numberOfFreePositionsInStacker != value)
+                {
+                    _numberOfFreePositionsInStacker = value;
+                    OnPropertyChanged(nameof(NumberOfFreePositionsInStacker));
+                }
+            }
+        }
+
+        private int _numberOfItemsInPastProductionQueue = 63;
+
+        public int NumberOfItemsInPastProductionQueue
+        {
+            get { return _numberOfItemsInPastProductionQueue; }
+
+            set
+            {
+                if (_numberOfItemsInPastProductionQueue != value)
+                {
+                    _numberOfItemsInPastProductionQueue = value;
+                    OnPropertyChanged(nameof(NumberOfItemsInPastProductionQueue));
+                }
+            }
+        }
+
+        private bool _isMqbDominant = true;
+
+        public bool IsMqbDominant
+        {
+            get { return _isMqbDominant; }
+
+            set
+            {
+                if (_isMqbDominant != value)
+                {
+                    _isMqbDominant = value;
+                    OnPropertyChanged(nameof(IsMqbDominant));
+                }
+            }
+        }
+
+        private int _restrictionSelectedIndex = 1;
+
+        public int RestrictionSelectedIndex
+        {
+            get { return _restrictionSelectedIndex; }
+
+            set
+            {
+                if (_restrictionSelectedIndex != value)
+                {
+                    _restrictionSelectedIndex = value;
+                    OnPropertyChanged(nameof(RestrictionSelectedIndex));
+                }
+            }
+        }
+
+        private ObservableCollection<ObservableString> _productionQueueRestrictions;
+
+        public ObservableCollection<ObservableString> ProductionQueueRestrictions
+        {
+            get { return _productionQueueRestrictions; }
+
+            set
+            {
+                if (_productionQueueRestrictions != value)
+                {
+                    _productionQueueRestrictions = value;
+                    OnPropertyChanged(nameof(ProductionQueueRestrictions));
+                }
+            }
+        }
+
+        private bool _areSimulationSequencesRandom;
+
+        public bool AreSimulationSequencesRandom
+        {
+            get { return _areSimulationSequencesRandom; }
+
+            set
+            {
+                if (_areSimulationSequencesRandom != value)
+                {
+                    _areSimulationSequencesRandom = value;
+                    OnPropertyChanged(nameof(AreSimulationSequencesRandom));
+                }
+            }
+        }
+
+        private int _numberOfSimulations = 10;
+
+        public int NumberOfSimulations
+        {
+            get { return _numberOfSimulations; }
+
+            set
+            {
+                if (_numberOfSimulations != value)
+                {
+                    _numberOfSimulations = value;
+                    OnPropertyChanged(nameof(NumberOfSimulations));
+                }
+            }
+        }
+
+        private int _numberOfItemsInFutureProductionQueue = 100;
+
+        public int NumberOfItemsInFutureProductionQueue
+        {
+            get { return _numberOfItemsInFutureProductionQueue; }
+
+            set
+            {
+                if (_numberOfItemsInFutureProductionQueue != value)
+                {
+                    _numberOfItemsInFutureProductionQueue = value;
+                    OnPropertyChanged(nameof(NumberOfItemsInFutureProductionQueue));
+                }
+            }
+        }
+
 
         public int CurrentStep { get => ProductionState.StepCounter; }
         public int NumberOfItemsInProductionQueue { get => ProductionState.FutureProductionPlan.Count; }
@@ -163,6 +346,191 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private bool _areCoefficientValuesFixed = false;
+
+        public bool AreCoefficientValuesFixed
+        {
+            get { return _areCoefficientValuesFixed; }
+
+            set
+            {
+                if (_areCoefficientValuesFixed != value)
+                {
+                    _areCoefficientValuesFixed = value;
+                    OnPropertyChanged(nameof(AreCoefficientValuesFixed));
+                }
+            }
+        }
+
+        private double _nextNonDominantItemProbability = 0.5;
+
+        public double NextNonDominantItemProbability
+        {
+            get { return _nextNonDominantItemProbability; }
+
+            set
+            {
+                if (_nextNonDominantItemProbability != value)
+                {
+                    _nextNonDominantItemProbability = value;
+                    OnPropertyChanged(nameof(NextNonDominantItemProbability));
+                }
+            }
+        }
+
+        private double _dominantDistanceWeight = 1.0;
+
+        public double DominantDistanceWeight
+        {
+            get { return _dominantDistanceWeight; }
+
+            set
+            {
+                if (_dominantDistanceWeight != value)
+                {
+                    _dominantDistanceWeight = value;
+                    OnPropertyChanged(nameof(DominantDistanceWeight));
+                }
+            }
+        }
+
+        private double _nonDominantDistanceWeight = 1.0;
+
+        public double NonDominantDistanceWeight
+        {
+            get { return _nonDominantDistanceWeight; }
+
+            set
+            {
+                if (_nonDominantDistanceWeight != value)
+                {
+                    _nonDominantDistanceWeight = value;
+                    OnPropertyChanged(nameof(NonDominantDistanceWeight));
+                }
+            }
+        }
+
+        private double _uniformProbabilityWeight = 1.0;
+        private List<SimulationResultModel> _simulationResults;
+        private SimulationResultModel _selectedSimulationResult;
+
+        public double UniformProbabilityWeight
+        {
+            get { return _uniformProbabilityWeight; }
+
+            set
+            {
+                if (_uniformProbabilityWeight != value)
+                {
+                    _uniformProbabilityWeight = value;
+                    OnPropertyChanged(nameof(UniformProbabilityWeight));
+                }
+            }
+        }
+
+        public List<SimulationResultModel> SimulationResults
+        {
+            get { return _simulationResults; }
+
+            set
+            {
+                if (_simulationResults != value)
+                {
+                    _simulationResults = value;
+                    OnPropertyChanged(nameof(SimulationResults));
+                }
+            }
+        }
+
+        public SimulationResultModel SelectedSimulationResult
+        {
+            get { return _selectedSimulationResult; }
+
+            set
+            {
+                if (_selectedSimulationResult != value)
+                {
+                    _selectedSimulationResult = value;
+                    OnPropertyChanged(nameof(SelectedSimulationResult));
+                }
+            }
+        }
+
+        private int _tiimeLimit = 36;
+        private int _clockTime = 55;
+        private bool _useWarehouseReorganization = false;
+
+        public int TimeLimit
+        {
+            get { return _tiimeLimit; }
+
+            set
+            {
+                if (_tiimeLimit != value)
+                {
+                    _tiimeLimit = value;
+                    OnPropertyChanged(nameof(TimeLimit));
+                }
+            }
+        }
+
+        public int ClockTime
+        {
+            get { return _clockTime; }
+
+            set
+            {
+                if (_clockTime != value)
+                {
+                    _clockTime = value;
+                    OnPropertyChanged(nameof(ClockTime));
+                }
+            }
+        }
+
+        public bool UseWarehouseReorganization
+        {
+            get { return _useWarehouseReorganization; }
+
+            set
+            {
+                if (_useWarehouseReorganization != value)
+                {
+                    _useWarehouseReorganization = value;
+                    OnPropertyChanged(nameof(UseWarehouseReorganization));
+                }
+            }
+        }
+
+
+        public int NumberOfDominantItems { get => ProductionState.ComputeDominantTypeItemsCount(NumberOfItemsInPastProductionQueue); }
+        public int NumberOfNonDominantItems { get => ProductionState.ComputeNonDominantTypeItemsCount(NumberOfItemsInPastProductionQueue, RestrictionSelectedIndex); }
+        public string DominantItemString { get => IsMqbDominant ? "MQB" : "MEB"; }
+        public string NonDominantItemString { get => !IsMqbDominant ? "MQB" : "MEB"; }
+
+        public string NumberOfDominantItemsHeader { get => $"Number of {DominantItemString} items"; }
+        public string NumberOfNonDominantItemsHeader { get => $"Number of {NonDominantItemString} items"; }
+
+        public IEnumerable<WarehouseItemViewModel> ExampleOfGeneratedSequence {
+            get {
+                int resLen = 12;
+                var res = new List<WarehouseItemViewModel>();
+
+                while (res.Count < resLen)
+                {
+                    res.Add(new WarehouseItemViewModel { StateStr = DominantItemString });
+                    res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, RestrictionSelectedIndex));
+                }
+
+                for (int i = 0; i < res.Count; i++)
+                {
+                    res[i].PositionCode = $"#{i + 1}";
+                }
+
+                return res.Take(resLen);
+            }
+        }
+
         public void ShowNotification(string message)
         {
             NotificationText = message;
@@ -182,6 +550,19 @@ namespace robot_simulator.ViewModels
 
         public bool WarehouserReorganizationIsRunning { get; set; } = false;
 
+        public string Error => string.Empty;
+
+        public string this[string columnName] => columnName switch
+        {
+            nameof(NumberOfFreePositionsInStacker) => NumberOfFreePositionsInStacker < 1 ? "Number of free positions in stacker has to be >= 1" : null,
+            nameof(NumberOfItemsInPastProductionQueue) => NumberOfItemsInPastProductionQueue < 5 ? "Number of items in pas production queue has to be >= 5" : null,
+            nameof(NextNonDominantItemProbability) => NextNonDominantItemProbability < 0 || NextNonDominantItemProbability > 1 ? "Probability must be in range from 0 to 1" : null,
+            nameof(UniformProbabilityWeight) => UniformProbabilityWeight < 0  ? "Uniform placing probability weight must be >= 0" : null,
+            nameof(ClockTime) => ClockTime < 10 || TimeLimit >= ClockTime ? $"Time for one operation cycle must be >= 10 and more than Intake to outtake cycle length ({TimeLimit})" : null,
+            nameof(TimeLimit) => TimeLimit < 10 || TimeLimit >= ClockTime ? $"Intake to outtake cycle length must be >= 10 and less than Time for one operation cycle lenght ({ClockTime})" : null,
+            _ => null
+        };
+
         public MainWindowViewModel(BaseController naiveController, BaseController asyncController, GreedyWarehouseReorganizer reorganizer, RealProductionSimulator realProductionSimulator, ProductionStateLoader scenarioLoader, OpenFileDialogService openFileDialogService, IOpenFileService openFolderDialog, MahApps.Metro.Controls.Dialogs.IDialogCoordinator dialogCoordinator)
         {
             NaiveController = naiveController;
@@ -200,12 +581,85 @@ namespace robot_simulator.ViewModels
             LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
             LoadProductionState = new SimpleCommand(LoadProductionStateExecute);
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
+            RunSimulations = new SimpleCommand(RunSimulationsExecute);
+            LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
+            SetIntervalLengthConfiguration = new SimpleCommand(SetIntervalLengthConfigurationExecute, SetIntervalLengthConfigurationCanExecute);
             UpdateProductionStateInView();
             OpenFileDialogService = openFileDialogService;
             RealProductionSimulator = realProductionSimulator;
             OpenFolderDialog = openFolderDialog;
             RealProductionSimulator.WarehouseReorganizationProgressUpdated += RealProductionSimulator_WarehouseReorganizationProgressUpdated;
             DialogCoordinator = dialogCoordinator;
+            ProductionQueueRestrictions = new ObservableCollection<ObservableString>();
+            UpdateProductionQueueRestrictions();
+            SimulationResults = new List<SimulationResultModel>() { new SimulationResultModel { Delay = 0, NumberOfNonProducedCars = 0, SimulationNumber = 0 }, new SimulationResultModel { Delay = 10, NumberOfNonProducedCars = 10, SimulationNumber = 1 } };
+            this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private bool SetIntervalLengthConfigurationCanExecute(object arg)
+        {
+            return this[nameof(TimeLimit)] == null && this[nameof(ClockTime)] == null;
+        }
+
+        private void SetIntervalLengthConfigurationExecute(object obj)
+        {
+            SelectedController.ClockTime = ClockTime;
+            SelectedController.TimeLimit = TimeLimit;
+        }
+
+        private void LoadSelectedSimulationExecute(object obj)
+        {
+            ShowNotification($"Simulation {SelectedSimulationResult.SimulationNumber} clicked");
+        }
+
+        private void RunSimulationsExecute(object obj)
+        {
+            ShowNotification("Simulation run button clicked");
+        }
+
+        private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var warehouseSizeMasterProperties = new List<string>() { nameof(FrontStackLevelsCount), nameof(NumberOfItemsInPastProductionQueue), nameof(NumberOfFreePositionsInStacker) };
+            if (warehouseSizeMasterProperties.Contains(e.PropertyName))
+            {
+                FrontStackColumnsCount = ProductionState.ComputeNeededColumnsInWarehouse(FrontStackLevelsCount * 2, NumberOfDominantItems, NumberOfNonDominantItems, NumberOfFreePositionsInStacker, NumberOfItemsInPastProductionQueue);
+                OnPropertyChanged(nameof(NumberOfDominantItems));
+                OnPropertyChanged(nameof(NumberOfNonDominantItems));
+            }
+            else if (e.PropertyName == nameof(IsMqbDominant))
+            {
+                UpdateProductionQueueRestrictions();
+                OnPropertyChanged(nameof(NumberOfDominantItems));
+                OnPropertyChanged(nameof(NumberOfNonDominantItems));
+                OnPropertyChanged(nameof(NumberOfDominantItemsHeader));
+                OnPropertyChanged(nameof(NumberOfNonDominantItemsHeader));
+                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
+            }
+            else if (e.PropertyName == nameof(RestrictionSelectedIndex))
+            {
+                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
+            }
+        }
+
+        private void UpdateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)
+        {
+            ItemState nonDominant = !IsMqbDominant ? ItemState.MQB : ItemState.MEB;
+
+            if(ProductionQueueRestrictions.Any())
+            {
+                foreach (var item in ProductionQueueRestrictions)
+                {
+                    item.Value = item.Value.Replace(IsMqbDominant ? ItemState.MQB.ToString() : ItemState.MEB.ToString(), nonDominant.ToString());
+                }
+                return;
+            }
+
+            ProductionQueueRestrictions.Clear();
+            ProductionQueueRestrictions.Add(new ObservableString() { Value = "Full production of dominant type" });
+            foreach (var item in Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"))
+            {
+                ProductionQueueRestrictions.Add(new ObservableString() { Value = item });
+            }
         }
 
         private async void RealProductionSimulator_WarehouseReorganizationProgressUpdated(object sender, ProgressEventArgs e)
@@ -381,7 +835,7 @@ namespace robot_simulator.ViewModels
                     PositionCode = ProductionState.GetWarehouseCell(cell.row, cell.col).ToGuiString(),
                     StateStr = ProductionState.WarehouseState[cell.row, cell.col].ToString(),
                 }).ToList();
-            res.InsertRange(24, Enumerable.Range(0, ProductionState.WarehouseColls).Select(cell => new WarehouseItemViewModel()
+            res.InsertRange(ProductionState.WarehouseRows/2 * ProductionState.WarehouseColls, Enumerable.Range(0, ProductionState.WarehouseColls).Select(_ => new WarehouseItemViewModel()
                 {
                     Row = 0,
                     Col = 0,

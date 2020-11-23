@@ -102,6 +102,8 @@
             <converters:TileEnabledValueConterter x:Key="TileEnabledValueConterter" />
             <converters:TileColorEnumValueConterter x:Key="TileColorEnumValueConterter" />
             <converters:QueueDisplayLimitConverter x:Key="QueueDisplayLimitConverter" />
+            <converters:ObservableStringValueConverter x:Key="ObservableStringValueConverter" />
+            <converters:NumberTimesNumberCoverter x:Key="NumberTimesNumberCoverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -133,6 +135,7 @@
                 <Expander Header="Settings" IsExpanded="False">
                     <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
@@ -171,6 +174,29 @@
                                     <Button Content="Load warehouse state" Margin="5 0 0 0" Command="{Binding LoadWarehouseState}"/>
                                     <Button Content="Load scenario from folder" Margin="5 0 0 0" Command="{Binding LoadProductionState}"/>
                                 </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0">
+                                <TextBox Width="200"  Margin="0 5 0 0" Grid.Row="2" Grid.Column="0"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Time for one operation cycle"
+                                             ToolTip="It is an interval length between two consecutive item arrivals from past production queue"
+                                             Text="{Binding ClockTime, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                </TextBox>
+
+
+                                <TextBox Width="200"  Margin="10 5 0 0" Grid.Row="2" Grid.Column="1"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Intake to outtake cycle length"
+                                             ToolTip="It is an interval length between item arrival from past production queue and outtake of item based on the production plan"
+                                             Text="{Binding TimeLimit, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                </TextBox>
+                                <Button Content="Set time configuration" Margin="5 5 0 0" Height="auto" Command="{Binding SetIntervalLengthConfiguration}"/>
+                                
                             </StackPanel>
                         </Grid>
                 </Expander>
@@ -406,6 +432,269 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+            </mah:MetroTabItem>
+
+            <mah:MetroTabItem Header="Batch simulation">
+                <StackPanel Margin="0 15 15 0" >
+                    <Expander Header="Front stack configuration" IsExpanded="True">
+                        <StackPanel Orientation="Vertical">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                
+                                <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="0">
+                                    <TextBlock Text="Number of levels in front stack storage" Style="{StaticResource SmallSectionHeader}" />
+                                    <ComboBox SelectedValue="{Binding FrontStackLevelsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding FrontStackLevelCollection, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="15 0 0 0" Grid.Row="0" Grid.Column="1">
+                                    <TextBlock Text="Number of free positions in the front stack" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        Minimum="1"
+                                        Speedup="True"
+                                        Value="{Binding NumberOfFreePositionsInStacker, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="15 0 0 0" Grid.Row="0" Grid.Column="2">
+                                    <TextBlock Text="Number of items in past production queue" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        Speedup="True"
+                                        Minimum="10"
+                                        Value="{Binding NumberOfItemsInPastProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                </StackPanel>
+
+                                
+
+                                <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="1" Grid.Column="0"
+                                   Header="Select dominant production type"
+                                   IsOn="{Binding IsMqbDominant, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   OffContent="MEB"
+                                   OnContent="MQB">
+                                </mah:ToggleSwitch>
+
+                                <StackPanel Orientation="Vertical" Margin="15 10 0 0 " Grid.Row="1" Grid.Column="1">
+                                    <TextBlock Text="Select restriction for production queue" Style="{StaticResource SmallSectionHeader}" Margin="0 0 8 6" />
+                                    <ComboBox DisplayMemberPath="Value"  SelectedIndex="{Binding RestrictionSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding ProductionQueueRestrictions, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <TextBox Width="250"  Margin="0 5 0 0" Grid.Row="2" Grid.Column="0"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Time for one operation cycle"
+                                             ToolTip="It is an interval length between two consecutive item arrivals from past production queue"
+                                             Text="{Binding ClockTime, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                </TextBox>
+
+
+                                <TextBox Width="250"  Margin="15 5 0 0" Grid.Row="2" Grid.Column="1"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Intake to outtake cycle length"
+                                             ToolTip="It is an interval length between item arrival from past production queue and outtake of item based on the production plan"
+                                             Text="{Binding TimeLimit, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                </TextBox>
+
+                                <Expander Header="Parameters overview" IsExpanded="True" Grid.Row="3" Grid.ColumnSpan="4" Margin="0 10 0 0">
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Width="200" Margin="0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="Number of total rows in warehouse"
+                                                 Text="{Binding FrontStackLevelsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumberTimesNumberCoverter}, ConverterParameter=2}" />
+
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="Number of total columns in warehouse"
+                                                 Text="{Binding FrontStackColumnsCount, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="{Binding NumberOfDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Text="{Binding NumberOfDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBox Width="200" Margin="10 0 0 0"
+                                                 IsReadOnly="True"
+                                                 mah:TextBoxHelper.UseFloatingWatermark="True"
+                                                 mah:TextBoxHelper.Watermark="{Binding NumberOfNonDominantItemsHeader, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Text="{Binding NumberOfNonDominantItems, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <TextBlock Text="Example of generated sequence" Style="{StaticResource HeadingStyle}" Margin="0 0 0 8"/>
+                                        <ItemsControl ItemsSource="{Binding ExampleOfGeneratedSequence, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <UniformGrid Rows="1" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <mah:Tile Title="{Binding PositionCode, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       Background="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource TileColorValueConterter}}"
+                                                       Count="{Binding StateStr, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                                       CountFontSize="15"
+                                                       HorizontalTitleAlignment="Left"
+                                                       IsEnabled="True"
+                                                       Style="{StaticResource SmallTileStyle}"
+                                                       TitleFontSize="12"
+                                                       HorizontalContentAlignment="Center"
+                                                       Width="Auto"
+                                                       VerticalTitleAlignment="Top" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Expander>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander Header="Simulation configuration" IsExpanded="True" Margin="0 8 0 0">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Number of items in each future production plan" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        Speedup="True"
+                                        ToolTip="Larger number means longer simulation time!"
+                                        Minimum="50"
+                                        Value="{Binding NumberOfItemsInFutureProductionQueue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="10 0 0 0">
+                                    <TextBlock Text="Number of simulations" Style="{StaticResource SmallSectionHeader}" Width="200" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        ToolTip="Larger number means longer simulation time!"
+                                        Speedup="True"
+                                        Minimum="1"
+                                        Value="{Binding NumberOfSimulations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                </StackPanel>
+
+                                <CheckBox IsChecked="{Binding UseWarehouseReorganization, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="True" Content="Use warehouse reorganization?" Margin="10 20 0 0" ToolTip="Leads to longer simulation time!" />
+                            </StackPanel>
+
+                            <Expander Header="Advanced configuration" IsExpanded="False" Margin="0 10 0 0">
+                                <Grid Margin="4 0 0 0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition Width="auto" />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="0" Grid.Column="0"
+                                           Header="Use fixed coeficients?"
+                                           IsOn="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           OffContent="Coefficient values are sampled"
+                                           OnContent="Coefficient values are fixed">
+                                    </mah:ToggleSwitch>
+
+                                    <mah:ToggleSwitch Margin="0 8 0 0" Grid.Row="0" Grid.Column="1"
+                                           Header="Are simulations generated randomly?"
+                                           IsOn="{Binding AreSimulationSequencesRandom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           OffContent="Simulation sequences are deterministic"
+                                           OnContent="Every simulation sequence is different">
+                                    </mah:ToggleSwitch>
+
+                                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="3">
+                                        <TextBox Width="250"  Margin="0 0 5 5"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Probability of non-dominant item as the next one"
+                                             IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             ToolTip="Future and past production queues are generated sequentially, this probability states how probable is that the next item in sequence will be non-dominant one"
+                                             Text="{Binding NextNonDominantItemProbability, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                        </TextBox>
+
+                                        <TextBox Width="200" Margin="0 0 5 5"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Dominant type distance weight"
+                                             ToolTip="Negative weight mean that the dominant type items will be placed towards end of the warehouse, positive will place them towards the beginning"
+                                             IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding DominantDistanceWeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                        </TextBox>
+
+                                        <TextBox Width="200" Margin="0 0 5 5"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Non-dominant type distance weight"
+                                             ToolTip="Negative weight mean that the non-dominant type items will be placed towards end of the warehouse, positive will place them towards the beginning"
+                                             IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding NonDominantDistanceWeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                        </TextBox>
+
+                                        <TextBox Width="200" Margin="0 0 5 5"
+                                             IsReadOnly="False"
+                                             mah:TextBoxHelper.UseFloatingWatermark="True"
+                                             mah:TextBoxHelper.Watermark="Uniform placing probability weight"
+                                             ToolTip="Bigger number means more randomness will be present in the items placing in the warehouse"
+                                             IsEnabled="{Binding AreCoefficientValuesFixed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Text="{Binding UniformProbabilityWeight, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnDataErrors=True}"
+                                             >
+                                        </TextBox>
+                                    </StackPanel>
+                                </Grid>
+                            </Expander>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Run simulations" Command="{Binding RunSimulations}" Margin="0 10 0 0 " Width="150" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander Header="Simulation resuls" IsExpanded="True" Margin="0 10 0 0">
+                        <DataGrid ItemsSource="{Binding SimulationResults, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedSimulationResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    AutoGenerateColumns="False"
+                                    CanUserAddRows="False"
+                                    CanUserDeleteRows="False"
+                                    CanUserReorderColumns="True"
+                                    CanUserResizeColumns="True"
+                                    CanUserResizeRows="True"
+                                    CanUserSortColumns="True">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Load selected simulation" Command="{Binding LoadSelectedSimulation}" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                            
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding SimulationNumber}" Header="#" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Delay}" Header="Delay" />
+                                <DataGridTextColumn IsReadOnly="True" Binding="{Binding NumberOfNonProducedCars}" Header="Number Of non-produced cars" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Expander>
+                </StackPanel>
             </mah:MetroTabItem>
         </TabControl>
     </ScrollViewer>
