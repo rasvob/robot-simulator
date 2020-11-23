@@ -47,6 +47,12 @@
     <Compile Include="AsyncControllers\NaiveAsyncController.cs" />
     <Compile Include="AsyncControllers\NaiveAsyncControllerWithHalfCycleDelay.cs" />
     <Compile Include="BaseController.cs" />
+    <Compile Include="BatchSimulation\AggregatedResults.cs" />
+    <Compile Include="BatchSimulation\ExperimentConfig.cs" />
+    <Compile Include="BatchSimulation\ExperimentFactory.cs" />
+    <Compile Include="BatchSimulation\ExperimentResults.cs" />
+    <Compile Include="BatchSimulation\ExperimentRunner.cs" />
+    <Compile Include="BatchSimulation\SingleSimulationResult.cs" />
     <Compile Include="DTO\ProgressEventArgs.cs" />
     <Compile Include="DTO\SimulationResultModel.cs" />
     <Compile Include="Extensions\PositionCodesExt.cs" />

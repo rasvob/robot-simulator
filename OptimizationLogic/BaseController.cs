@@ -15,9 +15,9 @@ namespace OptimizationLogic
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
-        public int TimeLimit { get; protected set; }
+        public int TimeLimit { get; set; }
         public int TimeLimitForOneStep { get => TimeLimit; }
-        public int ClockTime { get; protected set; }
+        public int ClockTime { get; set; }
 
         public double RealTime { get; set; } = -300;
         public double Delay { get; set; } = 0;
