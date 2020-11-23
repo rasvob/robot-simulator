@@ -458,6 +458,7 @@ namespace robot_simulator.ViewModels
 
         private int _tiimeLimit = 36;
         private int _clockTime = 55;
+        private bool _useWarehouseReorganization = false;
 
         public int TimeLimit
         {
@@ -483,6 +484,20 @@ namespace robot_simulator.ViewModels
                 {
                     _clockTime = value;
                     OnPropertyChanged(nameof(ClockTime));
+                }
+            }
+        }
+
+        public bool UseWarehouseReorganization
+        {
+            get { return _useWarehouseReorganization; }
+
+            set
+            {
+                if (_useWarehouseReorganization != value)
+                {
+                    _useWarehouseReorganization = value;
+                    OnPropertyChanged(nameof(UseWarehouseReorganization));
                 }
             }
         }

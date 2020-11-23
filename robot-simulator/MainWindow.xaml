@@ -591,6 +591,8 @@
                                         Minimum="1"
                                         Value="{Binding NumberOfSimulations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                                 </StackPanel>
+
+                                <CheckBox IsChecked="{Binding UseWarehouseReorganization, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="True" Content="Use warehouse reorganization?" Margin="10 20 0 0" ToolTip="Leads to longer simulation time!" />
                             </StackPanel>
 
                             <Expander Header="Advanced configuration" IsExpanded="False" Margin="0 10 0 0">
