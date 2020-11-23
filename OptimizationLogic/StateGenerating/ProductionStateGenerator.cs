@@ -46,7 +46,6 @@ namespace OptimizationLogic.StateGenerating
         {
             double DistanceFunc(double time, double maxTime) => (1 + (-time/maxTime));
             double UniformFunc(int validCount) => (1.0 / validCount);
-            // TODO: prodiskutovat s Radkem, netusim co ta DistanceFunc dela
             Dictionary<(int row, int col), double> ComputeTimeAdvantageForCells(List<(int row, int col)> validPositions, double maximum) => validPositions.ToDictionary(k => ((k.row, k.col)), t => DistanceFunc(state.GetDistanceFromStacker(t.row, t.col), maximum));
             var validPositions = ((PositionCodes[])Enum.GetValues(typeof(PositionCodes)))
                    .FilterPositions(state.WarehouseRows, state.WarehouseColls)

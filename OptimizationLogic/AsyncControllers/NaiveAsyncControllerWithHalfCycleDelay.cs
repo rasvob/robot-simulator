@@ -72,8 +72,6 @@ namespace OptimizationLogic.AsyncControllers
                     break;
                 
 
-                //TODO: 7205 ma byt 131 tzn 1309 je zbytek
-                //TODO: 2750 ma byt 50 aut a 1390 zbyva
                 case AsyncControllerState.SwapChain:
                     var deq = ProductionState.FutureProductionPlan.Dequeue();
                     ProductionState.ProductionHistory.Enqueue(deq);

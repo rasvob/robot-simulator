@@ -177,7 +177,6 @@ namespace OptimizersSimulationsSummary
         {
             switch (plannedProductionLength)
             {
-                // TODO: modify to match correct numbers 
                 case 100: return plannedProductionLength * 55;
                 case 1440: return 86400;
                 case 7200: return 5 * 86400;
