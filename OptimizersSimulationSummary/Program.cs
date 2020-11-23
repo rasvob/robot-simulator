@@ -25,8 +25,10 @@ namespace OptimizersSimulationsSummary
 
         static void Main(string[] args)
         {
+            SimulationsReport simulationsReport = new SimulationsReport();
+            simulationsReport.Run();
             //SimulateOne();            
-            SimulateAssignedScenarios();
+            //SimulateAssignedScenarios();
             //SimulateGeneratedScenarios();
             //SimulateGeneratedDayScenarios();
             //SimulateGeneratedWeekScenarios();
