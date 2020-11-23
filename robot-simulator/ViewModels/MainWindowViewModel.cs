@@ -34,6 +34,7 @@ namespace robot_simulator.ViewModels
         public ICommand LoadProductionState { get; private set; }
         public ICommand RunSimulations { get; private set; }
         public ICommand LoadSelectedSimulation { get; private set; }
+        public ICommand SetIntervalLengthConfiguration { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
         {
@@ -455,6 +456,38 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        private int _tiimeLimit = 36;
+        private int _clockTime = 55;
+
+        public int TimeLimit
+        {
+            get { return _tiimeLimit; }
+
+            set
+            {
+                if (_tiimeLimit != value)
+                {
+                    _tiimeLimit = value;
+                    OnPropertyChanged(nameof(TimeLimit));
+                }
+            }
+        }
+
+        public int ClockTime
+        {
+            get { return _clockTime; }
+
+            set
+            {
+                if (_clockTime != value)
+                {
+                    _clockTime = value;
+                    OnPropertyChanged(nameof(ClockTime));
+                }
+            }
+        }
+
+
         public int NumberOfDominantItems { get => ProductionState.ComputeDominantTypeItemsCount(NumberOfItemsInPastProductionQueue); }
         public int NumberOfNonDominantItems { get => ProductionState.ComputeNonDominantTypeItemsCount(NumberOfItemsInPastProductionQueue, RestrictionSelectedIndex); }
         public string DominantItemString { get => IsMqbDominant ? "MQB" : "MEB"; }
@@ -510,6 +543,8 @@ namespace robot_simulator.ViewModels
             nameof(NumberOfItemsInPastProductionQueue) => NumberOfItemsInPastProductionQueue < 5 ? "Number of items in pas production queue has to be >= 5" : null,
             nameof(NextNonDominantItemProbability) => NextNonDominantItemProbability < 0 || NextNonDominantItemProbability > 1 ? "Probability must be in range from 0 to 1" : null,
             nameof(UniformProbabilityWeight) => UniformProbabilityWeight < 0  ? "Uniform placing probability weight must be >= 0" : null,
+            nameof(ClockTime) => ClockTime < 10 || TimeLimit >= ClockTime ? $"Time for one operation cycle must be >= 10 and more than Intake to outtake cycle length ({TimeLimit})" : null,
+            nameof(TimeLimit) => TimeLimit < 10 || TimeLimit >= ClockTime ? $"Intake to outtake cycle length must be >= 10 and less than Time for one operation cycle lenght ({ClockTime})" : null,
             _ => null
         };
 
@@ -533,6 +568,7 @@ namespace robot_simulator.ViewModels
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
             RunSimulations = new SimpleCommand(RunSimulationsExecute);
             LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
+            SetIntervalLengthConfiguration = new SimpleCommand(SetIntervalLengthConfigurationExecute, SetIntervalLengthConfigurationCanExecute);
             UpdateProductionStateInView();
             OpenFileDialogService = openFileDialogService;
             RealProductionSimulator = realProductionSimulator;
@@ -543,6 +579,17 @@ namespace robot_simulator.ViewModels
             UpdateProductionQueueRestrictions();
             SimulationResults = new List<SimulationResultModel>() { new SimulationResultModel { Delay = 0, NumberOfNonProducedCars = 0, SimulationNumber = 0 }, new SimulationResultModel { Delay = 10, NumberOfNonProducedCars = 10, SimulationNumber = 1 } };
             this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private bool SetIntervalLengthConfigurationCanExecute(object arg)
+        {
+            return this[nameof(TimeLimit)] == null && this[nameof(ClockTime)] == null;
+        }
+
+        private void SetIntervalLengthConfigurationExecute(object obj)
+        {
+            SelectedController.ClockTime = ClockTime;
+            SelectedController.TimeLimit = TimeLimit;
         }
 
         private void LoadSelectedSimulationExecute(object obj)
