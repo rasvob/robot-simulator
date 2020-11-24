@@ -35,12 +35,16 @@ namespace OptimizationLogic.BatchSimulation
         public int NumberOfNonDominantItems { get => ProductionState.ComputeNonDominantTypeItemsCount(NumberOfItemsInPastProductionQueue, MaximumNonDominantItemsInARow); }
 
         private readonly int _randomSeed = 13;
+        private readonly int _randomWeightLowerBound = -5;
+        private readonly int _randomWeightHigherBound = 6;
+        private readonly int _randomWeightHigherBoundUniform = 5;
 
-        private IEnumerable<GeneratorCoefficients> SampleCoefficients()
+
+        private IEnumerable<GeneratorCoefficients> SampleCoefficients(Random random)
         {
             return UseFixedCoefficient switch {
                 true => Enumerable.Repeat(new GeneratorCoefficients { DominantDistanceWeight = DominantDistanceWeight, NonDominantDistanceWeight = NonDominantDistanceWeight, ProbabiityOfNonDominantItemAsNextOne = ProbabiityOfNonDominantItemAsNextOne, UniformProbabilityWeight = UniformProbabilityWeight }, BatchSize),
-                false => Enumerable.Repeat(0, BatchSize).Select(t => new GeneratorCoefficients()),
+                false => Enumerable.Repeat(0, BatchSize).Select(_ => new GeneratorCoefficients { UniformProbabilityWeight =  random.Next(0, _randomWeightHigherBoundUniform), ProbabiityOfNonDominantItemAsNextOne = random.NextDouble(), DominantDistanceWeight = random.Next(_randomWeightLowerBound, _randomWeightHigherBound), NonDominantDistanceWeight = random.Next(_randomWeightLowerBound, _randomWeightHigherBound) }),
             };
         }
 
@@ -51,13 +55,18 @@ namespace OptimizationLogic.BatchSimulation
             var res = new ExperimentConfig { ClockTime = ClockTime, TimeLimit = TimeLimit, UseReorganization = UseReorganization };
             var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow > 0 ? MaximumNonDominantItemsInARow : NumberOfItemsInPastProductionQueue, sequenceRandom);
             var productionStateGenerator = new RestrictiveProductionStateGenerator(sequenceGenerator, NumberOfDominantItems, NumberOfNonDominantItems, WarehouseRows, WarehouseColumns, NumberOfItemsInFutureProductionQueue, NumberOfItemsInPastProductionQueue);
-
-
-
+            res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select(item => {
+                sequenceGenerator.DominantToNonDominantTransitionProbability = item.ProbabiityOfNonDominantItemAsNextOne;
+                productionStateGenerator.UniformProbabilityWeight = item.UniformProbabilityWeight;
+                productionStateGenerator.DominantDistanceWeight = item.DominantDistanceWeight;
+                productionStateGenerator.NonDominantDistanceWeight = item.NonDominantDistanceWeight;
+                return productionStateGenerator.GenerateProductionState();
+            }));
+            res.ProductionStatesBackup.AddRange(res.ProductionStates.Select(t => (ProductionState)t.Clone()));
             return res;
         }
 
-        internal class GeneratorCoefficients
+        private class GeneratorCoefficients
         {
             public double ProbabiityOfNonDominantItemAsNextOne { get; set; }
             public double DominantDistanceWeight { get; set; }
