@@ -103,10 +103,12 @@ namespace OptimizationLogic
                     {
                         var currentRecord = warehouseReorganizationRecordsDict[depthIndex][topIndex];
                         var availableSwaps = currentRecord.ProductionState.GetAvailableWarehouseSwaps();
-                        // TODO: reimplement to parallel processing - for speeding up processing
-                        foreach (var swap in availableSwaps)
+                        WarehouseReorganizationRecord[] reorganizationRecordArray = new WarehouseReorganizationRecord[availableSwaps.Count];
+
+                        var result = Parallel.For(0, availableSwaps.Count, (i) =>
                         {
                             ProductionState newProductionState = (ProductionState)currentRecord.ProductionState.Clone();
+                            var swap = availableSwaps[i];
                             var swapTimeConsumed = newProductionState.SwapWarehouseItems(swap.Item1, swap.Item2);
                             PositionCodes previousPosition;
                             if (currentRecord.PreviousRecord == null)
@@ -131,15 +133,19 @@ namespace OptimizationLogic
                             if (timeRemaining - timeToStacker > 0)
                             {
                                 int numberOfMissingSteps = SimulateProcessing(newProductionState, 100);
-                                warehouseReorganizationRecordsDict[depthIndex + 1].Add(new WarehouseReorganizationRecord
+                                reorganizationRecordArray[i] = new WarehouseReorganizationRecord
                                 {
                                     ProductionState = newProductionState,
                                     Swap = swap,
                                     PreviousRecord = currentRecord,
                                     RemainingTime = timeRemaining,
                                     MissingSimulationSteps = numberOfMissingSteps
-                                });
+                                };
                             }
+                        });
+                        foreach (var item in reorganizationRecordArray)
+                        {
+                            warehouseReorganizationRecordsDict[depthIndex + 1].Add(item);
                         }
                     }
                 }
