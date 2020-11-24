@@ -516,11 +516,19 @@ namespace robot_simulator.ViewModels
                 int resLen = 12;
                 var res = new List<WarehouseItemViewModel>();
 
-                while (res.Count < resLen)
+                if (RestrictionSelectedIndex > 0)
                 {
-                    res.Add(new WarehouseItemViewModel { StateStr = DominantItemString });
-                    res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, RestrictionSelectedIndex));
+                    while (res.Count < resLen)
+                    {
+                        res.Add(new WarehouseItemViewModel { StateStr = DominantItemString });
+                        res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, RestrictionSelectedIndex));
+                    }
                 }
+                else
+                {
+                    res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, resLen));
+                }
+                
 
                 for (int i = 0; i < res.Count; i++)
                 {
@@ -655,7 +663,7 @@ namespace robot_simulator.ViewModels
             }
 
             ProductionQueueRestrictions.Clear();
-            ProductionQueueRestrictions.Add(new ObservableString() { Value = "Full production of dominant type" });
+            ProductionQueueRestrictions.Add(new ObservableString() { Value = "Full production of non-dominant type" });
             foreach (var item in Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"))
             {
                 ProductionQueueRestrictions.Add(new ObservableString() { Value = item });
