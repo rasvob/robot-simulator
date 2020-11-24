@@ -40,7 +40,7 @@ namespace OptimizationLogic.BatchSimulation
         {
             return UseFixedCoefficient switch {
                 true => Enumerable.Repeat(new GeneratorCoefficients { DominantDistanceWeight = DominantDistanceWeight, NonDominantDistanceWeight = NonDominantDistanceWeight, ProbabiityOfNonDominantItemAsNextOne = ProbabiityOfNonDominantItemAsNextOne, UniformProbabilityWeight = UniformProbabilityWeight }, BatchSize),
-                false => Enumerable.Repeat(0, BatchSize).Select(t => {  }),
+                false => Enumerable.Repeat(0, BatchSize).Select(t => new GeneratorCoefficients()),
             };
         }
 
