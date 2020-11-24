@@ -17,6 +17,11 @@ namespace OptimizationLogic.AsyncControllers
         {
         }
 
+        public NaiveAsyncControllerWithHalfCycleDelay(ProductionState state, int tactTime, int operationLimit) : base(state, tactTime, operationLimit)
+        {
+        }
+
+
         public double GetPreviousOuttakeTime()
         {
             if (RealTime < TimeBase + IntakeOuttakeDifference)
