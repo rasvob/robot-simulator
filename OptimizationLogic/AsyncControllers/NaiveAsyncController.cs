@@ -29,12 +29,14 @@ namespace OptimizationLogic.AsyncControllers
 
         public NaiveAsyncController(ProductionState productionState, string csvWarehouseInitialState, string csvHistroicalProduction, string csvFutureProductionPlan) : base(productionState, csvWarehouseInitialState, csvHistroicalProduction, csvFutureProductionPlan)
         {
-
         }
 
         public NaiveAsyncController(ProductionState state) : base(state)
         {
+        }
 
+        public NaiveAsyncController(ProductionState state, int tactTime, int operationLimit) : base(state, tactTime, operationLimit)
+        {
         }
 
         public override void SetControllerTimes(int tactTime = 55, int operationLimit = 36)

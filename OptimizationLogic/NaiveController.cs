@@ -19,6 +19,10 @@ namespace OptimizationLogic
         {
         }
 
+        public NaiveController(ProductionState state, int tactTime, int operationLimit) : base(state, tactTime, operationLimit)
+        {
+        }
+
         public override bool NextStep()
         {
             if (ProductionState.FutureProductionPlan.Count == 0)

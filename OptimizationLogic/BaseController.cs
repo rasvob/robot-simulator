@@ -57,6 +57,13 @@ namespace OptimizationLogic
             SetControllerTimes();
         }
 
+        public BaseController(ProductionState state, int tactTime, int operationLimit)
+        {
+            ProductionState = state;
+            InitSortedPositionCodes();
+            SetControllerTimes(tactTime, operationLimit);
+        }
+
         public virtual void SetControllerTimes(int tactTime = 55, int operationLimit = 36)
         {
             TimeLimit = operationLimit;
