@@ -76,7 +76,7 @@ namespace OptimizationLogic.BatchSimulation
                     simulationResultsArray[resultIndex].ConfigurationName = simulationName;
                     simulationResultsArray[resultIndex].SimulationNumber = i;
 
-                    simulator.Controller.ProductionState = Config.ProductionStates[i];
+                    simulator.Controller.ProductionState = (DTO.ProductionState)Config.ProductionStates[i].Clone();
                     SimulateSingleRun(simulator, simulationResultsArray[resultIndex]);
                 }
                 // TODO: check if this is valid operation, workaround bcs "a property or indexer may not be passed as an out or ref parameter" warning
