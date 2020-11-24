@@ -16,7 +16,13 @@ namespace OptimizationLogic.BatchSimulation
 
     public class ExperimentRunner
     {
-        public int Counter { get; set; } = 0;
+        private int _counter = 0;
+
+        public int Counter
+        {
+            get { return _counter; }
+            set { _counter = value; }
+        }
         public event EventHandler<int> CounterUpdated;
         protected virtual void OnCounterUpdated(int e)
         {
@@ -80,8 +86,8 @@ namespace OptimizationLogic.BatchSimulation
                     SimulateSingleRun(simulator, simulationResultsArray[resultIndex]);
                 }
                 // TODO: check if this is valid operation, workaround bcs "a property or indexer may not be passed as an out or ref parameter" warning
-                Interlocked.Increment(ref completedCounter);
-                Counter = completedCounter;
+                Interlocked.Increment(ref _counter);
+                //Counter = completedCounter;
             });
             
             return new List<SingleSimulationResult>(simulationResultsArray);
