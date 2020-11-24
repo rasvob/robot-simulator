@@ -627,12 +627,13 @@ namespace robot_simulator.ViewModels
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var warehouseSizeMasterProperties = new List<string>() { nameof(FrontStackLevelsCount), nameof(NumberOfItemsInPastProductionQueue), nameof(NumberOfFreePositionsInStacker) };
+            var warehouseSizeMasterProperties = new List<string>() { nameof(FrontStackLevelsCount), nameof(NumberOfItemsInPastProductionQueue), nameof(NumberOfFreePositionsInStacker), nameof(RestrictionSelectedIndex) };
             if (warehouseSizeMasterProperties.Contains(e.PropertyName))
             {
                 FrontStackColumnsCount = ProductionState.ComputeNeededColumnsInWarehouse(FrontStackLevelsCount * 2, NumberOfDominantItems, NumberOfNonDominantItems, NumberOfFreePositionsInStacker, NumberOfItemsInPastProductionQueue);
                 OnPropertyChanged(nameof(NumberOfDominantItems));
                 OnPropertyChanged(nameof(NumberOfNonDominantItems));
+                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
             }
             else if (e.PropertyName == nameof(IsMqbDominant))
             {
@@ -641,10 +642,6 @@ namespace robot_simulator.ViewModels
                 OnPropertyChanged(nameof(NumberOfNonDominantItems));
                 OnPropertyChanged(nameof(NumberOfDominantItemsHeader));
                 OnPropertyChanged(nameof(NumberOfNonDominantItemsHeader));
-                OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
-            }
-            else if (e.PropertyName == nameof(RestrictionSelectedIndex))
-            {
                 OnPropertyChanged(nameof(ExampleOfGeneratedSequence));
             }
         }
