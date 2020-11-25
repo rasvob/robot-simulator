@@ -39,6 +39,11 @@ namespace OptimizationLogic
 
         public void InitSortedPositionCodes()
         {
+            if (ProductionState is null)
+            {
+                return;
+            }
+            
             SortedPositionCodes = new Dictionary<PositionCodes, List<PositionCodes>>();
             foreach (PositionCodes sourcePosition in ((PositionCodes[])Enum.GetValues(typeof(PositionCodes))).FilterPositions(ProductionState.WarehouseRows, ProductionState.WarehouseColls))
             {
