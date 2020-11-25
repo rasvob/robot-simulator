@@ -694,8 +694,8 @@
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding PercentageOfCompletePlans}" Header="Percentage of completed plans" />
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding AverageMissingCars}" Header="Average number of non-produced cars" />
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding MedianMissingCars}" Header="Median of non-produced cars" />
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding AverageDelay, StringFormat={}{0:#,0.00}}" Header="Average delay" />
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding MedianDelay, StringFormat={}{0:#,0.00}}" Header="Median delay" />
+                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding AverageDelay, StringFormat=N2}" Header="Average delay" />
+                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding MedianDelay, StringFormat=N2}" Header="Median delay" />
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding MissingCars90Percentile}" Header="90th percentile of non-produced cars" />
                                     </DataGrid.Columns>
                                 </DataGrid>
@@ -724,7 +724,7 @@
                                     <DataGrid.Columns>
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding SimulationNumber}" Header="#" />
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding ConfigurationName}" Header="Configuration name" />
-                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding Delay, StringFormat={}{0:#,0.00}}" Header="Delay" />
+                                        <DataGridTextColumn IsReadOnly="True" Binding="{Binding Delay, StringFormat=N2}" Header="Delay" />
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding MissingCarsCount}" Header="Number of non-produced cars" />
                                     </DataGrid.Columns>
                                 </DataGrid>
