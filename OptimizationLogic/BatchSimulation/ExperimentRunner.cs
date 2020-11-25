@@ -53,7 +53,7 @@ namespace OptimizationLogic.BatchSimulation
             results.SimulationResults = SimulateScenarios();
 
             // aggregate results
-            foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" }) // TODO
+            foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" }) // TODO: 
             {
                 var filteredRecords = results.SimulationResults.FindAll(x => x.ConfigurationName == configurationName);
 

@@ -675,6 +675,7 @@ namespace robot_simulator.ViewModels
         {
             SelectedController.ClockTime = ClockTime;
             SelectedController.TimeLimit = TimeLimit;
+            Reorganizer.Controller.SetControllerTimes(ClockTime, TimeLimit);
         }
 
         private void LoadSelectedSimulationExecute(object obj)
