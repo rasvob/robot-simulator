@@ -63,7 +63,7 @@ namespace OptimizersSimulationsSummary
 
             simulationsDict[$"naive-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveController(new ProductionState(12, 4), warehouseFilename, historyFilename, planFilename),
-                new GreedyWarehouseReorganizer(new NaiveController(null), maxDepth: 10, selectBestCnt: 1)
+                new GreedyWarehouseReorganizer(new NaiveController(null), 10, 1)
                 );
 
             simulationsDict[$"async-skip_break-{key}"] = new RealProductionSimulator(
@@ -72,7 +72,7 @@ namespace OptimizersSimulationsSummary
 
             simulationsDict[$"async-reorganization-{key}"] = new RealProductionSimulator(
                 new NaiveAsyncControllerWithHalfCycleDelay(new ProductionState(12, 4), warehouseFilename, historyFilename, planFilename),
-                new GreedyWarehouseReorganizer(new NaiveController(null), maxDepth: 10, selectBestCnt: 1)
+                new GreedyWarehouseReorganizer(new NaiveController(null), 10, 1)
                 );
             return simulationsDict;
         }
