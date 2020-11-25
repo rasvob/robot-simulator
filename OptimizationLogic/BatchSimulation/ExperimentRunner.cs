@@ -48,7 +48,7 @@ namespace OptimizationLogic.BatchSimulation
             results.SimulationResults = SimulateScenarios();
 
             // aggregate results
-            foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" })
+            foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" }) // TODO
             {
                 var filteredRecords = results.SimulationResults.FindAll(x => x.ConfigurationName == configurationName);
 
@@ -73,7 +73,7 @@ namespace OptimizationLogic.BatchSimulation
         private List<SingleSimulationResult> SimulateScenarios()
         {
             var simulators = GetSimulationsDict();
-            SingleSimulationResult[] simulationResultsArray = Enumerable.Repeat(new SingleSimulationResult(), Config.ProductionStates.Count * simulators.Count).ToArray();
+            SingleSimulationResult[] simulationResultsArray = Enumerable.Repeat(0, Config.ProductionStates.Count * simulators.Count).Select(T => new SingleSimulationResult()).ToArray();
             try
             {
                 var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
@@ -106,7 +106,7 @@ namespace OptimizationLogic.BatchSimulation
             }
 
             // TODO: Parallel For user termination ?
-            
+
             return new List<SingleSimulationResult>(simulationResultsArray);
         }
 
@@ -141,9 +141,9 @@ namespace OptimizationLogic.BatchSimulation
                 switch (attribute)
                 {
                     case AttributeName.Delay:
-                        return (orderedList.ElementAt(indexLower).Delay + orderedList.ElementAt(indexLower + 1).Delay) / 2;
+                        return (orderedList.ElementAt(indexLower).Delay + orderedList.ElementAt(indexLower < orderedList.Count - 1 ? indexLower + 1 : indexLower).Delay) / 2;
                     case AttributeName.MissingCars:
-                        return (orderedList.ElementAt(indexLower).MissingCarsCount + orderedList.ElementAt(indexLower + 1).MissingCarsCount) / 2;
+                        return (orderedList.ElementAt(indexLower).MissingCarsCount + orderedList.ElementAt(indexLower < orderedList.Count - 1 ? indexLower + 1 : indexLower).MissingCarsCount) / 2;
                 }
             }
             else

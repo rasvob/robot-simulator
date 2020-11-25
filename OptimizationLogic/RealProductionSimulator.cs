@@ -149,7 +149,11 @@ namespace OptimizationLogic
 
         public RealProductionSimulator CreateNew(ProductionState state)
         {
-            GreedyWarehouseReorganizer reorganizer = new GreedyWarehouseReorganizer(this.warehouseReorganizer.Controller.CreateNew((ProductionState)state.Clone()), this.warehouseReorganizer.MaxDepth, this.warehouseReorganizer.SelectBestCnt);
+            GreedyWarehouseReorganizer reorganizer = null;
+            if (this.warehouseReorganizer != null)
+            {
+                reorganizer = new GreedyWarehouseReorganizer(this.warehouseReorganizer.Controller.CreateNew((ProductionState)state.Clone()), this.warehouseReorganizer.MaxDepth, this.warehouseReorganizer.SelectBestCnt);
+            }
             RealProductionSimulator simulator = new RealProductionSimulator(this.Controller.CreateNew(state), reorganizer);
             return simulator;
         }
