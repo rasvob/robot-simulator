@@ -46,21 +46,21 @@ namespace OptimizationLogic
             ProductionState.LoadFutureProductionPlan(csvFutureProductionPlan);
             ProductionState.LoadProductionHistory(csvHistroicalProduction);
             ProductionState.LoadWarehouseState(csvWarehouseInitialState);
-            InitSortedPositionCodes();
+            //InitSortedPositionCodes();
             SetControllerTimes();
         }
 
         public BaseController(ProductionState state)
         {
             ProductionState = state;
-            InitSortedPositionCodes();
+            //InitSortedPositionCodes();
             SetControllerTimes();
         }
 
         public BaseController(ProductionState state, int tactTime, int operationLimit)
         {
             ProductionState = state;
-            InitSortedPositionCodes();
+            //InitSortedPositionCodes();
             SetControllerTimes(tactTime, operationLimit);
         }
 

@@ -13,11 +13,13 @@ namespace OptimizationLogic
         public int MaxDepth { get; }
         public int SelectBestCnt { get; }
         public event EventHandler<ProgressEventArgs> ProgressTriggered;
+        public BaseController Controller { get; set; }
 
-        public GreedyWarehouseReorganizer(int maxDepth = 5, int selectBestCnt = 1)
+        public GreedyWarehouseReorganizer(BaseController controller, int maxDepth = 5, int selectBestCnt = 1)
         {
             MaxDepth = maxDepth;
             SelectBestCnt = selectBestCnt;
+            Controller = controller;
         }
 
         public void ReorganizeWarehouse(ProductionState productionState, List<BaseStepModel> logger, double reservedTime)
@@ -164,8 +166,8 @@ namespace OptimizationLogic
             {
                 localProductionState.FutureProductionPlan.Enqueue(localProductionState.FutureProductionPlan.ElementAt(counter++));
             }
-            NaiveController naiveController = new NaiveController(localProductionState);
-            while (naiveController.NextStep() && naiveController.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) { }
+            Controller.ProductionState = localProductionState;
+            while (Controller.NextStep() && Controller.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) { }
             return numberOfImagenarySteps;
         }
     }

@@ -25,7 +25,7 @@ namespace robot_simulator
             var scenarioLoader = new ProductionStateLoader(LoadScenarionPaths("InputFiles"), "InputFiles/ProcessingTimeMatrix.csv");
             var naiveController = new NaiveController(productionState);
             BaseController asyncController = new NaiveAsyncControllerWithHalfCycleDelay(productionState);
-            GreedyWarehouseReorganizer reorganizer = new GreedyWarehouseReorganizer();
+            GreedyWarehouseReorganizer reorganizer = new GreedyWarehouseReorganizer(new NaiveController(null));
             RealProductionSimulator realProductionSimulator = new RealProductionSimulator(naiveController, null);
             //ViewModel = new MainWindowViewModel(naiveController, scenarioLoader);
             var openFileDialog = new OpenFileDialogService();

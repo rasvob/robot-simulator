@@ -65,7 +65,6 @@ namespace OptimizationLogic.BatchSimulation
 
         private List<SingleSimulationResult> SimulateScenarios()
         {
-            int completedCounter = 0;
             var simulators = GetSimulationsDict();
             SingleSimulationResult[] simulationResultsArray = new SingleSimulationResult[Config.ProductionStates.Count * simulators.Count];
 
@@ -105,10 +104,12 @@ namespace OptimizationLogic.BatchSimulation
             if (Config.UseReorganization)
             {
                 simulationsDict[$"naive-reorganization"] = new Tuple<int, RealProductionSimulator>(2,
-                    new RealProductionSimulator(new NaiveController(null, Config.ClockTime, Config.TimeLimit), new GreedyWarehouseReorganizer(maxDepth: 5, selectBestCnt: 1)));
+                    new RealProductionSimulator(new NaiveController(null, Config.ClockTime, Config.TimeLimit),
+                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), maxDepth: 5, selectBestCnt: 1)));
 
                 simulationsDict[$"async-reorganization"] = new Tuple<int, RealProductionSimulator>(3,
-                    new RealProductionSimulator(new NaiveAsyncControllerWithHalfCycleDelay(null, Config.ClockTime, Config.TimeLimit), new GreedyWarehouseReorganizer(maxDepth: 5, selectBestCnt: 1)));
+                    new RealProductionSimulator(new NaiveAsyncControllerWithHalfCycleDelay(null, Config.ClockTime, Config.TimeLimit),
+                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), maxDepth: 5, selectBestCnt: 1)));
             }
 
             return simulationsDict;
