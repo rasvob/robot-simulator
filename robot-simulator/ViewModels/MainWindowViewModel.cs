@@ -746,13 +746,6 @@ namespace robot_simulator.ViewModels
                         ProgressDialog?.SetMessage($"Completed {e.CurrentValue} simulations out of {ProgressDialog?.Maximum}");
                         ProgressDialog?.SetProgress(e.CurrentValue);
                         break;
-                    default:
-                        if (ProgressDialog?.IsOpen == true)
-                        {
-                            await ProgressDialog?.CloseAsync();
-                        }
-                        SimulatioanIsRunning = false;
-                        break;
                 }
             };
 
