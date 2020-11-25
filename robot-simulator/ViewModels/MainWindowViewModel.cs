@@ -414,7 +414,7 @@ namespace robot_simulator.ViewModels
 
         private double _uniformProbabilityWeight = 1.0;
         private List<SimulationResultModel> _simulationResults;
-        private SimulationResultModel _selectedSimulationResult;
+        private SingleSimulationResult _selectedSimulationResult;
 
         public double UniformProbabilityWeight
         {
@@ -444,7 +444,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        public SimulationResultModel SelectedSimulationResult
+        public SingleSimulationResult SelectedSimulationResult
         {
             get { return _selectedSimulationResult; }
 
@@ -461,6 +461,7 @@ namespace robot_simulator.ViewModels
         private int _tiimeLimit = 36;
         private int _clockTime = 55;
         private bool _useWarehouseReorganization = false;
+        private ExperimentResults _experimentResults;
 
         public int TimeLimit
         {
@@ -500,6 +501,20 @@ namespace robot_simulator.ViewModels
                 {
                     _useWarehouseReorganization = value;
                     OnPropertyChanged(nameof(UseWarehouseReorganization));
+                }
+            }
+        }
+
+        public ExperimentResults ExperimentResults
+        {
+            get { return _experimentResults; }
+
+            set
+            {
+                if (_experimentResults != value)
+                {
+                    _experimentResults = value;
+                    OnPropertyChanged(nameof(ExperimentResults));
                 }
             }
         }
@@ -559,6 +574,7 @@ namespace robot_simulator.ViewModels
         public ProgressDialogController ProgressDialog { get; set; }
 
         public bool WarehouserReorganizationIsRunning { get; set; } = false;
+        public bool SimulatioanIsRunning { get; set; } = false;
 
         public string Error => string.Empty;
 
@@ -591,7 +607,7 @@ namespace robot_simulator.ViewModels
             LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
             LoadProductionState = new SimpleCommand(LoadProductionStateExecute);
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
-            RunSimulations = new SimpleCommand(RunSimulationsExecute, RunSimulationsCanExecute);
+            RunSimulations = new SimpleCommand(RunSimulationsExecuteAsync, RunSimulationsCanExecute);
             LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
             SetIntervalLengthConfiguration = new SimpleCommand(SetIntervalLengthConfigurationExecute, SetIntervalLengthConfigurationCanExecute);
             UpdateProductionStateInView();
@@ -627,7 +643,7 @@ namespace robot_simulator.ViewModels
             ShowNotification($"Simulation {SelectedSimulationResult.SimulationNumber} clicked");
         }
 
-        private void RunSimulationsExecute(object obj)
+        private async void RunSimulationsExecuteAsync(object obj)
         {
             var factory = new ExperimentFactory
             {
@@ -656,12 +672,41 @@ namespace robot_simulator.ViewModels
             CancellationTokenSource cts = new CancellationTokenSource();
             runner.CancellationToken = cts.Token;
 
-            runner.CounterUpdated += (sender, args) =>
+            runner.CounterUpdated += async (sender, e) =>
             {
-
+                switch (e.State)
+                {
+                    case ProgressState.Start:
+                        SimulatioanIsRunning = true;
+                        ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Simulation is running", "Please wait...", true);
+                        ProgressDialog.Minimum = 0;
+                        ProgressDialog.Maximum = NumberOfSimulations;
+                        ProgressDialog.Canceled += (s, e) => {
+                            cts.Cancel();
+                        };
+                        break;
+                    case ProgressState.End:
+                        if (ProgressDialog?.IsOpen == true)
+                        {
+                            await ProgressDialog?.CloseAsync();
+                        }
+                        SimulatioanIsRunning = false;
+                        break;
+                    case ProgressState.Update:
+                        ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
+                        ProgressDialog?.SetProgress(e.CurrentValue);
+                        break;
+                    default:
+                        if (ProgressDialog?.IsOpen == true)
+                        {
+                            await ProgressDialog?.CloseAsync();
+                        }
+                        SimulatioanIsRunning = false;
+                        break;
+                }
             };
-
-
+            runner.RunExperiments();
+            //ExperimentResults = await Task.Factory.StartNew(() => runner.RunExperiments());
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
