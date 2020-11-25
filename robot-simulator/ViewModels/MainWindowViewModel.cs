@@ -37,6 +37,7 @@ namespace robot_simulator.ViewModels
         public ICommand LoadProductionState { get; private set; }
         public ICommand RunSimulations { get; private set; }
         public ICommand LoadSelectedSimulation { get; private set; }
+        public ICommand SaveSelectedSimulation { get; private set; }
         public ICommand SetIntervalLengthConfiguration { get; private set; }
 
         public ObservableCollection<WarehouseItemViewModel> CurrentWarehouseState
@@ -463,6 +464,8 @@ namespace robot_simulator.ViewModels
         private int _clockTime = 55;
         private bool _useWarehouseReorganization = false;
         private ExperimentResults _experimentResults;
+        private int _selectedTabIndex = 0;
+        private bool _scrollToTop;
 
         public int TimeLimit
         {
@@ -520,6 +523,32 @@ namespace robot_simulator.ViewModels
             }
         }
 
+        public int SelectedTabIndex
+        {
+            get { return _selectedTabIndex; }
+
+            set
+            {
+                if (_selectedTabIndex != value)
+                {
+                    _selectedTabIndex = value;
+                    OnPropertyChanged(nameof(SelectedTabIndex));
+                }
+            }
+        }
+
+        public bool ScrollToTop
+        {
+            get { return _scrollToTop; }
+
+            set
+            {
+                _scrollToTop = value;
+                OnPropertyChanged(nameof(ScrollToTop));
+            }
+        }
+
+        public List<ProductionState> ProductionStatesFromConfig { get; set; }
 
         public int NumberOfDominantItems { get => ProductionState.ComputeDominantTypeItemsCount(NumberOfItemsInPastProductionQueue); }
         public int NumberOfNonDominantItems { get => ProductionState.ComputeNonDominantTypeItemsCount(NumberOfItemsInPastProductionQueue, RestrictionSelectedIndex); }
@@ -610,6 +639,7 @@ namespace robot_simulator.ViewModels
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
             RunSimulations = new SimpleCommand(RunSimulationsExecuteAsync, RunSimulationsCanExecute);
             LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
+            SaveSelectedSimulation = new SimpleCommand(SaveSelectedSimulationExecute);
             SetIntervalLengthConfiguration = new SimpleCommand(SetIntervalLengthConfigurationExecute, SetIntervalLengthConfigurationCanExecute);
             UpdateProductionStateInView();
             OpenFileDialogService = openFileDialogService;
@@ -621,6 +651,14 @@ namespace robot_simulator.ViewModels
             UpdateProductionQueueRestrictions();
             SimulationResults = new List<SimulationResultModel>() { new SimulationResultModel { Delay = 0, NumberOfNonProducedCars = 0, SimulationNumber = 0 }, new SimulationResultModel { Delay = 10, NumberOfNonProducedCars = 10, SimulationNumber = 1 } };
             this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private void SaveSelectedSimulationExecute(object obj)
+        {
+            //TODO: Finish method
+            
+            int idx = SelectedSimulationResult.SimulationNumber;
+            var prodState = ProductionStatesFromConfig[idx];
         }
 
         private bool RunSimulationsCanExecute(object arg)
@@ -641,7 +679,15 @@ namespace robot_simulator.ViewModels
 
         private void LoadSelectedSimulationExecute(object obj)
         {
-            ShowNotification($"Simulation {SelectedSimulationResult.SimulationNumber} clicked");
+            int idx = SelectedSimulationResult.SimulationNumber;
+            ProductionState = (ProductionState)ProductionStatesFromConfig[idx].Clone();
+            ProductionState.ResetState();
+            SelectedController.ProductionState = ProductionState;
+            SelectedController.RenewControllerState();
+            UpdateProductionStateInView();
+            ScrollToTop = true;
+            SelectedTabIndex = 0;
+            ShowNotification("Scenario loaded");
         }
 
         private async void RunSimulationsExecuteAsync(object obj)
@@ -700,23 +746,15 @@ namespace robot_simulator.ViewModels
                         ProgressDialog?.SetMessage($"Completed {e.CurrentValue} simulations out of {ProgressDialog?.Maximum}");
                         ProgressDialog?.SetProgress(e.CurrentValue);
                         break;
-                    default:
-                        if (ProgressDialog?.IsOpen == true)
-                        {
-                            await ProgressDialog?.CloseAsync();
-                        }
-                        SimulatioanIsRunning = false;
-                        break;
                 }
             };
 
             try
             {
                 ExperimentResults = await Task.Factory.StartNew(() => {
-                    
-
                     ProgressDialog?.SetMessage($"Creating experiments configuration");
                     runner.Config = factory.CreateExperimentConfig();
+                    ProductionStatesFromConfig = runner.Config.ProductionStatesBackup;
                     return runner.RunExperiments();
                 });
             }
@@ -912,10 +950,16 @@ namespace robot_simulator.ViewModels
 
         public void LoadSelectedScenarioExecute(object o)
         {
-            ScenarioLoader.LoadScenarioFromMemory(ProductionState, SelectedPredefinedScenario);
+            ProductionState = ScenarioLoader.LoadScenarioFromMemory(SelectedPredefinedScenario);
             ProductionState.ResetState();
+            SelectedController.ProductionState = ProductionState;
             SelectedController.RenewControllerState();
             UpdateProductionStateInView();
+
+            //ScenarioLoader.LoadScenarioFromMemory(ProductionState, SelectedPredefinedScenario);
+            //ProductionState.ResetState();
+            //SelectedController.RenewControllerState();
+            //UpdateProductionStateInView();
         }
 
         public void UpdateProductionStateInView()

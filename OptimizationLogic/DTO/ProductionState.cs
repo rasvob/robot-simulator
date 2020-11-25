@@ -21,8 +21,8 @@ namespace OptimizationLogic.DTO
         public double CurrentStepTime { get; set; } = 0;
         public double TimeSpentInSimulation { get; set; } = 0;
         public int InitialFutureProductionPlanLen { get; set; } = 0;
-        public int WarehouseXDimension { get; }
-        public int WarehouseYDimension { get; }
+        public int WarehouseXDimension { get; private set; }
+        public int WarehouseYDimension { get; private set; }
 
         public static readonly int ForbiddedSpotsCount = 4;
 
@@ -86,11 +86,16 @@ namespace OptimizationLogic.DTO
 
         public ProductionState(int WarehouseXDimension, int WarehouseYDimension)
         {
+            this.WarehouseXDimension = WarehouseXDimension;
+            this.WarehouseYDimension = WarehouseYDimension;
+            InitProductionState();
+        }
+
+        public void InitProductionState()
+        {
             WarehouseState = new ItemState[WarehouseYDimension, WarehouseXDimension];
             TimeDictionary = new Dictionary<PositionCodes, Dictionary<PositionCodes, double>>();
             //TimeMatrix = new double[TimeMatrixDimension, TimeMatrixDimension];
-            this.WarehouseXDimension = WarehouseXDimension;
-            this.WarehouseYDimension = WarehouseYDimension;
             _warehousePositionMapping = BuildWarehousePositionMappingDict();
             var s = _warehousePositionMapping.Select(t => t.Value).GroupBy(t => t);
             _warehousePositionMappingReverse = BuildWarehousePositionMappingReverseDict();
@@ -248,7 +253,12 @@ namespace OptimizationLogic.DTO
         };
 
         public void LoadWarehouseState(string csvPath)
-        { // TODO : zkontrolovat zda je nutny refactoring
+        {
+            LoadWarehouseStateNew(csvPath);
+        }
+
+        public void LoadWarehouseStateOld(string csvPath)
+        { // TODO: zkontrolovat zda je nutny refactoring
             string[] lines = File.ReadAllLines(csvPath);
             CheckCorrectInputDimension(lines, WarehouseYDimension);
 
@@ -257,6 +267,23 @@ namespace OptimizationLogic.DTO
                 string[] row = lines[i].Split(';');
                 CheckCorrectInputDimension(row, WarehouseXDimension);
                 for (int j = 0; j < row.Length; j++)
+                {
+                    WarehouseState[i, j] = GetItemState(row[j]);
+                }
+            }
+        }
+
+        public void LoadWarehouseStateNew(string csvPath)
+        { 
+            string[] lines = File.ReadAllLines(csvPath);
+            this.WarehouseXDimension = lines[0].Split(';').Length;
+            this.WarehouseYDimension = lines.Length;
+            InitProductionState();
+
+            for (int i = 0; i < WarehouseYDimension; i++)
+            {
+                string[] row = lines[i].Split(';');
+                for (int j = 0; j < WarehouseXDimension; j++)
                 {
                     WarehouseState[i, j] = GetItemState(row[j]);
                 }
