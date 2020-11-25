@@ -39,6 +39,11 @@ namespace OptimizationLogic.BatchSimulation
             Config = config;
         }
 
+        public ExperimentRunner()
+        {
+
+        }
+
         public ExperimentResults RunExperiments()
         {
             Counter = 0;
