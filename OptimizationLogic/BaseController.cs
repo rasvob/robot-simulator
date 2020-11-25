@@ -10,11 +10,24 @@ namespace OptimizationLogic
 {
     public abstract class BaseController : IController
     {
-        public ProductionState ProductionState { get; set; }
+        public ProductionState ProductionState
+        {
+            get { return _productionState; }
+            set 
+            {
+                _productionState = value;
+                if (value != null)
+                {
+                    InitSortedPositionCodes();
+                }
+            }
+        }
         public List<BaseStepModel> StepLog { get; set; } = new List<BaseStepModel>();
 
         public Stack<ProductionState> History { get; set; } = new Stack<ProductionState>();
         protected Dictionary<PositionCodes, List<PositionCodes>> SortedPositionCodes;
+        private ProductionState _productionState;
+
         public int TimeLimit { get; set; }
         public int TimeLimitForOneStep { get => TimeLimit; }
         public int ClockTime { get; set; }
