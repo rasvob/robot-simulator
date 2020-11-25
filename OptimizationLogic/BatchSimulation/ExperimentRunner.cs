@@ -1,6 +1,8 @@
 ﻿using OptimizationLogic.AsyncControllers;
+using OptimizationLogic.DTO;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -23,13 +25,14 @@ namespace OptimizationLogic.BatchSimulation
             get { return _counter; }
             set { _counter = value; }
         }
-        public event EventHandler<int> CounterUpdated;
-        protected virtual void OnCounterUpdated(int e)
+        public event EventHandler<ProgressEventArgs> CounterUpdated;
+        protected virtual void OnCounterUpdated(ProgressEventArgs e)
         {
             CounterUpdated?.Invoke(this, e);
         }
 
         public ExperimentConfig Config { get; set; }
+        public CancellationToken CancellationToken { get; set; }
 
         public ExperimentRunner(ExperimentConfig config)
         {
@@ -38,6 +41,9 @@ namespace OptimizationLogic.BatchSimulation
 
         public ExperimentResults RunExperiments()
         {
+            Counter = 0;
+            OnCounterUpdated(new ProgressEventArgs { CurrentValue = Counter, State = ProgressState.Start });
+
             ExperimentResults results = new ExperimentResults();
             results.SimulationResults = SimulateScenarios();
 
@@ -60,6 +66,7 @@ namespace OptimizationLogic.BatchSimulation
                 });
             }
 
+            OnCounterUpdated(new ProgressEventArgs { CurrentValue = Counter, State = ProgressState.End });
             return results;
         }
 
@@ -68,26 +75,38 @@ namespace OptimizationLogic.BatchSimulation
             var simulators = GetSimulationsDict();
             SingleSimulationResult[] simulationResultsArray = new SingleSimulationResult[Config.ProductionStates.Count * simulators.Count];
 
-            // TODO: Parallel For user termination ?
-            var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
+            try
             {
-                foreach (var simulation in simulators)
+                var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
                 {
-                    var simulationName = simulation.Key;
-                    var simulatorOrder = simulation.Value.Item1;
-                    var simulator = simulation.Value.Item2;
+                    foreach (var simulation in simulators)
+                    {
+                        var simulationName = simulation.Key;
+                        var simulatorOrder = simulation.Value.Item1;
+                        var simulator = simulation.Value.Item2;
 
-                    var resultIndex = i * simulators.Count + simulatorOrder;
-                    simulationResultsArray[resultIndex].ConfigurationName = simulationName;
-                    simulationResultsArray[resultIndex].SimulationNumber = i;
+                        var resultIndex = i * simulators.Count + simulatorOrder;
+                        simulationResultsArray[resultIndex].ConfigurationName = simulationName;
+                        simulationResultsArray[resultIndex].SimulationNumber = i;
 
-                    simulator.Controller.ProductionState = (DTO.ProductionState)Config.ProductionStates[i].Clone();
-                    SimulateSingleRun(simulator, simulationResultsArray[resultIndex]);
-                }
-                // TODO: check if this is valid operation, workaround bcs "a property or indexer may not be passed as an out or ref parameter" warning
-                Interlocked.Increment(ref _counter);
-                //Counter = completedCounter;
-            });
+                        simulator.Controller.ProductionState = (DTO.ProductionState)Config.ProductionStates[i].Clone();
+                        SimulateSingleRun(simulator, simulationResultsArray[resultIndex]);
+
+                        CancellationToken.ThrowIfCancellationRequested();
+                    }
+                    // TODO: check if this is valid operation, workaround bcs "a property or indexer may not be passed as an out or ref parameter" warning
+                    Interlocked.Increment(ref _counter);
+                    OnCounterUpdated(new ProgressEventArgs { CurrentValue = Counter, State = ProgressState.Update });
+                    //Counter = completedCounter;
+                });
+            }
+
+            catch (OperationCanceledException exc)
+            {
+                Debug.WriteLine($"Parallel for canceled: {exc.Message}");
+            }
+
+            // TODO: Parallel For user termination ?
             
             return new List<SingleSimulationResult>(simulationResultsArray);
         }

@@ -14,6 +14,8 @@ using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Documents;
 using System.Web.UI;
 using System.ComponentModel;
+using OptimizationLogic.BatchSimulation;
+using System.Threading;
 
 namespace robot_simulator.ViewModels
 {
@@ -589,7 +591,7 @@ namespace robot_simulator.ViewModels
             LoadProductionHistory = new SimpleCommand(LoadProductionHistoryExecute);
             LoadProductionState = new SimpleCommand(LoadProductionStateExecute);
             Undo = new SimpleCommand(UndoExecute, _ => SelectedController.CanUndo());
-            RunSimulations = new SimpleCommand(RunSimulationsExecute);
+            RunSimulations = new SimpleCommand(RunSimulationsExecute, RunSimulationsCanExecute);
             LoadSelectedSimulation = new SimpleCommand(LoadSelectedSimulationExecute);
             SetIntervalLengthConfiguration = new SimpleCommand(SetIntervalLengthConfigurationExecute, SetIntervalLengthConfigurationCanExecute);
             UpdateProductionStateInView();
@@ -602,6 +604,11 @@ namespace robot_simulator.ViewModels
             UpdateProductionQueueRestrictions();
             SimulationResults = new List<SimulationResultModel>() { new SimulationResultModel { Delay = 0, NumberOfNonProducedCars = 0, SimulationNumber = 0 }, new SimulationResultModel { Delay = 10, NumberOfNonProducedCars = 10, SimulationNumber = 1 } };
             this.PropertyChanged += MainWindowViewModel_PropertyChanged;
+        }
+
+        private bool RunSimulationsCanExecute(object arg)
+        {
+            return SetIntervalLengthConfigurationCanExecute(arg);
         }
 
         private bool SetIntervalLengthConfigurationCanExecute(object arg)
@@ -622,7 +629,39 @@ namespace robot_simulator.ViewModels
 
         private void RunSimulationsExecute(object obj)
         {
-            ShowNotification("Simulation run button clicked");
+            var factory = new ExperimentFactory
+            {
+                BatchSize = NumberOfSimulations,
+                ClockTime = ClockTime,
+                DominantDistanceWeight = DominantDistanceWeight,
+                IsMqbDominant = IsMqbDominant,
+                MaximumNonDominantItemsInARow = RestrictionSelectedIndex,
+                NonDominantDistanceWeight = NonDominantDistanceWeight,
+                NumberOfFreePositions = NumberOfFreePositionsInStacker,
+                NumberOfItemsInFutureProductionQueue = NumberOfItemsInFutureProductionQueue,
+                NumberOfItemsInPastProductionQueue = NumberOfItemsInPastProductionQueue,
+                ProbabiityOfNonDominantItemAsNextOne = NextNonDominantItemProbability,
+                SequencesAreDeterministic = !AreSimulationSequencesRandom,
+                TimeLimit = TimeLimit,
+                UniformProbabilityWeight = UniformProbabilityWeight,
+                UseFixedCoefficient = AreCoefficientValuesFixed,
+                UseReorganization = UseWarehouseReorganization,
+                WarehouseColumns = FrontStackColumnsCount,
+                 WarehouseRows = FrontStackLevelsCount * 2
+            };
+
+            var config = factory.CreateExperimentConfig();
+            var runner = new ExperimentRunner(config);
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+            runner.CancellationToken = cts.Token;
+
+            runner.CounterUpdated += (sender, args) =>
+            {
+
+            };
+
+
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
