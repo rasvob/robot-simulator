@@ -161,13 +161,13 @@ namespace OptimizationLogic
         private int SimulateProcessing(ProductionState productionState, int numberOfImagenarySteps)
         {
             ProductionState localProductionState = (ProductionState)productionState.Clone();
+            BaseController localController = Controller.CreateNew(localProductionState);
             int counter = 0;
             while (localProductionState.FutureProductionPlan.Count < numberOfImagenarySteps)
             {
                 localProductionState.FutureProductionPlan.Enqueue(localProductionState.FutureProductionPlan.ElementAt(counter++));
             }
-            Controller.ProductionState = localProductionState;
-            while (Controller.NextStep() && Controller.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) { }
+            while (localController.NextStep() && localController.ProductionState.ProductionStateIsOk && --numberOfImagenarySteps > 0) { }
             return numberOfImagenarySteps;
         }
     }

@@ -140,5 +140,7 @@ namespace OptimizationLogic
         public virtual bool CanUndo() => History.Count > 0;
 
         public abstract bool NextStep();
+
+        public abstract BaseController CreateNew(ProductionState state);
     }
 }

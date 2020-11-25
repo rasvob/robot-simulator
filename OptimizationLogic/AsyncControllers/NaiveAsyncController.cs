@@ -312,5 +312,12 @@ namespace OptimizationLogic.AsyncControllers
             step.Message += $", Going to state: {CurrentState}";
             StepLog.Add(step);
         }
+
+        public override BaseController CreateNew(ProductionState state)
+        {
+            NaiveAsyncController controller = new NaiveAsyncController(state);
+            controller.SetControllerTimes(this.ClockTime, this.TimeLimit);
+            return controller;
+        }
     }
 }

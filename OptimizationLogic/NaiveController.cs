@@ -76,5 +76,12 @@ namespace OptimizationLogic
 
             return true;
         }
+
+        public override BaseController CreateNew(ProductionState state)
+        {
+            NaiveController controller = new NaiveController(state);
+            controller.SetControllerTimes(this.ClockTime, this.TimeLimit);
+            return controller;
+        }
     }
 }
