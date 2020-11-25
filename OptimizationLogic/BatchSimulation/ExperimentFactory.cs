@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimizationLogic.BatchSimulation
@@ -39,6 +40,7 @@ namespace OptimizationLogic.BatchSimulation
         private readonly int _randomWeightHigherBound = 6;
         private readonly int _randomWeightHigherBoundUniform = 5;
 
+        public CancellationToken CancellationToken { get; set; }
 
         private IEnumerable<GeneratorCoefficients> SampleCoefficients(Random random)
         {
@@ -56,13 +58,16 @@ namespace OptimizationLogic.BatchSimulation
             var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow > 0 ? MaximumNonDominantItemsInARow : NumberOfItemsInPastProductionQueue, sequenceRandom);
             var productionStateGenerator = new RestrictiveProductionStateGenerator(sequenceGenerator, NumberOfDominantItems, NumberOfNonDominantItems, WarehouseRows, WarehouseColumns, NumberOfItemsInFutureProductionQueue, NumberOfItemsInPastProductionQueue);
             res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select(item => {
+                CancellationToken.ThrowIfCancellationRequested();
                 sequenceGenerator.DominantToNonDominantTransitionProbability = item.ProbabiityOfNonDominantItemAsNextOne;
                 productionStateGenerator.UniformProbabilityWeight = item.UniformProbabilityWeight;
                 productionStateGenerator.DominantDistanceWeight = item.DominantDistanceWeight;
                 productionStateGenerator.NonDominantDistanceWeight = item.NonDominantDistanceWeight;
                 return productionStateGenerator.GenerateProductionState();
             }));
-            res.ProductionStatesBackup.AddRange(res.ProductionStates.Select(t => (ProductionState)t.Clone()));
+            res.ProductionStatesBackup.AddRange(res.ProductionStates.Select(t => {
+                CancellationToken.ThrowIfCancellationRequested();
+                return (ProductionState)t.Clone(); }));
             return res;
         }
 

@@ -79,38 +79,27 @@ namespace OptimizationLogic.BatchSimulation
         {
             var simulators = GetSimulationsDict();
             SingleSimulationResult[] simulationResultsArray = Enumerable.Repeat(0, Config.ProductionStates.Count * simulators.Count).Select(T => new SingleSimulationResult()).ToArray();
-            try
+
+            var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
             {
-                var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
+                foreach (var simulation in simulators)
                 {
-                    foreach (var simulation in simulators)
-                    {
-                        var simulationName = simulation.Key;
-                        var simulatorOrder = simulation.Value.Item1;
-                        var simulator = simulation.Value.Item2;
+                    var simulationName = simulation.Key;
+                    var simulatorOrder = simulation.Value.Item1;
+                    var simulator = simulation.Value.Item2;
 
-                        var resultIndex = i * simulators.Count + simulatorOrder;
-                        simulationResultsArray[resultIndex].ConfigurationName = simulationName;
-                        simulationResultsArray[resultIndex].SimulationNumber = i;
+                    var resultIndex = i * simulators.Count + simulatorOrder;
+                    simulationResultsArray[resultIndex].ConfigurationName = simulationName;
+                    simulationResultsArray[resultIndex].SimulationNumber = i;
 
-                        var localSimulator = simulator.CreateNew((DTO.ProductionState)Config.ProductionStates[i].Clone());
-                        SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex]);
+                    var localSimulator = simulator.CreateNew((DTO.ProductionState)Config.ProductionStates[i].Clone());
+                    SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex]);
 
-                        CancellationToken.ThrowIfCancellationRequested();
-                    }
-                    // TODO: check if this is valid operation, workaround bcs "a property or indexer may not be passed as an out or ref parameter" warning
-                    Interlocked.Increment(ref _counter);
-                    OnCounterUpdated(new ProgressEventArgs { CurrentValue = Counter, State = ProgressState.Update });
-                    //Counter = completedCounter;
-                });
-            }
-
-            catch (OperationCanceledException exc)
-            {
-                Debug.WriteLine($"Parallel for canceled: {exc.Message}");
-            }
-
-            // TODO: Parallel For user termination ?
+                    CancellationToken.ThrowIfCancellationRequested();
+                }
+                Interlocked.Increment(ref _counter);
+                OnCounterUpdated(new ProgressEventArgs { CurrentValue = Counter, State = ProgressState.Update });
+            });
 
             return new List<SingleSimulationResult>(simulationResultsArray);
         }

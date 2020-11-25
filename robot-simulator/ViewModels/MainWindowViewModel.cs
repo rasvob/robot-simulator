@@ -16,6 +16,7 @@ using System.Web.UI;
 using System.ComponentModel;
 using OptimizationLogic.BatchSimulation;
 using System.Threading;
+using System.Diagnostics;
 
 namespace robot_simulator.ViewModels
 {
@@ -647,17 +648,36 @@ namespace robot_simulator.ViewModels
         {
             
             var runner = new ExperimentRunner();
+            var factory = new ExperimentFactory
+            {
+                BatchSize = NumberOfSimulations,
+                ClockTime = ClockTime,
+                DominantDistanceWeight = DominantDistanceWeight,
+                IsMqbDominant = IsMqbDominant,
+                MaximumNonDominantItemsInARow = RestrictionSelectedIndex,
+                NonDominantDistanceWeight = NonDominantDistanceWeight,
+                NumberOfFreePositions = NumberOfFreePositionsInStacker,
+                NumberOfItemsInFutureProductionQueue = NumberOfItemsInFutureProductionQueue,
+                NumberOfItemsInPastProductionQueue = NumberOfItemsInPastProductionQueue,
+                ProbabiityOfNonDominantItemAsNextOne = NextNonDominantItemProbability,
+                SequencesAreDeterministic = !AreSimulationSequencesRandom,
+                TimeLimit = TimeLimit,
+                UniformProbabilityWeight = UniformProbabilityWeight,
+                UseFixedCoefficient = AreCoefficientValuesFixed,
+                UseReorganization = UseWarehouseReorganization,
+                WarehouseColumns = FrontStackColumnsCount,
+                WarehouseRows = FrontStackLevelsCount * 2
+            };
 
             CancellationTokenSource cts = new CancellationTokenSource();
             runner.CancellationToken = cts.Token;
+            factory.CancellationToken = cts.Token;
 
             SimulatioanIsRunning = true;
             ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Simulation is running", "Please wait...", true);
             ProgressDialog.Minimum = 0;
             ProgressDialog.Maximum = NumberOfSimulations;
-            ProgressDialog.Canceled += (s, e) => {
-                cts.Cancel();
-            };
+            ProgressDialog.Canceled += (s, e) => cts.Cancel();
 
             runner.CounterUpdated += async (sender, e) =>
             {
@@ -666,11 +686,6 @@ namespace robot_simulator.ViewModels
                     case ProgressState.Start:
                         break;
                     case ProgressState.End:
-                        if (ProgressDialog?.IsOpen == true)
-                        {
-                            await ProgressDialog?.CloseAsync();
-                        }
-                        SimulatioanIsRunning = false;
                         break;
                     case ProgressState.Update:
                         ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
@@ -685,32 +700,29 @@ namespace robot_simulator.ViewModels
                         break;
                 }
             };
-            //runner.RunExperiments();
-            ExperimentResults = await Task.Factory.StartNew(() => {
-                var factory = new ExperimentFactory
-                {
-                    BatchSize = NumberOfSimulations,
-                    ClockTime = ClockTime,
-                    DominantDistanceWeight = DominantDistanceWeight,
-                    IsMqbDominant = IsMqbDominant,
-                    MaximumNonDominantItemsInARow = RestrictionSelectedIndex,
-                    NonDominantDistanceWeight = NonDominantDistanceWeight,
-                    NumberOfFreePositions = NumberOfFreePositionsInStacker,
-                    NumberOfItemsInFutureProductionQueue = NumberOfItemsInFutureProductionQueue,
-                    NumberOfItemsInPastProductionQueue = NumberOfItemsInPastProductionQueue,
-                    ProbabiityOfNonDominantItemAsNextOne = NextNonDominantItemProbability,
-                    SequencesAreDeterministic = !AreSimulationSequencesRandom,
-                    TimeLimit = TimeLimit,
-                    UniformProbabilityWeight = UniformProbabilityWeight,
-                    UseFixedCoefficient = AreCoefficientValuesFixed,
-                    UseReorganization = UseWarehouseReorganization,
-                    WarehouseColumns = FrontStackColumnsCount,
-                    WarehouseRows = FrontStackLevelsCount * 2
-                };
 
-                runner.Config = factory.CreateExperimentConfig();
-                return runner.RunExperiments();
-            } );
+            try
+            {
+                ExperimentResults = await Task.Factory.StartNew(() => {
+                    
+
+                    ProgressDialog?.SetMessage($"Creating experiments configuration");
+                    runner.Config = factory.CreateExperimentConfig();
+                    return runner.RunExperiments();
+                });
+            }
+            catch (AggregateException exc)
+            {
+                Debug.WriteLine(exc.Message);
+            }
+            finally
+            {
+                if (ProgressDialog?.IsOpen == true)
+                {
+                    await ProgressDialog?.CloseAsync();
+                }
+                SimulatioanIsRunning = false;
+            }
         }
 
         private void MainWindowViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
