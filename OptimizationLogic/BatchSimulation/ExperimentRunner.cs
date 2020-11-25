@@ -73,8 +73,7 @@ namespace OptimizationLogic.BatchSimulation
         private List<SingleSimulationResult> SimulateScenarios()
         {
             var simulators = GetSimulationsDict();
-            SingleSimulationResult[] simulationResultsArray = new SingleSimulationResult[Config.ProductionStates.Count * simulators.Count];
-
+            SingleSimulationResult[] simulationResultsArray = Enumerable.Repeat(new SingleSimulationResult(), Config.ProductionStates.Count * simulators.Count).ToArray();
             try
             {
                 var result = Parallel.For(0, Config.ProductionStates.Count, (i) =>
