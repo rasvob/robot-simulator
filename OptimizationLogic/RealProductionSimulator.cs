@@ -152,7 +152,7 @@ namespace OptimizationLogic
             GreedyWarehouseReorganizer reorganizer = null;
             if (this.warehouseReorganizer != null)
             {
-                reorganizer = new GreedyWarehouseReorganizer(this.warehouseReorganizer.Controller.CreateNew((ProductionState)state.Clone()), this.warehouseReorganizer.MaxDepth, this.warehouseReorganizer.SelectBestCnt);
+                reorganizer = new GreedyWarehouseReorganizer(this.warehouseReorganizer.Controller.CreateNew((ProductionState)state.Clone()), this.warehouseReorganizer.MaxDepth, this.warehouseReorganizer.SelectBestCnt) { CancellationToken = this.warehouseReorganizer.CancellationToken };
             }
             RealProductionSimulator simulator = new RealProductionSimulator(this.Controller.CreateNew(state), reorganizer);
             return simulator;

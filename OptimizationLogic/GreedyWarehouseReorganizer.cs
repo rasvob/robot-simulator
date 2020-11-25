@@ -14,6 +14,7 @@ namespace OptimizationLogic
         public int SelectBestCnt { get; }
         public event EventHandler<ProgressEventArgs> ProgressTriggered;
         public BaseController Controller { get; set; }
+        public CancellationToken? CancellationToken { get; set; }
 
         public GreedyWarehouseReorganizer(BaseController controller, int maxDepth = 5, int selectBestCnt = 1)
         {
@@ -160,6 +161,7 @@ namespace OptimizationLogic
 
         private int SimulateProcessing(ProductionState productionState, int numberOfImagenarySteps)
         {
+            CancellationToken?.ThrowIfCancellationRequested();
             ProductionState localProductionState = (ProductionState)productionState.Clone();
             BaseController localController = Controller.CreateNew(localProductionState);
             int counter = 0;
