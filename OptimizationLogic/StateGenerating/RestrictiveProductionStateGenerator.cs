@@ -64,8 +64,8 @@ namespace OptimizationLogic.StateGenerating
             int numberOfNonDominantItems = MaximumOfNonDominantItems - state.ProductionHistory.Count(t => t == NonDominantItem);
             int numberOfFreeSlots = MaximumFreeSlotsInWarehouse - numberOfDominantItems - numberOfNonDominantItems;
 
-            var randomPermutationOfItems = Enumerable.Repeat(DominantItem, numberOfNonDominantItems)
-                .Concat(Enumerable.Repeat(NonDominantItem, numberOfDominantItems))
+            var randomPermutationOfItems = Enumerable.Repeat(NonDominantItem, numberOfNonDominantItems)
+                .Concat(Enumerable.Repeat(DominantItem, numberOfDominantItems))
                 .OrderBy(_ => RandomGenerator.Next())
                 .ToList();
 
