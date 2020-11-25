@@ -42,6 +42,13 @@ namespace OptimizationLogic.BatchSimulation
 
         public CancellationToken CancellationToken { get; set; }
 
+        public event EventHandler<ProgressEventArgs> ProgressUpdated;
+
+        protected virtual void OnProgressUpdated(ProgressEventArgs e)
+        {
+            ProgressUpdated?.Invoke(this, e);
+        }
+
         private IEnumerable<GeneratorCoefficients> SampleCoefficients(Random random)
         {
             return UseFixedCoefficient switch {
@@ -57,12 +64,15 @@ namespace OptimizationLogic.BatchSimulation
             var res = new ExperimentConfig { ClockTime = ClockTime, TimeLimit = TimeLimit, UseReorganization = UseReorganization };
             var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow > 0 ? MaximumNonDominantItemsInARow : NumberOfItemsInPastProductionQueue, sequenceRandom);
             var productionStateGenerator = new RestrictiveProductionStateGenerator(sequenceGenerator, NumberOfDominantItems, NumberOfNonDominantItems, WarehouseRows, WarehouseColumns, NumberOfItemsInFutureProductionQueue, NumberOfItemsInPastProductionQueue);
-            res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select(item => {
+            res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select((item, idx) => {
                 CancellationToken.ThrowIfCancellationRequested();
                 sequenceGenerator.DominantToNonDominantTransitionProbability = item.ProbabiityOfNonDominantItemAsNextOne;
                 productionStateGenerator.UniformProbabilityWeight = item.UniformProbabilityWeight;
                 productionStateGenerator.DominantDistanceWeight = item.DominantDistanceWeight;
                 productionStateGenerator.NonDominantDistanceWeight = item.NonDominantDistanceWeight;
+
+                OnProgressUpdated(new ProgressEventArgs { CurrentValue = idx, State = ProgressState.Update });
+
                 return productionStateGenerator.GenerateProductionState();
             }));
             res.ProductionStatesBackup.AddRange(res.ProductionStates.Select(t => {

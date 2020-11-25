@@ -678,7 +678,7 @@
                                 
                             </Expander>
 
-                            <Expander Header="Detailed results" IsExpanded="False" Margin="0 10 0 0">
+                            <Expander Header="Detailed results" IsExpanded="True" Margin="0 10 0 0">
                                 <DataGrid ItemsSource="{Binding ExperimentResults.SimulationResults, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedSimulationResult, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                     AutoGenerateColumns="False"
                                     CanUserAddRows="False"
@@ -693,6 +693,10 @@
                                             <MenuItem Header="Save selected item" Command="{Binding LoadSelectedSimulation}" />
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
+
+                                    <xb:Interaction.Behaviors>
+                                        <behaviours:IgnoreMouseWheelBehavior />
+                                    </xb:Interaction.Behaviors>
 
                                     <DataGrid.Columns>
                                         <DataGridTextColumn IsReadOnly="True" Binding="{Binding SimulationNumber}" Header="#" />

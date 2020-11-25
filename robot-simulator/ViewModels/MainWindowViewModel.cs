@@ -646,7 +646,7 @@ namespace robot_simulator.ViewModels
 
         private async void RunSimulationsExecuteAsync(object obj)
         {
-            
+            ExperimentResults = null;
             var runner = new ExperimentRunner();
             var factory = new ExperimentFactory
             {
@@ -673,8 +673,17 @@ namespace robot_simulator.ViewModels
             runner.CancellationToken = cts.Token;
             factory.CancellationToken = cts.Token;
 
+            factory.ProgressUpdated += (sender, args) =>
+            {
+                if (args.State == ProgressState.Update)
+                {
+                    ProgressDialog?.SetMessage($"Generated {args.CurrentValue} experiment parameters out of {ProgressDialog?.Maximum}");
+                    ProgressDialog?.SetProgress(args.CurrentValue);
+                }
+            };
+
             SimulatioanIsRunning = true;
-            ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, $"Simulation is running", "Please wait...", true);
+            ProgressDialog = await DialogCoordinator.ShowProgressAsync(this, "Simulation is running", "Please wait...", true);
             ProgressDialog.Minimum = 0;
             ProgressDialog.Maximum = NumberOfSimulations;
             ProgressDialog.Canceled += (s, e) => cts.Cancel();
@@ -688,7 +697,7 @@ namespace robot_simulator.ViewModels
                     case ProgressState.End:
                         break;
                     case ProgressState.Update:
-                        ProgressDialog?.SetMessage($"Step {e.CurrentValue} out of {ProgressDialog?.Maximum}");
+                        ProgressDialog?.SetMessage($"Completed {e.CurrentValue} simulations out of {ProgressDialog?.Maximum}");
                         ProgressDialog?.SetProgress(e.CurrentValue);
                         break;
                     default:
