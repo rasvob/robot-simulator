@@ -414,7 +414,7 @@ namespace robot_simulator.ViewModels
 
         private double _uniformProbabilityWeight = 1.0;
         private List<SimulationResultModel> _simulationResults;
-        private SimulationResultModel _selectedSimulationResult;
+        private SingleSimulationResult _selectedSimulationResult;
 
         public double UniformProbabilityWeight
         {
@@ -444,7 +444,7 @@ namespace robot_simulator.ViewModels
             }
         }
 
-        public SimulationResultModel SelectedSimulationResult
+        public SingleSimulationResult SelectedSimulationResult
         {
             get { return _selectedSimulationResult; }
 
