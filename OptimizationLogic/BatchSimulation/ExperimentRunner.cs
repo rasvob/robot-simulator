@@ -89,8 +89,8 @@ namespace OptimizationLogic.BatchSimulation
                         simulationResultsArray[resultIndex].ConfigurationName = simulationName;
                         simulationResultsArray[resultIndex].SimulationNumber = i;
 
-                        simulator.Controller.ProductionState = (DTO.ProductionState)Config.ProductionStates[i].Clone();
-                        SimulateSingleRun(simulator, simulationResultsArray[resultIndex]);
+                        var localSimulator = simulator.CreateNew((DTO.ProductionState)Config.ProductionStates[i].Clone());
+                        SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex]);
 
                         CancellationToken.ThrowIfCancellationRequested();
                     }
