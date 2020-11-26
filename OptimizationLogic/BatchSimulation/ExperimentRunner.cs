@@ -51,9 +51,10 @@ namespace OptimizationLogic.BatchSimulation
 
             ExperimentResults results = new ExperimentResults();
             results.SimulationResults = SimulateScenarios();
-
+            
             // aggregate results
-            foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" }) // TODO: 
+            var simulators = GetSimulationsDict();
+            foreach (string configurationName in simulators.Keys) // TODO: 
             {
                 var filteredRecords = results.SimulationResults.FindAll(x => x.ConfigurationName == configurationName);
                 if (filteredRecords.Count == 0)
@@ -95,7 +96,7 @@ namespace OptimizationLogic.BatchSimulation
                     simulationResultsArray[resultIndex].SimulationNumber = i;
 
                     var localSimulator = simulator.CreateNew((DTO.ProductionState)Config.ProductionStates[i].Clone());
-                    SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex]);
+                    SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex], simulationName == "async-skip_break" && i == 7);
 
                     CancellationToken.ThrowIfCancellationRequested();
                 }
@@ -155,21 +156,10 @@ namespace OptimizationLogic.BatchSimulation
             throw new ArgumentException("Wrong arguments in GetPercentileValue");
         }
 
-        int GetPlanedTime(int plannedProductionLength)
-        {
-            switch (plannedProductionLength)
-            {
-                case 100: return plannedProductionLength * 55;
-                case 1440: return 86400;
-                case 7200: return 5 * 86400;
-                default: throw new ArgumentException("Wrong production length");
-            }
-        }
-
-        void SimulateSingleRun(RealProductionSimulator productionSimulator, SingleSimulationResult simulationResult)
+        void SimulateSingleRun(RealProductionSimulator productionSimulator, SingleSimulationResult simulationResult, bool printDebug = false)
         {
             productionSimulator.Controller.RealTime = -300;
-            var plannedRealProcessingTime = GetPlanedTime(productionSimulator.Controller.ProductionState.FutureProductionPlan.Count);
+            var plannedRealProcessingTime = productionSimulator.GetPlannedTimeWithBreaks();
 
             while (productionSimulator.Controller.ProductionState.FutureProductionPlan.Count > 0)
             {
@@ -179,6 +169,8 @@ namespace OptimizationLogic.BatchSimulation
                 {
                     simulationResult.MissingCarsCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
+                if (printDebug)
+                    Console.WriteLine($"{productionSimulator.Controller.RealTime};{productionSimulator.Controller.Delay};{productionSimulator.Controller.ProductionState.FutureProductionPlan.Count}");
             }
 
             simulationResult.Delay = productionSimulator.Controller.Delay;

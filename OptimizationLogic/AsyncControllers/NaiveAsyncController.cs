@@ -122,7 +122,7 @@ namespace OptimizationLogic.AsyncControllers
             IntakeItem = ItemState.Empty;
             OuttakeItem = ItemState.Empty;
             CurrentState = AsyncControllerState.Start;
-            _timeBaseShift = 9;
+            _timeBaseShift = InitialIntakeTime;
         }
 
         public override bool CanUndo()

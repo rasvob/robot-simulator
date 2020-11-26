@@ -33,6 +33,11 @@ namespace OptimizationLogic.AsyncControllers
             return (currentIntakeSteps-1) * IntakeClock + InitialIntakeTime + IntakeOuttakeDifference + BreakTime;
         }
 
+        public double GetNextOuttakeTime()
+        {
+            return GetPreviousOuttakeTime() + IntakeClock;
+        }
+
         public override void PutHandler()
         {
             var nearestNeededPosition = GetNearesElementWarehousePosition(ProductionState, Needed);
@@ -81,7 +86,11 @@ namespace OptimizationLogic.AsyncControllers
                     var deq = ProductionState.FutureProductionPlan.Dequeue();
                     ProductionState.ProductionHistory.Enqueue(deq);
                     CurrentState = AsyncControllerState.Get;
-
+                    
+                    if (RealTime > GetNextOuttakeTime())
+                    {
+                        Delay += RealTime - nextOuttake;
+                    }
                     if (RealTime <= nextIntake)
                     {
                         //RealTime = GetClosestNextIntakeTime();
@@ -173,7 +182,7 @@ namespace OptimizationLogic.AsyncControllers
         }
         public override BaseController CreateNew(ProductionState state)
         {
-            NaiveAsyncController controller = new NaiveAsyncControllerWithHalfCycleDelay(state);
+            NaiveAsyncControllerWithHalfCycleDelay controller = new NaiveAsyncControllerWithHalfCycleDelay(state);
             controller.SetControllerTimes(this.ClockTime, this.TimeLimit);
             return controller;
         }
