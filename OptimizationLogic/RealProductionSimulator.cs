@@ -42,7 +42,6 @@ namespace OptimizationLogic
         private List<Tuple<double, double>> productionDayBreaks = new List<Tuple<double, double>>();
         private GreedyWarehouseReorganizer warehouseReorganizer;
         private const int secondsInProductionDay = 86400;
-        private const int tactTime = 55;
         public event EventHandler<ProgressEventArgs> WarehouseReorganizationProgressUpdated;
         public RealProductionSimulator(BaseController controller, GreedyWarehouseReorganizer warehouseReorganizer = null)
         {
@@ -128,7 +127,7 @@ namespace OptimizationLogic
                 Controller.StepLog.Add(new BaseStepModel() { Message = $"Break time (duration {breakDuration})" });
                 WarehouseReorganizer?.ReorganizeWarehouse(Controller.ProductionState, Controller.StepLog, breakDuration);
                 Controller.RealTime += breakDuration + timeUsedInBreak;
-                var timeShift = (breakDuration + timeUsedInBreak) % tactTime;
+                var timeShift = (breakDuration + timeUsedInBreak) % Controller.ClockTime;
                 if (Controller.RealTime > 0)
                 {
                     Controller.IncreaseTimebaseShift(timeShift);

@@ -12,7 +12,16 @@ namespace OptimizationLogic.DTO
 {
     public class ProductionState : ICloneable
     {
-        public Queue<ItemState> FutureProductionPlan { get; set; } = new Queue<ItemState>();
+        private Queue<ItemState> _futureProductionPlan = new Queue<ItemState>();
+        public Queue<ItemState> FutureProductionPlan
+        {
+            get { return _futureProductionPlan; }
+            set
+            {
+                _futureProductionPlan = value;
+                InitialFutureProductionPlanLen = FutureProductionPlan.Count;
+            }
+        }
         public Queue<ItemState> ProductionHistory { get; set; } = new Queue<ItemState>();
         public ItemState[,] WarehouseState { get; set; }
         public Dictionary<PositionCodes, Dictionary<PositionCodes, double>> TimeDictionary { get; set; }

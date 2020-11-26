@@ -56,6 +56,8 @@ namespace OptimizationLogic.BatchSimulation
             foreach (string configurationName in new List<string>() { "naive-skip_break", "async-skip_break" }) // TODO: 
             {
                 var filteredRecords = results.SimulationResults.FindAll(x => x.ConfigurationName == configurationName);
+                if (filteredRecords.Count == 0)
+                    continue;
 
                 var sortedMissing = filteredRecords.OrderBy(x => x.MissingCarsCount).ToList();
                 var sortedDelay = filteredRecords.OrderBy(x => x.Delay).ToList();
