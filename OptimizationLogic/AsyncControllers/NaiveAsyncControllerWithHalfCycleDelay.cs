@@ -173,7 +173,7 @@ namespace OptimizationLogic.AsyncControllers
         }
         public override BaseController CreateNew(ProductionState state)
         {
-            NaiveAsyncController controller = new NaiveAsyncControllerWithHalfCycleDelay(state);
+            NaiveAsyncControllerWithHalfCycleDelay controller = new NaiveAsyncControllerWithHalfCycleDelay(state);
             controller.SetControllerTimes(this.ClockTime, this.TimeLimit);
             return controller;
         }
