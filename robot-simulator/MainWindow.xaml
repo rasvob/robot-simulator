@@ -684,7 +684,7 @@
                                     CanUserResizeColumns="True"
                                     CanUserResizeRows="True"
                                     CanUserSortColumns="True">
-                                    
+
                                     <xb:Interaction.Behaviors>
                                         <behaviours:IgnoreMouseWheelBehavior />
                                     </xb:Interaction.Behaviors>
@@ -730,8 +730,6 @@
                                 </DataGrid>
                             </Expander>
                         </StackPanel>
-                        
-                        
                     </Expander>
                 </StackPanel>
             </mah:MetroTabItem>

@@ -655,10 +655,25 @@ namespace robot_simulator.ViewModels
 
         private void SaveSelectedSimulationExecute(object obj)
         {
-            //TODO: Finish method
-            
             int idx = SelectedSimulationResult.SimulationNumber;
             var prodState = ProductionStatesFromConfig[idx];
+
+            try
+            {
+                string folder = OpenFolderDialog.Open();
+                if (string.IsNullOrEmpty(folder))
+                {
+                    ShowNotification("Folder does not exist");
+                    return;
+                }
+                prodState.SaveProductionState(folder, $"_{idx}");
+                ShowNotification("Scenario saved");
+            }
+            catch (ArgumentException exc)
+            {
+                ShowNotification(exc.Message);
+            }
+
         }
 
         private bool RunSimulationsCanExecute(object arg)
