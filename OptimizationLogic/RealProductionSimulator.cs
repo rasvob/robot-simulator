@@ -59,6 +59,25 @@ namespace OptimizationLogic
             productionDayBreaks.Add(new Tuple<double, double>(72900, 74700));
             productionDayBreaks.Add(new Tuple<double, double>(79200, 79500));
         }
+        public double GetPlannedTimeWithBreaks()
+        {
+            double productionTime = Controller.ProductionState.FutureProductionPlan.Count * Controller.ClockTime;
+            double dayBreaks = 7200;
+            double timeWithBreaksCounter = productionTime + Math.Floor(productionTime / (secondsInProductionDay - dayBreaks)) * dayBreaks;
+            var missingSeconds = productionTime % (secondsInProductionDay - dayBreaks);
+            for (int i = 1; i < productionDayBreaks.Count; i++)
+            {
+                var breakPair = productionDayBreaks[i];
+                if (missingSeconds >= breakPair.Item1)
+                {
+                    timeWithBreaksCounter += breakPair.Item2 - breakPair.Item1;
+                    missingSeconds += breakPair.Item2 - breakPair.Item1;
+                }
+                else
+                    break;
+            }
+            return timeWithBreaksCounter;
+        }
 
         private int GetBreakTimeIndex(double realTimeStamp)
         {
