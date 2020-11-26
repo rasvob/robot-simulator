@@ -567,8 +567,8 @@ namespace robot_simulator.ViewModels
                 {
                     while (res.Count < resLen)
                     {
-                        res.Add(new WarehouseItemViewModel { StateStr = DominantItemString });
-                        res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = NonDominantItemString }, RestrictionSelectedIndex));
+                        res.Add(new WarehouseItemViewModel { StateStr = NonDominantItemString });
+                        res.AddRange(Enumerable.Repeat(new WarehouseItemViewModel { StateStr = DominantItemString }, RestrictionSelectedIndex));
                     }
                 }
                 else
@@ -812,19 +812,21 @@ namespace robot_simulator.ViewModels
         private void UpdateProductionQueueRestrictions(int maximumOfNonDominantInRow = 5)
         {
             ItemState nonDominant = !IsMqbDominant ? ItemState.MQB : ItemState.MEB;
+            ItemState dominant = IsMqbDominant ? ItemState.MQB : ItemState.MEB;
 
-            if(ProductionQueueRestrictions.Any())
+            if (ProductionQueueRestrictions.Any())
             {
-                foreach (var item in ProductionQueueRestrictions)
+                
+                for (int i = 1; i < maximumOfNonDominantInRow; i++)
                 {
-                    item.Value = item.Value.Replace(IsMqbDominant ? ItemState.MQB.ToString() : ItemState.MEB.ToString(), nonDominant.ToString());
+                    ProductionQueueRestrictions[i].Value = $"Minimum of {i} {dominant} items between two {nonDominant}";
                 }
                 return;
             }
 
             ProductionQueueRestrictions.Clear();
             ProductionQueueRestrictions.Add(new ObservableString() { Value = "Full production of non-dominant type" });
-            foreach (var item in Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Maximum of {t} {nonDominant} items in a row"))
+            foreach (var item in Enumerable.Range(1, maximumOfNonDominantInRow).Select(t => $"Minimum of {t} {dominant} items between two {nonDominant}"))
             {
                 ProductionQueueRestrictions.Add(new ObservableString() { Value = item });
             }

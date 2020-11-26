@@ -26,6 +26,11 @@ namespace OptimizationLogic.StateGenerating
 
         public List<ItemState> GenerateSequence(int sequenceLength)
         {
+            return GenerateSequenceNew(sequenceLength);
+        }
+
+        public List<ItemState> GenerateSequenceAlt(int sequenceLength)
+        {
             var res = new List<ItemState>(sequenceLength);
             int nonDominantCounter = 0;
             for (int i = 0; i < sequenceLength; i++)
@@ -45,6 +50,36 @@ namespace OptimizationLogic.StateGenerating
             }
 
             return res;
+        }
+
+        public List<ItemState> GenerateSequenceNew(int sequenceLength)
+        {
+            var res = new List<ItemState>();
+
+            if (NonDominantItemInARowLimit == 0)
+            {
+                for (int i = 0; i < sequenceLength; i++)
+                {
+                    ItemState currentState = RandomGenerator.NextDouble() < DominantToNonDominantTransitionProbability ? NonDominantItem : DominantItem;
+                    res.Add(currentState);
+                }
+            }
+
+            while (res.Count < sequenceLength)
+            {
+                ItemState currentState = RandomGenerator.NextDouble() < DominantToNonDominantTransitionProbability ? NonDominantItem : DominantItem;
+                res.Add(currentState);
+
+                if (currentState == NonDominantItem)
+                {
+                    for (int i = 0; i < NonDominantItemInARowLimit; i++)
+                    {
+                        res.Add(DominantItem);
+                    }
+                }
+            }
+
+            return res.Take(sequenceLength).ToList();
         }
     }
 }

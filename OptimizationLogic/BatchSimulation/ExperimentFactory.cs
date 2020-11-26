@@ -62,7 +62,7 @@ namespace OptimizationLogic.BatchSimulation
             Random sequenceRandom = SequencesAreDeterministic ? new Random(_randomSeed) : new Random();
             Random weightRandom = SequencesAreDeterministic ? new Random(_randomSeed) : new Random();
             var res = new ExperimentConfig { ClockTime = ClockTime, TimeLimit = TimeLimit, UseReorganization = UseReorganization };
-            var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow > 0 ? MaximumNonDominantItemsInARow : NumberOfItemsInPastProductionQueue, sequenceRandom);
+            var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow, sequenceRandom);
             var productionStateGenerator = new RestrictiveProductionStateGenerator(sequenceGenerator, NumberOfDominantItems, NumberOfNonDominantItems, WarehouseRows, WarehouseColumns, NumberOfItemsInFutureProductionQueue, NumberOfItemsInPastProductionQueue);
             res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select((item, idx) => {
                 CancellationToken.ThrowIfCancellationRequested();
