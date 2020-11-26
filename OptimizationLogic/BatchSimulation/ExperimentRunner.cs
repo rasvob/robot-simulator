@@ -96,7 +96,7 @@ namespace OptimizationLogic.BatchSimulation
                     simulationResultsArray[resultIndex].SimulationNumber = i;
 
                     var localSimulator = simulator.CreateNew((DTO.ProductionState)Config.ProductionStates[i].Clone());
-                    SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex]);
+                    SimulateSingleRun(localSimulator, simulationResultsArray[resultIndex], simulationName == "async-skip_break" && i == 7);
 
                     CancellationToken.ThrowIfCancellationRequested();
                 }
@@ -156,7 +156,7 @@ namespace OptimizationLogic.BatchSimulation
             throw new ArgumentException("Wrong arguments in GetPercentileValue");
         }
 
-        void SimulateSingleRun(RealProductionSimulator productionSimulator, SingleSimulationResult simulationResult)
+        void SimulateSingleRun(RealProductionSimulator productionSimulator, SingleSimulationResult simulationResult, bool printDebug = false)
         {
             productionSimulator.Controller.RealTime = -300;
             var plannedRealProcessingTime = productionSimulator.GetPlannedTimeWithBreaks();
@@ -169,6 +169,8 @@ namespace OptimizationLogic.BatchSimulation
                 {
                     simulationResult.MissingCarsCount = productionSimulator.Controller.ProductionState.FutureProductionPlan.Count;
                 }
+                if (printDebug)
+                    Console.WriteLine($"{productionSimulator.Controller.RealTime};{productionSimulator.Controller.Delay};{productionSimulator.Controller.ProductionState.FutureProductionPlan.Count}");
             }
 
             simulationResult.Delay = productionSimulator.Controller.Delay;
