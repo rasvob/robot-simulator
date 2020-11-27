@@ -150,7 +150,7 @@ namespace OptimizationLogic
                 if (Controller.RealTime > 0)
                 {
                     Controller.IncreaseTimebaseShift(timeShift);
-                }                
+                }            
                 Controller.BreakTime += breakDuration + timeUsedInBreak;
                 if (WarehouseReorganizer != null)
                 {

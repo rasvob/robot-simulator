@@ -572,6 +572,7 @@ namespace robot_simulator.ViewModels
 
         public string NumberOfDominantItemsHeader { get => $"Number of {DominantItemString} items"; }
         public string NumberOfNonDominantItemsHeader { get => $"Number of {NonDominantItemString} items"; }
+        public int WarehouseRows { get => ProductionState.WarehouseRows; }
 
         public IEnumerable<WarehouseItemViewModel> ExampleOfGeneratedSequence {
             get {
@@ -1014,6 +1015,7 @@ namespace robot_simulator.ViewModels
             OnPropertyChanged(nameof(RealTime));
             OnPropertyChanged(nameof(NextItemFromFlow));
             OnPropertyChanged(nameof(NextItemFromQueue));
+            OnPropertyChanged(nameof(WarehouseRows));
         }
 
         public IEnumerable<WarehouseItemViewModel> CreateWarehouseViewModelCollection()

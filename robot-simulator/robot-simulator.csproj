@@ -184,6 +184,7 @@
     <Compile Include="ViewModels\ValueConterters\OptimizerToIsEnabledConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\QueueDisplayLimitConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\TileColorValueConterter.cs" />
+    <Compile Include="ViewModels\ValueConterters\WarehouseRowsToUniformGridCoverter.cs" />
     <Compile Include="ViewModels\WarehouseItemViewModel.cs" />
     <Compile Include="Views\QueueViewControl.xaml.cs">
       <DependentUpon>QueueViewControl.xaml</DependentUpon>

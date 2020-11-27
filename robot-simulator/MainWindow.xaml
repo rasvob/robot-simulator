@@ -105,6 +105,7 @@
             <converters:ObservableStringValueConverter x:Key="ObservableStringValueConverter" />
             <converters:NumberTimesNumberCoverter x:Key="NumberTimesNumberCoverter" />
             <converters:OptimizerToIsEnabledConverter x:Key="OptimizerToIsEnabledConverter" />
+            <converters:WarehouseRowsToUniformGridCoverter x:Key="WarehouseRowsToUniformGridCoverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -383,7 +384,7 @@
                 <ItemsControl ItemsSource="{Binding CurrentWarehouseState, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <UniformGrid Rows="5" />
+                                <UniformGrid Rows="{Binding WarehouseRows, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource WarehouseRowsToUniformGridCoverter}}" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
