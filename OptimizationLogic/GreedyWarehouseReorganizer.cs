@@ -10,7 +10,7 @@ namespace OptimizationLogic
 {
     public class GreedyWarehouseReorganizer
     {
-        public int MaxDepth { get; }
+        public int MaxDepth { get; set; }
         public int SelectBestCnt { get; }
         public event EventHandler<ProgressEventArgs> ProgressTriggered;
         public BaseController Controller { get; set; }

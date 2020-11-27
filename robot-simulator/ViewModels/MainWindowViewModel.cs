@@ -466,6 +466,7 @@ namespace robot_simulator.ViewModels
         private ExperimentResults _experimentResults;
         private int _selectedTabIndex = 0;
         private bool _scrollToTop;
+        private int _reorganizationComplexityLevel = 2;
 
         public int TimeLimit
         {
@@ -545,6 +546,20 @@ namespace robot_simulator.ViewModels
             {
                 _scrollToTop = value;
                 OnPropertyChanged(nameof(ScrollToTop));
+            }
+        }
+
+        public int ReorganizationComplexityLevel
+        {
+            get { return _reorganizationComplexityLevel; }
+
+            set
+            {
+                if (_reorganizationComplexityLevel != value)
+                {
+                    _reorganizationComplexityLevel = value;
+                    OnPropertyChanged(nameof(ReorganizationComplexityLevel));
+                }
             }
         }
 
@@ -728,7 +743,8 @@ namespace robot_simulator.ViewModels
                 UseFixedCoefficient = AreCoefficientValuesFixed,
                 UseReorganization = UseWarehouseReorganization,
                 WarehouseColumns = FrontStackColumnsCount,
-                WarehouseRows = FrontStackLevelsCount * 2
+                WarehouseRows = FrontStackLevelsCount * 2,
+                ReorganizationComplexityLevel = ReorganizationComplexityLevel
             };
 
             CancellationTokenSource cts = new CancellationTokenSource();
@@ -951,6 +967,7 @@ namespace robot_simulator.ViewModels
             SelectedController.RenewControllerState();
             UpdateProductionStateInView();
             SelectedOptimizer = SelectedOptimizerComboBox;
+            Reorganizer.MaxDepth = ReorganizationComplexityLevel;
         }
 
         public void UndoExecute(object o)

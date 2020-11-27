@@ -181,6 +181,7 @@
     <Compile Include="ViewModels\SimpleCommand.cs" />
     <Compile Include="ViewModels\ValueConterters\NumberTimesNumberCoverter.cs" />
     <Compile Include="ViewModels\ValueConterters\ObservableStringValueConverter.cs" />
+    <Compile Include="ViewModels\ValueConterters\OptimizerToIsEnabledConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\QueueDisplayLimitConverter.cs" />
     <Compile Include="ViewModels\ValueConterters\TileColorValueConterter.cs" />
     <Compile Include="ViewModels\WarehouseItemViewModel.cs" />
