@@ -104,6 +104,7 @@
             <converters:QueueDisplayLimitConverter x:Key="QueueDisplayLimitConverter" />
             <converters:ObservableStringValueConverter x:Key="ObservableStringValueConverter" />
             <converters:NumberTimesNumberCoverter x:Key="NumberTimesNumberCoverter" />
+            <converters:OptimizerToIsEnabledConverter x:Key="OptimizerToIsEnabledConverter" />
         </ResourceDictionary>
     </Window.Resources>
 
@@ -156,7 +157,7 @@
                                 <StackPanel Orientation="Vertical" Grid.Row="0" Grid.Column="1" Margin="5 0 0 0">
                                     <TextBlock Text="Optimizers" Style="{StaticResource SmallSectionHeader}" />
                                     <StackPanel Orientation="Horizontal" >
-                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedOptimizerComboBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBox Width="200" SelectedIndex="{Binding SelectedOptimizerComboBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="OptimizerComboBox">
                                             <ComboBoxItem Content="Naive" />
                                             <ComboBoxItem Content="Naive with using pauses" />
                                             <ComboBoxItem Content="Async" />
@@ -164,6 +165,19 @@
                                         </ComboBox>
                                         <Button Content="Set optimizer" Margin="5 0 0 0" Command="{Binding SetSelectedOptimizer}"/>
                                     </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="10 0 0 0">
+                                    <TextBlock Text="Warehouse reorganization complexity" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        ToolTip="Larger number means much longer simulation time!"
+                                        Speedup="True"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Height="29"
+                                        IsEnabled="{Binding ElementName=OptimizerComboBox, Path=SelectedValue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource OptimizerToIsEnabledConverter}}"
+                                        Value="{Binding ReorganizationComplexityLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -503,7 +517,7 @@
                                 </TextBox>
 
 
-                                <TextBox Width="250"  Margin="15 5 0 0" Grid.Row="2" Grid.Column="1"
+                                <TextBox Width="280"  Margin="15 5 0 0" Grid.Row="2" Grid.Column="1"
                                              IsReadOnly="False"
                                              mah:TextBoxHelper.UseFloatingWatermark="True"
                                              mah:TextBoxHelper.Watermark="Intake to outtake cycle length"
@@ -591,6 +605,18 @@
                                         Speedup="True"
                                         Minimum="1"
                                         Value="{Binding NumberOfSimulations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Margin="10 0 0 0">
+                                    <TextBlock Text="Warehouse reorganization complexity" Style="{StaticResource SmallSectionHeader}" />
+                                    <mah:NumericUpDown
+                                        mah:TextBoxHelper.ClearTextButton="False"
+                                        ToolTip="Larger number means much longer simulation time!"
+                                        Speedup="True"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        IsEnabled="{Binding UseWarehouseReorganization, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Value="{Binding ReorganizationComplexityLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" />
                                 </StackPanel>
 
                                 <CheckBox IsChecked="{Binding UseWarehouseReorganization, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="True" Content="Use warehouse reorganization?" Margin="10 20 0 0" ToolTip="Leads to longer simulation time!" />

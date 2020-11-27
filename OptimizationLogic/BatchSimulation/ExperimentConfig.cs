@@ -14,5 +14,6 @@ namespace OptimizationLogic.BatchSimulation
         public int TimeLimit { get; set; }
         public int ClockTime { get; set; }
         public bool UseReorganization { get; set; }
+        public int ReorganizationComplexityLevel { get; set; }
     }
 }

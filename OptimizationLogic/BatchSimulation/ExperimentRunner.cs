@@ -120,11 +120,11 @@ namespace OptimizationLogic.BatchSimulation
             {
                 simulationsDict[$"naive-reorganization"] = new Tuple<int, RealProductionSimulator>(2,
                     new RealProductionSimulator(new NaiveController(null, Config.ClockTime, Config.TimeLimit),
-                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), 5, 1) { CancellationToken = CancellationToken }));
+                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), Config.ReorganizationComplexityLevel, 1) { CancellationToken = CancellationToken }));
 
                 simulationsDict[$"async-reorganization"] = new Tuple<int, RealProductionSimulator>(3,
                     new RealProductionSimulator(new NaiveAsyncControllerWithHalfCycleDelay(null, Config.ClockTime, Config.TimeLimit),
-                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), 5, 1) { CancellationToken = CancellationToken }));
+                    new GreedyWarehouseReorganizer(new NaiveController(null, Config.ClockTime, Config.TimeLimit), Config.ReorganizationComplexityLevel, 1) { CancellationToken = CancellationToken }));
             }
 
             return simulationsDict;

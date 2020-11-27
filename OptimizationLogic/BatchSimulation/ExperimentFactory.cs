@@ -29,6 +29,8 @@ namespace OptimizationLogic.BatchSimulation
         public bool UseFixedCoefficient { get; set; }
         public bool SequencesAreDeterministic { get; set; }
 
+        public int ReorganizationComplexityLevel { get; set; }
+
         public ItemState DominantItem { get => IsMqbDominant ? ItemState.MQB : ItemState.MEB; }
         public ItemState NonDominantItem { get => !IsMqbDominant ? ItemState.MQB : ItemState.MEB; }
 
@@ -61,7 +63,7 @@ namespace OptimizationLogic.BatchSimulation
         {
             Random sequenceRandom = SequencesAreDeterministic ? new Random(_randomSeed) : new Random();
             Random weightRandom = SequencesAreDeterministic ? new Random(_randomSeed) : new Random();
-            var res = new ExperimentConfig { ClockTime = ClockTime, TimeLimit = TimeLimit, UseReorganization = UseReorganization };
+            var res = new ExperimentConfig { ClockTime = ClockTime, TimeLimit = TimeLimit, UseReorganization = UseReorganization, ReorganizationComplexityLevel = ReorganizationComplexityLevel };
             var sequenceGenerator = new RestrictivePlanGenerator(DominantItem, NonDominantItem, MaximumNonDominantItemsInARow, sequenceRandom);
             var productionStateGenerator = new RestrictiveProductionStateGenerator(sequenceGenerator, NumberOfDominantItems, NumberOfNonDominantItems, WarehouseRows, WarehouseColumns, NumberOfItemsInFutureProductionQueue, NumberOfItemsInPastProductionQueue);
             res.ProductionStates.AddRange(SampleCoefficients(weightRandom).Select((item, idx) => {
