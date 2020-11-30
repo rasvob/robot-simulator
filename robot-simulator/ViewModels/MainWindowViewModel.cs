@@ -791,7 +791,7 @@ namespace robot_simulator.ViewModels
                     return runner.RunExperiments();
                 });
             }
-            catch (AggregateException exc)
+            catch (Exception exc) when (exc is AggregateException || exc is OperationCanceledException)
             {
                 Debug.WriteLine(exc.Message);
             }
